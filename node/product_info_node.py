@@ -1,4 +1,4 @@
-from node.executable_node import ExecutableNode
+from node.tc_node import TCNode
 
-class ProductInfoNode(ExecutableNode):
+class ProductInfoNode(TCNode):
   pass

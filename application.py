@@ -4,7 +4,7 @@ from node.base_node import BaseNode
 # from node.tj_config_node import TJConfigNode
 # from node.executable_node import ExecutableNode
 from sample_profile.profile import SampleProfile
-from node.load_test_case_node import LoadTestCaseNode
+from node.load_test_case_node import LoadTCNode
 from typing import List, Dict
 from producer_consumer.node_executor import NodeExecutor
 from producer_consumer.dependency_checker import DependencyChecker
@@ -27,7 +27,7 @@ class Application:
     # and put them into a list.
 
     # I need to check if a node is ready to be put on the execution queue. I need to find a way to get around this.
-    load_test_case = LoadTestCaseNode(self._nodes, SampleProfile)
+    load_test_case = LoadTCNode(self._nodes, SampleProfile)
     await self._queue_for_executable_nodes.put(load_test_case)
      
   @property

@@ -4,7 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 # from functools import partial
 import asyncio
 
-class ExecutableNode(BaseNode):
+class TCNode(BaseNode):
+  """
+  A wrapper around test cases.
+  """
   def __init__(self, callable_object: Callable[..., Any]) -> None:
     super().__init__(callable_object.__name__)
     self._callable_object = callable_object

@@ -1,0 +1,1 @@
+add "python.experiments.optOutFrom": ["pythonTestAdapter"] to user settings then reload window

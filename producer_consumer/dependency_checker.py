@@ -11,7 +11,8 @@ class DependencyChecker:
     while True:
       try:
         for node in self._node_list:
-          await self._output_queue.put(node)
+          if node.is_cleared():
+            await self._output_queue.put(node)
       except Exception as e:
         print(f"DependencyChecker Exception: {e}")
       await asyncio.sleep(1)

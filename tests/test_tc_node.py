@@ -1,4 +1,4 @@
-from node.executable_node import ExecutableNode
+from node.tc_node import TCNode
 from node.tj_config_node import TJConfigNode
 from node.product_info_node import ProductInfoNode
 from node.load_profile_node import LoadProfileNode
@@ -9,25 +9,25 @@ import unittest
 
 class TestExecutableNode(unittest.IsolatedAsyncioTestCase):
   async def test_executable_node_result(self):
-    node = ExecutableNode(task_func1)
+    node = TCNode(task_func1)
     self.assertEqual(node.result, None)
     await node.execute()
     self.assertEqual(node.result, True)
 
   async def test_executable_node_with_async_executable(self):
-    node = ExecutableNode(task_func1)
+    node = TCNode(task_func1)
     self.assertEqual(node.name, "task_func1")
     await node.execute()
     self.assertEqual(node.result, True)
 
   async def test_executable_node_with_sync_executable(self):
-    node = ExecutableNode(task_func3)
+    node = TCNode(task_func3)
     self.assertEqual(node.name, "task_func3")
     await node.execute()
     self.assertEqual(node.result, 55)
 
 class TestTJConfigNode(unittest.IsolatedAsyncioTestCase):
-  async def test_tjconfig_node_init(self):
+  async def test_tj_config_node_init(self):
     async def tj_config_func():
       await asyncio.sleep(1)
       return {"tj_config": True}
