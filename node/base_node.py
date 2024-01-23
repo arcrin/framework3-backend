@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Callable
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -15,6 +15,7 @@ class BaseNode(ABC):
     self._name = name
     self._dependencies: List["BaseNode"] = []
     self._state = NodeState.NOT_PROCESSED
+    self._on_ready_callback: Callable[["BaseNode"], None] = lambda node: None
     self._result = None
 
   @property
@@ -45,14 +46,19 @@ class BaseNode(ABC):
   def is_cleared(self) -> bool:
     return self._state == NodeState.CLEARED
   
-  def set_to_cleared(self) -> None:
-    self._state = NodeState.CLEARED
-  
   def ready_to_process(self) -> bool:
     if all([node.is_cleared() for node in self._dependencies]):
       self._state = NodeState.READY_TO_PROCESS
       return True
     return False
+  
+  def notify_dependencies_resolved(self):
+    if all(dep.is_cleared() for dep in self.dependencies):
+      self._state = NodeState.READY_TO_PROCESS
+      self._on_ready_callback(self)
+
+  def set_on_ready_callback(self, callback: Callable[["BaseNode"], None]):
+    self._on_ready_callback = callback  
 
 
   @abstractmethod

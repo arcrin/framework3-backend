@@ -14,22 +14,29 @@ class ConcreteNode(BaseNode):
 
 class TestDependencyChecker(unittest.IsolatedAsyncioTestCase):
   def setUp(self):
-    self.node_list: List[BaseNode] = [ConcreteNode("node1"), ConcreteNode("node2"), ConcreteNode("node3")]
+    self.node1 = ConcreteNode("node1")  
+    self.node2 = ConcreteNode("node2")
+    self.node3 = ConcreteNode("node3")
+
+    self.node1.add_dependency(self.node2)
+    self.node3.add_dependency(self.node1)
+
+    self.node_list: List[BaseNode] = [self.node1, self.node2, self.node3]
     self.output_queue:asyncio.Queue[BaseNode] = asyncio.Queue()
     self.dependency_checker = DependencyChecker(self.node_list, self.output_queue)
 
   async def test_process_queue(self):
+
     self.assertFalse(self.node_list[0].is_cleared())
     self.assertFalse(self.node_list[1].is_cleared())
     self.assertFalse(self.node_list[2].is_cleared())
 
     # Clear the first two nodes
-    self.node_list[0].set_cleared()
-    self.node_list[1].set_cleared()
+    self.node2.set_cleared()
 
-    self.assertTrue(self.node_list[0].is_cleared())
-    self.assertTrue(self.node_list[1].is_cleared())
-    self.assertFalse(self.node_list[2].is_cleared())
+    self.assertTrue(self.node2.is_cleared())
+    self.assertTrue(self.node1.ready_to_process())
+    self.assertFalse(self.node3.ready_to_process())
 
     # Run the process_queue method in a separate task because it's an infinite loop
     task = asyncio.create_task(self.dependency_checker.process_queue())
@@ -41,11 +48,11 @@ class TestDependencyChecker(unittest.IsolatedAsyncioTestCase):
     task.cancel()
 
     # Assert that the cleared nodes were put in the output queue
-    self.assertTrue(self.node_list[0] in list(self.output_queue._queue)) # type: ignore
-    self.assertTrue(self.node_list[1] in list(self.output_queue._queue)) # type: ignore
+    self.assertTrue(self.node1 in list(self.output_queue._queue)) # type: ignore
+    self.assertTrue(self.node2 in list(self.output_queue._queue)) # type: ignore
 
     # Assert that the uncleared node was not put in the output queue
-    self.assertFalse(self.node_list[2] in list(self.output_queue._queue)) # type: ignore
+    self.assertFalse(self.node3 in list(self.output_queue._queue)) # type: ignore
 
 if __name__ == '__main__':
   unittest.main()

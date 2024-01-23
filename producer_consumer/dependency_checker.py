@@ -11,11 +11,12 @@ class DependencyChecker:
     while True:
       try:
         for node in self._node_list:
-          if node.is_cleared():
+          if node.ready_to_process():
             await self._output_queue.put(node)
+            self._node_list.remove(node)
       except Exception as e:
         print(f"DependencyChecker Exception: {e}")
-      await asyncio.sleep(1)
+      await asyncio.sleep(0.1)
 
   def start_processing(self):
     return asyncio.create_task(self.process_queue())

@@ -10,14 +10,14 @@ class TestApplication(unittest.IsolatedAsyncioTestCase):
   def test_application_init(self):
     app = Application()
     self.assertEqual(app.nodes, [])
-    self.assertIsInstance(app._queue_for_executable_nodes, asyncio.Queue)
-    self.assertTrue(app._queue_for_executable_nodes.empty())
+    self.assertIsInstance(app._queue_for_execution, asyncio.Queue)
+    self.assertTrue(app._queue_for_execution.empty())
 
 
   async def test_load_profile(self):
     app = Application()
     await app.load_test_case()
-    self.assertTrue(isinstance(await app._queue_for_executable_nodes.get(), LoadTCNode))
+    self.assertTrue(isinstance(await app._queue_for_execution.get(), LoadTCNode))
 
     
 if __name__ == "__main__":
