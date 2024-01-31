@@ -1,4 +1,4 @@
-from typing import List, Any, Callable
+from typing import List, Any, Callable, Awaitable
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -14,14 +14,19 @@ class BaseNode(ABC):
   def __init__(self, name: str="Node") -> None:
     self._name = name
     self._dependencies: List["BaseNode"] = []
+    self._dependents: List["BaseNode"] = []
     self._state = NodeState.NOT_PROCESSED
-    self._on_ready_callback: Callable[["BaseNode"], None] = lambda node: None
+    self._on_ready_callback: Callable[["BaseNode"], Awaitable[None]] = self._default_on_ready_callback
     self._result = None
 
   @property
   @abstractmethod
   def result(self) -> Any:
     raise NotImplementedError("result() not implemented")
+  
+  @property
+  def state(self) -> NodeState:
+    return self._state
 
 
   @property
@@ -31,17 +36,31 @@ class BaseNode(ABC):
   @property
   def dependencies(self) -> List["BaseNode"]:
     return self._dependencies
+  
+  @property
+  def dependents(self) -> List["BaseNode"]:
+    return self._dependents
+  
+  @property
+  def on_ready_callback(self) -> Callable[["BaseNode"], Awaitable[None]]:
+    return self._on_ready_callback
+
+  async def _default_on_ready_callback(self, node: "BaseNode") -> None:
+    pass
 
   def add_dependency(self, node: "BaseNode") -> None:
     self._dependencies.append(node)
-    # TODO: This is likely not the state we want to set here. Reconsider when we have more states
+    node._dependents.append(self)
     self._state = NodeState.NOT_PROCESSED
 
   def remove_dependency(self, node: "BaseNode") -> None:
     self._dependencies.remove(node)
+    node._dependents.remove(self)
 
-  def set_cleared(self) -> None:
+  async def set_cleared(self) -> None:
     self._state = NodeState.CLEARED
+    for dep in self._dependents:
+      await dep.notify_dependencies_resolved()
 
   def is_cleared(self) -> bool:
     return self._state == NodeState.CLEARED
@@ -52,12 +71,12 @@ class BaseNode(ABC):
       return True
     return False
   
-  def notify_dependencies_resolved(self):
+  async def notify_dependencies_resolved(self):
     if all(dep.is_cleared() for dep in self.dependencies):
       self._state = NodeState.READY_TO_PROCESS
-      self._on_ready_callback(self)
+      await self._on_ready_callback(self)
 
-  def set_on_ready_callback(self, callback: Callable[["BaseNode"], None]):
+  def set_on_ready_callback(self, callback: Callable[["BaseNode"], Awaitable[None]]):
     self._on_ready_callback = callback  
 
 

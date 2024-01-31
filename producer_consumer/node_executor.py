@@ -12,6 +12,7 @@ class NodeExecutor:
     await self._output_queue.put(node)
 
   async def process_queue(self):
+    # TODO: this isn't executing test cases concurrently. I need to compare to the old implementation
     while True:
       node = await self._input_queue.get()
       await self._execute_node(node)

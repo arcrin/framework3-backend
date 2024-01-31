@@ -10,7 +10,7 @@ class ResultProcessor:
     while True:
       node = await self._input_queue.get()
       if node.result:
-        node.set_cleared()
+        await node.set_cleared()
 
   def start_processing(self):
     return asyncio.create_task(self.process_queue())

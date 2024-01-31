@@ -1,4 +1,5 @@
-from node.base_node import BaseNode
+from node.base_node import BaseNode, NodeState
+from unittest.mock import AsyncMock, Mock
 import unittest
 
 class ConcreteNode(BaseNode):
@@ -18,7 +19,7 @@ class NodeMissingProperty(BaseNode):
     pass
 
 
-class TestNode(unittest.TestCase):
+class TestNode(unittest.IsolatedAsyncioTestCase):
 
   def test_create_node(self):
     node = ConcreteNode("Script 1")
@@ -49,14 +50,14 @@ class TestNode(unittest.TestCase):
     node1.remove_dependency(node2)
     self.assertNotIn(node2, node1.dependencies)
 
-  def test_set_cleared(self):
+  async def test_set_cleared(self):
     node1 = ConcreteNode("Node 1")
     self.assertFalse(node1.is_cleared())
 
-    node1.set_cleared()
+    await node1.set_cleared()
     self.assertTrue(node1.is_cleared())
 
-  def test_ready_to_process(self):
+  async def test_ready_to_process(self):
     node1 = ConcreteNode("Node 1")
     self.assertTrue(node1.ready_to_process())
 
@@ -64,10 +65,10 @@ class TestNode(unittest.TestCase):
     node1.add_dependency(node2)
     self.assertFalse(node1.ready_to_process())
 
-    node2.set_cleared()
+    await node2.set_cleared()
     self.assertTrue(node1.ready_to_process())
 
-  def test_node_state_change(self):
+  async def test_node_state_change(self):
     # Create a ConcreteNode
     node1 = ConcreteNode("Node 1")
     node2 = ConcreteNode("Node 2")
@@ -82,10 +83,10 @@ class TestNode(unittest.TestCase):
     node1.add_dependency(node2)
     self.assertFalse(node1.ready_to_process())
 
-    node2.set_cleared()
+    await node2.set_cleared()
     self.assertTrue(node1.ready_to_process())
 
-    node1.set_cleared()
+    await node1.set_cleared()
     self.assertTrue(node1.is_cleared())
 
     node3 = ConcreteNode("Node 3")
@@ -101,6 +102,57 @@ class TestNode(unittest.TestCase):
 
     await node1.execute()
     self.assertTrue(node1.result)
+
+  def test_dependents(self):
+    node1 = ConcreteNode("Node 1")
+    node2 = ConcreteNode("Node 2")
+    node3 = ConcreteNode("Node 3")
+
+    self.assertEqual(node1.dependents, [])
+
+    node1.add_dependency(node2)
+    node1.add_dependency(node3)
+
+    self.assertEqual(node2.dependents, [node1])
+    self.assertEqual(node3.dependents, [node1])
+
+    node1.remove_dependency(node2)
+
+    self.assertEqual(node2.dependents, [])
+
+  def test_set_on_ready_callback(self):
+    node = ConcreteNode("Node 1")
+
+    mock_callback = Mock()
+
+    node.set_on_ready_callback(mock_callback)
+
+    node.on_ready_callback(node)
+
+    mock_callback.assert_called_once_with(node)
+
+  async def test_notify_dependencies_resolved(self):
+    node1 = ConcreteNode("Node 1")
+    node2 = ConcreteNode("Node 2")
+    node3 = ConcreteNode("Node 3")
+
+    node1.add_dependency(node2)
+    node1.add_dependency(node3)
+
+    mock_callback = AsyncMock()
+
+    node1.set_on_ready_callback(mock_callback)
+
+    self.assertEqual(node1.state, NodeState.NOT_PROCESSED)
+
+    await node2.set_cleared()
+    await node3.set_cleared()
+
+    await node1.notify_dependencies_resolved()
+
+    self.assertEqual(node1.state, NodeState.READY_TO_PROCESS)
+
+    mock_callback.assert_called_once_with(node1)
 
 
 if __name__ == "__main__":
