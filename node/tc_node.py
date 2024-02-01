@@ -1,8 +1,7 @@
 from node.base_node import BaseNode
 from typing import Callable, Any
 from concurrent.futures import ThreadPoolExecutor
-
-# from functools import partial
+from util.async_timing import async_timed
 import asyncio
 
 
@@ -15,6 +14,7 @@ class TCNode(BaseNode):
         super().__init__(callable_object.__name__)
         self._callable_object = callable_object
         self._result: Any = None
+        self.execute = async_timed(self.name)(self.execute)
 
     @property
     def result(self) -> Any:

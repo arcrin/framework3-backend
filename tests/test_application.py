@@ -17,7 +17,7 @@ class TestApplication(unittest.IsolatedAsyncioTestCase):
   async def test_load_profile(self):
     app = Application()
     await app.load_test_case()
-    self.assertTrue(isinstance(await app._queue_for_execution.get(), LoadTCNode))
+    self.assertEqual(len(app._nodes), 8) # sample profile has 8 test cases, including the sentinel node
 
     
 if __name__ == "__main__":

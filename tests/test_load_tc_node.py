@@ -8,7 +8,7 @@ class TestLoadTCNode(unittest.IsolatedAsyncioTestCase):
     profile_class = SampleProfile
     node = LoadTCNode(node_list, profile_class)
     await node.execute()
-    self.assertEqual(len(node_list), 7)
+    self.assertEqual(len(node_list), 8)
 
 
 

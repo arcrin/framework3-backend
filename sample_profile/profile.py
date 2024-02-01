@@ -1,10 +1,15 @@
+from node.sentinel_node import SentinelNode
+from node.base_node import BaseNode
+from util.dag_vis import draw_graph
 from node.tc_node import TCNode
 from typing import List
 import asyncio
 
 class SampleProfile:
     def __init__(self) -> None:
-        self._test_case_list: List[TCNode] = []
+        self._test_case_list: List[BaseNode] = []
+
+        sentinel_node = SentinelNode()
 
         tc1 = TCNode(task_func1)
         tc2 = TCNode(task_func2)
@@ -14,6 +19,8 @@ class SampleProfile:
         tc6 = TCNode(task_func6)
         tc7 = TCNode(task_func7)
 
+        sentinel_node.add_dependency(tc1)
+        
         tc1.add_dependency(tc2)
         tc2.add_dependency(tc3)
         tc1.add_dependency(tc4)
@@ -21,6 +28,9 @@ class SampleProfile:
         tc3.add_dependency(tc5)
         tc2.add_dependency(tc6)
         tc6.add_dependency(tc7) 
+        
+
+        self._test_case_list.append(sentinel_node)
 
         self._test_case_list.append(tc1)
         self._test_case_list.append(tc2)
@@ -31,7 +41,7 @@ class SampleProfile:
         self._test_case_list.append(tc7)
 
     @property
-    def test_case_list(self) -> List[TCNode]:
+    def test_case_list(self) -> List[BaseNode]:
         return self._test_case_list
 
     def add_test(self, tc: TCNode) -> None:
@@ -56,7 +66,7 @@ async def task_func2(task3: bool | None=None, task6: bool | None=None):
     return True
 
 def task_func3(task5: bool | None=None) -> int:
-    result = fib(10)
+    result = fib(35)
     print(f"Task 3: calculated fib(30) with task5 result {task5}")
     return result
 
@@ -82,8 +92,13 @@ async def task_func6(task7: bool | None=None):
     return True
 
 async def task_func7(): 
-    await asyncio.sleep(5)   
+    await asyncio.sleep(10)   
     print("Executed task7")
     return True
     # await asyncio.sleep(2)
     # raise Exception("Task 7 failed with exception")
+
+
+if __name__ == "__main__":
+    sample_profile = SampleProfile()
+    draw_graph(sample_profile.test_case_list[0])

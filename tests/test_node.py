@@ -137,7 +137,7 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
     node3 = ConcreteNode("Node 3")
 
     node1.add_dependency(node2)
-    node1.add_dependency(node3)
+    node1.add_dependency(node3) # on_ready_callback should be called here, after node3 is cleared
 
     mock_callback = AsyncMock()
 
@@ -147,8 +147,6 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
 
     await node2.set_cleared()
     await node3.set_cleared()
-
-    await node1.notify_dependencies_resolved()
 
     self.assertEqual(node1.state, NodeState.READY_TO_PROCESS)
 

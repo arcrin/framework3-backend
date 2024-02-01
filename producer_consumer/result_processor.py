@@ -1,3 +1,4 @@
+from node.sentinel_node import SentinelNode
 from node.base_node import BaseNode
 import asyncio
 
@@ -9,6 +10,8 @@ class ResultProcessor:
   async def process_queue(self):
     while True:
       node = await self._input_queue.get()
+      if isinstance(node, SentinelNode):
+        return
       if node.result:
         await node.set_cleared()
 

@@ -1,10 +1,8 @@
-from node.base_node import BaseNode
-from sample_profile.profile import SampleProfile
-from node.load_test_case_node import LoadTCNode
-from typing import List, Dict
-from producer_consumer.node_executor import NodeExecutor
-from producer_consumer.dependency_checker import DependencyChecker
 from producer_consumer.result_processor import ResultProcessor
+from producer_consumer.node_executor import NodeExecutor
+from sample_profile.profile import SampleProfile
+from node.base_node import BaseNode
+from typing import List, Dict
 import asyncio
 
 
@@ -30,7 +28,6 @@ class Application:
         await node.notify_dependencies_resolved()
 
     async def _node_ready(self, node: BaseNode):
-        # asyncio.create_task(self._queue_for_execution.put(node))
         await self._queue_for_execution.put(node)
 
     async def load_test_case(self):

@@ -32,7 +32,7 @@ class TestDependencyChecker(unittest.IsolatedAsyncioTestCase):
     self.assertFalse(self.node_list[2].is_cleared())
 
     # Clear the first two nodes
-    self.node2.set_cleared()
+    await self.node2.set_cleared()
 
     self.assertTrue(self.node2.is_cleared())
     self.assertTrue(self.node1.ready_to_process())

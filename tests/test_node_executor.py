@@ -1,41 +1,89 @@
 # type: ignore
-import unittest
-import asyncio
 from producer_consumer.node_executor import NodeExecutor
 from unittest.mock import AsyncMock, MagicMock
+from node.sentinel_node import SentinelNode
+from node.base_node import BaseNode
+import unittest
+import asyncio
+
+class ConcreteNode(BaseNode):
+  def __init__(self, name: str="Node") -> None:
+    super().__init__(name)
+    self._result = None
+    
+  async def execute(self):
+    self._result = True
+
+  @property
+  def result(self):
+    return self._result
 
 
-class TestNodeExecutor(unittest.TestCase):
-  def setUp(self):
-    input_queue = MagicMock()
-    output_queue = AsyncMock()
-    self.node_executor = NodeExecutor(input_queue, output_queue)
+class TestNodeExecutor(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        input_queue = MagicMock()
+        output_queue = AsyncMock()
+        self.node_executor = NodeExecutor(input_queue, output_queue)
+        self.loop = asyncio.get_event_loop()
 
-  def test_node_executor_init(self):
-    input_queue = asyncio.Queue()
-    output_queue = asyncio.Queue()
-    node_executor = NodeExecutor(input_queue, output_queue)
-    self.assertEqual(node_executor._input_queue, input_queue)
-    self.assertEqual(node_executor._output_queue, output_queue)
+    def test_node_executor_init(self):
+        input_queue = asyncio.Queue()
+        output_queue = asyncio.Queue()
+        node_executor = NodeExecutor(input_queue, output_queue)
+        self.assertEqual(node_executor._input_queue, input_queue)
+        self.assertEqual(node_executor._output_queue, output_queue)
 
-  async def test_process_queue(self):
-    # Mock the get method to return a dummy node
-    dummy_node = object()
-    self.node_executor._input_queue.get = AsyncMock(return_value=dummy_node)
+    async def test_process_queue(self):
+        input_queue = asyncio.Queue()
+        output_queue = asyncio.Queue()
+        node_executor = NodeExecutor(input_queue, output_queue)
+        node1 = ConcreteNode("Node 1")
+        node2 = ConcreteNode("Node 2")
+        node3 = ConcreteNode("Node 3")
+        node4 = ConcreteNode("Node 4")
+        node5 = ConcreteNode("Node 5")
 
-    # Run the process_queue method in a separate task because it's an infinite loop
-    task = asyncio.create_task(self.node_executor.process_queue())
+        nodes = [node1, node2, node3, node4, node5]
 
-    # Give the task a moment to start and call _execute_node
-    await asyncio.sleep(0.1)
+        for node in nodes:
+            await input_queue.put(node)
+        await input_queue.put(SentinelNode())
 
-    # Cancel the task to stop the infinite loop
-    task.cancel()
+        # Start processing the queue
+        await node_executor.process_queue()
 
-    # Assert that the task was cancelled
-    self.node_executor._execute_node.assert_awaited_with(dummy_node)
+        # Check that all nodes were processed and added to the output queue
+
+        # The first node in the output queue should be the sentinel node
+        output_sentinel_node = await output_queue.get()
+        self.assertIsInstance(output_sentinel_node, SentinelNode)
+
+        for node in nodes:
+            output_node = await output_queue.get()
+            self.assertEqual(node, output_node)
 
 
+    async def test_process_queue_error_handling(self):
+        input_queue = asyncio.Queue()
+        output_queue = asyncio.Queue()
+        node_executor = NodeExecutor(input_queue, output_queue)
 
-if __name__ == '__main__':
-  unittest.main()
+        class ErrorNode(BaseNode):
+            async def execute(self):
+                raise Exception("Error")
+
+            @property
+            def result(self):
+                return None
+            
+        await input_queue.put(ErrorNode())
+        await input_queue.put(SentinelNode())
+
+        # Start processing the queue and check that an error message is printed
+        with self.assertRaises(Exception) as cm:
+            await node_executor.process_queue()
+        self.assertEqual(str(cm.exception), "Error")
+
+
+if __name__ == "__main__":
+    unittest.main()
