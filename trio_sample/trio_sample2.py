@@ -1,3 +1,4 @@
+from trio_sample3_task_switching import Tracer
 import trio
 
 async def child1():
@@ -22,4 +23,4 @@ async def parent():
     print("parent: waiting for children to finish...")
   print("parent: all done!")
 
-trio.run(parent)
+trio.run(parent, instruments=[Tracer()])
