@@ -1,4 +1,4 @@
-from trio_sample3_task_switching import Tracer
+from trio_sample.tracer import Tracer
 import trio
 
 async def child1():

@@ -21100,6 +21100,194 @@
           "kind": "reference"
         }
       ]
+    },
+    {
+      "message": {
+        "text": "I am trying to migrate to Trio from asyncio",
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 43
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 44
+            },
+            "text": "I am trying to migrate to Trio from asyncio",
+            "kind": "text"
+          }
+        ]
+      },
+      "variableData": {
+        "variables": {},
+        "message": "I am trying to migrate to Trio from asyncio"
+      },
+      "response": [
+        {
+          "value": "Migrating from asyncio to Trio involves changing how you create tasks and manage concurrency. Trio has a different design philosophy compared to asyncio and encourages structured concurrency.\n\nHere are some general steps you might follow:\n\n1. Replace `asyncio.run()` with `trio.run()`.\n2. Replace `asyncio.sleep()` with `trio.sleep()`.\n3. Replace `asyncio.gather()` with `trio.Nursery().start_soon()`. In Trio, you use a nursery to start new tasks.\n4. Replace `asyncio.Queue` with `trio.Queue`.\n5. Replace `asyncio.Lock` with `trio.Lock`.\n6. Replace `asyncio.Event` with `trio.Event`.\n7. Replace `asyncio.Condition` with `trio.Condition`.\n8. Replace `asyncio.Semaphore` with `trio.Semaphore`.\n9. Replace `asyncio.create_task()` with `nursery.start_soon()`.\n\nHere's an example of how you might convert a simple asyncio program to Trio:\n\nAsyncio version:\n\n```python\nimport asyncio\n\nasync def worker(name, queue):\n    while True:\n        sleep_for = await queue.get()\n        await asyncio.sleep(sleep_for)\n        queue.task_done()\n        print(f'{name} has slept for {sleep_for:.2f} seconds')\n\nasync def main():\n    queue = asyncio.Queue()\n\n    # Generate random sleep times and add them to the queue\n    for _ in range(20):\n        await queue.put(random.uniform(0.1, 1.0))\n\n    # Create three worker tasks\n    tasks = []\n    for i in range(3):\n        task = asyncio.create_task(worker(f'worker-{i}', queue))\n        tasks.append(task)\n\n    # Wait for all of the tasks to finish\n    await queue.join()\n\n    # Cancel our worker tasks\n    for task in tasks:\n        task.cancel()\n\n    # Wait until all worker tasks are cancelled\n    await asyncio.gather(*tasks, return_exceptions=True)\n\nasyncio.run(main())\n```\n\nTrio version:\n\n```python\nimport trio\n\nasync def worker(name, queue):\n    while True:\n        sleep_for = await queue.get()\n        await trio.sleep(sleep_for)\n        print(f'{name} has slept for {sleep_for:.2f} seconds')\n\nasync def main():\n    queue = trio.Queue(3)\n\n    async with trio.open_nursery() as nursery:\n        for i in range(3):\n            nursery.start_soon(worker, f'worker-{i}', queue)\n\n        for _ in range(20):\n            await queue.put(random.uniform(0.1, 1.0))\n\n        # Indicate that there's no more work to be done\n        for _ in range(3):\n            await queue.put(None)\n\ntrio.run(main)\n```\n\nPlease note that this is a simplified example and actual migration might involve more changes depending on the complexity of your asyncio code.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "followups": [
+        {
+          "kind": "reply",
+          "message": "How can I handle exceptions in Trio when using structured concurrency?",
+          "title": "How can I handle exceptions in Trio when using structured concurrency?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": true,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": []
+    },
+    {
+      "message": {
+        "text": "from typing import List, Any, Callable, Awaitable\r\nfrom abc import ABC, abstractmethod\r\nfrom enum import Enum\r\n\r\nclass NodeState(Enum):\r\n  READY_TO_PROCESS = 1\r\n  CLEARED = 2\r\n  NOT_PROCESSED = 3 \r\n\r\nclass BaseNode(ABC):\r\n  \"\"\"\r\n  A node represents a single unit of job.\r\n  \"\"\"\r\n  def __init__(self, name: str=\"Node\") -> None:\r\n    self._name = name\r\n    self._dependencies: List[\"BaseNode\"] = []\r\n    self._dependents: List[\"BaseNode\"] = []\r\n    self._state = NodeState.NOT_PROCESSED\r\n    self._on_ready_callback: Callable[[\"BaseNode\"], Awaitable[None]] = self._default_on_ready_callback\r\n    self._result = None\r\n\r\n  @property\r\n  @abstractmethod\r\n  def result(self) -> Any:\r\n    raise NotImplementedError(\"result() not implemented\")\r\n  \r\n  @property\r\n  def state(self) -> NodeState:\r\n    return self._state\r\n\r\n\r\n  @property\r\n  def name(self) -> str:\r\n    return self._name\r\n  \r\n  @property\r\n  def dependencies(self) -> List[\"BaseNode\"]:\r\n    return self._dependencies\r\n  \r\n  @property\r\n  def dependents(self) -> List[\"BaseNode\"]:\r\n    return self._dependents\r\n  \r\n  @property\r\n  def on_ready_callback(self) -> Callable[[\"BaseNode\"], Awaitable[None]]:\r\n    return self._on_ready_callback\r\n\r\n  async def _default_on_ready_callback(self, node: \"BaseNode\") -> None:\r\n    pass\r\n\r\n  def add_dependency(self, node: \"BaseNode\") -> None:\r\n    self._dependencies.append(node)\r\n    node._dependents.append(self)\r\n    self._state = NodeState.NOT_PROCESSED\r\n\r\n  def remove_dependency(self, node: \"BaseNode\") -> None:\r\n    self._dependencies.remove(node)\r\n    node._dependents.remove(self)\r\n\r\n  async def set_cleared(self) -> None:\r\n    self._state = NodeState.CLEARED\r\n    for dep in self._dependents:\r\n      await dep.notify_dependencies_resolved()\r\n\r\n  def is_cleared(self) -> bool:\r\n    return self._state == NodeState.CLEARED\r\n  \r\n  def ready_to_process(self) -> bool:\r\n    if all([node.is_cleared() for node in self._dependencies]):\r\n      self._state = NodeState.READY_TO_PROCESS\r\n      return True\r\n    return False\r\n  \r\n  async def notify_dependencies_resolved(self):\r\n    if all(dep.is_cleared() for dep in self.dependencies):\r\n      self._state = NodeState.READY_TO_PROCESS\r\n      await self._on_ready_callback(self)\r\n\r\n  def set_on_ready_callback(self, callback: Callable[[\"BaseNode\"], Awaitable[None]]):\r\n    self._on_ready_callback = callback  \r\n\r\n\r\n  @abstractmethod\r\n  async def execute(self) -> None:\r\n    \"\"\"\r\n    Every node must have a execute() method. Based on the different job type, the implementation of this method will differ.\r\n    \"\"\"\r\n    raise NotImplementedError(\"execute() not implemented\")\r\n    ",
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 2615
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 89,
+              "endColumn": 5
+            },
+            "text": "from typing import List, Any, Callable, Awaitable\r\nfrom abc import ABC, abstractmethod\r\nfrom enum import Enum\r\n\r\nclass NodeState(Enum):\r\n  READY_TO_PROCESS = 1\r\n  CLEARED = 2\r\n  NOT_PROCESSED = 3 \r\n\r\nclass BaseNode(ABC):\r\n  \"\"\"\r\n  A node represents a single unit of job.\r\n  \"\"\"\r\n  def __init__(self, name: str=\"Node\") -> None:\r\n    self._name = name\r\n    self._dependencies: List[\"BaseNode\"] = []\r\n    self._dependents: List[\"BaseNode\"] = []\r\n    self._state = NodeState.NOT_PROCESSED\r\n    self._on_ready_callback: Callable[[\"BaseNode\"], Awaitable[None]] = self._default_on_ready_callback\r\n    self._result = None\r\n\r\n  @property\r\n  @abstractmethod\r\n  def result(self) -> Any:\r\n    raise NotImplementedError(\"result() not implemented\")\r\n  \r\n  @property\r\n  def state(self) -> NodeState:\r\n    return self._state\r\n\r\n\r\n  @property\r\n  def name(self) -> str:\r\n    return self._name\r\n  \r\n  @property\r\n  def dependencies(self) -> List[\"BaseNode\"]:\r\n    return self._dependencies\r\n  \r\n  @property\r\n  def dependents(self) -> List[\"BaseNode\"]:\r\n    return self._dependents\r\n  \r\n  @property\r\n  def on_ready_callback(self) -> Callable[[\"BaseNode\"], Awaitable[None]]:\r\n    return self._on_ready_callback\r\n\r\n  async def _default_on_ready_callback(self, node: \"BaseNode\") -> None:\r\n    pass\r\n\r\n  def add_dependency(self, node: \"BaseNode\") -> None:\r\n    self._dependencies.append(node)\r\n    node._dependents.append(self)\r\n    self._state = NodeState.NOT_PROCESSED\r\n\r\n  def remove_dependency(self, node: \"BaseNode\") -> None:\r\n    self._dependencies.remove(node)\r\n    node._dependents.remove(self)\r\n\r\n  async def set_cleared(self) -> None:\r\n    self._state = NodeState.CLEARED\r\n    for dep in self._dependents:\r\n      await dep.notify_dependencies_resolved()\r\n\r\n  def is_cleared(self) -> bool:\r\n    return self._state == NodeState.CLEARED\r\n  \r\n  def ready_to_process(self) -> bool:\r\n    if all([node.is_cleared() for node in self._dependencies]):\r\n      self._state = NodeState.READY_TO_PROCESS\r\n      return True\r\n    return False\r\n  \r\n  async def notify_dependencies_resolved(self):\r\n    if all(dep.is_cleared() for dep in self.dependencies):\r\n      self._state = NodeState.READY_TO_PROCESS\r\n      await self._on_ready_callback(self)\r\n\r\n  def set_on_ready_callback(self, callback: Callable[[\"BaseNode\"], Awaitable[None]]):\r\n    self._on_ready_callback = callback  \r\n\r\n\r\n  @abstractmethod\r\n  async def execute(self) -> None:\r\n    \"\"\"\r\n    Every node must have a execute() method. Based on the different job type, the implementation of this method will differ.\r\n    \"\"\"\r\n    raise NotImplementedError(\"execute() not implemented\")\r\n    ",
+            "kind": "text"
+          }
+        ]
+      },
+      "variableData": {
+        "variables": {},
+        "message": "from typing import List, Any, Callable, Awaitable\r\nfrom abc import ABC, abstractmethod\r\nfrom enum import Enum\r\n\r\nclass NodeState(Enum):\r\n  READY_TO_PROCESS = 1\r\n  CLEARED = 2\r\n  NOT_PROCESSED = 3 \r\n\r\nclass BaseNode(ABC):\r\n  \"\"\"\r\n  A node represents a single unit of job.\r\n  \"\"\"\r\n  def __init__(self, name: str=\"Node\") -> None:\r\n    self._name = name\r\n    self._dependencies: List[\"BaseNode\"] = []\r\n    self._dependents: List[\"BaseNode\"] = []\r\n    self._state = NodeState.NOT_PROCESSED\r\n    self._on_ready_callback: Callable[[\"BaseNode\"], Awaitable[None]] = self._default_on_ready_callback\r\n    self._result = None\r\n\r\n  @property\r\n  @abstractmethod\r\n  def result(self) -> Any:\r\n    raise NotImplementedError(\"result() not implemented\")\r\n  \r\n  @property\r\n  def state(self) -> NodeState:\r\n    return self._state\r\n\r\n\r\n  @property\r\n  def name(self) -> str:\r\n    return self._name\r\n  \r\n  @property\r\n  def dependencies(self) -> List[\"BaseNode\"]:\r\n    return self._dependencies\r\n  \r\n  @property\r\n  def dependents(self) -> List[\"BaseNode\"]:\r\n    return self._dependents\r\n  \r\n  @property\r\n  def on_ready_callback(self) -> Callable[[\"BaseNode\"], Awaitable[None]]:\r\n    return self._on_ready_callback\r\n\r\n  async def _default_on_ready_callback(self, node: \"BaseNode\") -> None:\r\n    pass\r\n\r\n  def add_dependency(self, node: \"BaseNode\") -> None:\r\n    self._dependencies.append(node)\r\n    node._dependents.append(self)\r\n    self._state = NodeState.NOT_PROCESSED\r\n\r\n  def remove_dependency(self, node: \"BaseNode\") -> None:\r\n    self._dependencies.remove(node)\r\n    node._dependents.remove(self)\r\n\r\n  async def set_cleared(self) -> None:\r\n    self._state = NodeState.CLEARED\r\n    for dep in self._dependents:\r\n      await dep.notify_dependencies_resolved()\r\n\r\n  def is_cleared(self) -> bool:\r\n    return self._state == NodeState.CLEARED\r\n  \r\n  def ready_to_process(self) -> bool:\r\n    if all([node.is_cleared() for node in self._dependencies]):\r\n      self._state = NodeState.READY_TO_PROCESS\r\n      return True\r\n    return False\r\n  \r\n  async def notify_dependencies_resolved(self):\r\n    if all(dep.is_cleared() for dep in self.dependencies):\r\n      self._state = NodeState.READY_TO_PROCESS\r\n      await self._on_ready_callback(self)\r\n\r\n  def set_on_ready_callback(self, callback: Callable[[\"BaseNode\"], Awaitable[None]]):\r\n    self._on_ready_callback = callback  \r\n\r\n\r\n  @abstractmethod\r\n  async def execute(self) -> None:\r\n    \"\"\"\r\n    Every node must have a execute() method. Based on the different job type, the implementation of this method will differ.\r\n    \"\"\"\r\n    raise NotImplementedError(\"execute() not implemented\")"
+      },
+      "response": [
+        {
+          "value": "The code you've provided is an abstract base class for a node in a dependency graph. Each node has a state, a list of dependencies (other nodes it relies on), and a list of dependents (other nodes that rely on it). The node can be in one of three states: `READY_TO_PROCESS`, `CLEARED`, or `NOT_PROCESSED`.\n\nThe node also has a callback function that is called when all its dependencies are resolved. This function is initially set to a default function that does nothing, but it can be changed with the `set_on_ready_callback()` method.\n\nThe `execute()` method is an abstract method, meaning it must be implemented by any class that inherits from `BaseNode`. This method is where the actual work of the node would be done.\n\nThe code is written using asyncio, but it doesn't use any asyncio-specific features like tasks, futures, or the event loop. Therefore, migrating this code to Trio would not require any changes. The async functions in this code (`_default_on_ready_callback()`, `set_cleared()`, `notify_dependencies_resolved()`, and `execute()`) can be used with Trio without modification.\n\nHowever, if you have other parts of your code that use asyncio-specific features, those parts would need to be modified to use the equivalent Trio features. For example, if you have code that uses `asyncio.create_task()`, you would need to replace it with `trio.Nursery().start_soon()`. If you have code that uses `asyncio.Queue`, you would need to replace it with `trio.Queue`, and so on.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "followups": [
+        {
+          "kind": "reply",
+          "message": "How can I migrate my asyncio code to use Trio?",
+          "title": "How can I migrate my asyncio code to use Trio?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": true,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3-production\\node\\base_node.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3-production/node/base_node.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3-production/node/base_node.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 89,
+              "endColumn": 5
+            }
+          },
+          "kind": "reference"
+        }
+      ]
     }
   ],
   "providerId": "copilot"

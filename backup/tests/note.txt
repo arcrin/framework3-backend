@@ -1,0 +1,2 @@
+add "python.experiments.optOutFrom": ["pythonTestAdapter"] to user settings then reload window
+if the debugger does not work in unittest

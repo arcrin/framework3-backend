@@ -23,8 +23,10 @@ class TCNode(BaseNode):
     async def execute(self):
         try:
             if asyncio.iscoroutinefunction(self._callable_object):
+                print("coroutine function executed")
                 self._result = await self._callable_object()
             else:
+                print("non-coroutine function executed")
                 with ThreadPoolExecutor() as pool:
                     self._result = await asyncio.get_running_loop().run_in_executor(
                         pool, self._callable_object
