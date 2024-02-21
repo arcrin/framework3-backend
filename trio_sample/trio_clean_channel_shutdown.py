@@ -1,5 +1,4 @@
-#type: ignore
-
+# type: ignore
 import trio
 
 async def main():
@@ -8,23 +7,14 @@ async def main():
     nursery.start_soon(producer, send_channel)
     nursery.start_soon(consumer, receive_channel)
 
-
 async def producer(send_channel):
-  try:
-    async with send_channel:
-      for i in range(5):
-        await send_channel.send(i)
-        print(f"sent {i!r}")
-  except trio.BrokenResourceError:
-    print("consumer channel closed")
-
+  async with send_channel:
+    for i in range(3):
+      await send_channel.send(f"message {i}")
 
 async def consumer(receive_channel):
   async with receive_channel:
     async for value in receive_channel:
-      await trio.sleep(1)
-      if value == 3:
-        break
       print(f"got value {value!r}")
 
 trio.run(main)

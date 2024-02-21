@@ -1,0 +1,11 @@
+strict_exception_groups is default True.
+
+I am not sure what problem "Spawning tasks without becoming a parent" is trying to solve. Be careful with cancel scope when using this. Cancel scope only applies to the nursery, not each task.
+
+The use of python contextvars for logging.
+
+synchronization fairness: the task that has been waiting the longest will get the next lock, get the next item from the queue, etc.
+
+open_memory_channel: when max_buffer_size is set to 0, the sending channel will block until the receiving channel take a receive() action.
+
+I can use context managers to synchronize the shutdown of channels
