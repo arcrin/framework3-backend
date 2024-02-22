@@ -20,11 +20,12 @@ async def producer(send_channel):
 
 
 async def consumer(receive_channel):
-  async with receive_channel:
-    async for value in receive_channel:
-      await trio.sleep(1)
-      if value == 3:
-        break
-      print(f"got value {value!r}")
+  # async with receive_channel:
+  async for value in receive_channel:
+    await trio.sleep(1)
+    if value == 3:
+      await receive_channel.aclose()
+      break
+    print(f"got value {value!r}")
 
 trio.run(main)

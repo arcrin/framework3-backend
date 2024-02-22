@@ -17,9 +17,10 @@ async def task_func2(task3: bool | None=None, task6: bool | None=None):
     print(f"Executed task2 with task3 result {task3} and task6 result {task6}")
     return True
 
-def task_func3(task5: bool | None=None) -> int:
-    result = fib(10)
-    print(f"Task 3: calculated fib(30) with task5 result {task5}")
+def task_func3(index: int ,task5: bool | None=None) -> int:
+    result = fib(index)
+    print(f"Task 3: with task5 result {task5}; fib({index}) returns {result}")
+    raise ValueError("Task 3 failed with ValueError")
     return result
 
 # async def task_func3(task5: bool | None=None):

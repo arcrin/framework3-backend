@@ -4,13 +4,16 @@ import random
 
 async def main():
   async with trio.open_nursery() as nursery:
-    send_channel, receive_channel = trio.open_memory_channel(0)
+    send_channel1, receive_channel1 = trio.open_memory_channel(0)
+    # send_channel2, receive_channel2 = trio.open_memory_channel(0)
+
+
     # Start two producers
-    nursery.start_soon(producer, "A", send_channel)
-    nursery.start_soon(producer, "B", send_channel)
+    nursery.start_soon(producer, "A", send_channel1.clone())
+    nursery.start_soon(producer, "B", send_channel1.clone())
     # And two consumers
-    nursery.start_soon(consumer, "X", receive_channel)
-    nursery.start_soon(consumer, "Y", receive_channel)
+    nursery.start_soon(consumer, "X", receive_channel1.clone())
+    nursery.start_soon(consumer, "Y", receive_channel1.clone())
 
 
 async def producer(name, send_channel):

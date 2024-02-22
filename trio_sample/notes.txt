@@ -9,3 +9,5 @@ synchronization fairness: the task that has been waiting the longest will get th
 open_memory_channel: when max_buffer_size is set to 0, the sending channel will block until the receiving channel take a receive() action.
 
 I can use context managers to synchronize the shutdown of channels
+
+multi producer, consumer management: why use clone() instead of just create new channel pair?
