@@ -20,7 +20,7 @@ async def task_func2(task3: bool | None=None, task6: bool | None=None):
 def task_func3(index: int ,task5: bool | None=None) -> int:
     result = fib(index)
     print(f"Task 3: with task5 result {task5}; fib({index}) returns {result}")
-    raise ValueError("Task 3 failed with ValueError")
+    # raise ValueError("Task 3 failed with ValueError")
     return result
 
 # async def task_func3(task5: bool | None=None):
