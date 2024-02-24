@@ -1,8 +1,8 @@
 from node.base_node import BaseNode
 from typing import Callable, Any
-from concurrent.futures import ThreadPoolExecutor
 from util.async_timing import async_timed
-import asyncio
+import inspect
+import trio
 
 
 class TCNode(BaseNode):
@@ -22,14 +22,17 @@ class TCNode(BaseNode):
 
     async def execute(self):
         try:
-            if asyncio.iscoroutinefunction(self._callable_object):
+            if inspect.iscoroutinefunction(self._callable_object):
+                # Execute coroutine
                 print("coroutine function executed")
-                self._result = await self._callable_object()
+                async with trio.open_nursery() as nursery:
+                    # TODO: need to pass parameters into the coroutine
+                    self._result = await self._callable_object()
             else:
+                # Execute synchronous function
                 print("non-coroutine function executed")
-                with ThreadPoolExecutor() as pool:
-                    self._result = await asyncio.get_running_loop().run_in_executor(
-                        pool, self._callable_object
-                    )
+                async with trio.open_nursery() as nursery:
+                    # TODO: need to pass parameters into the synchronous function
+                    self._result = await trio.to_thread.run_sync(self._callable_object)
         except Exception as e:
             raise e

@@ -1,3 +1,4 @@
+# type: ignore
 import time
 import trio
 
@@ -9,5 +10,7 @@ async def broken_double_sleep(x):
 
   sleep_time = time.perf_counter() - start_time
   print(f"woke up after {sleep_time:.2f} seconds")
+  return 15
 
-trio.run(broken_double_sleep, 3)
+result = trio.run(broken_double_sleep, 3)
+print(result)

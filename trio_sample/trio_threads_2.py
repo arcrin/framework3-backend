@@ -1,3 +1,5 @@
+# type: ignore
+
 from sample_profile.scripts import task_func3, task_func7, task_func4
 import trio
 
