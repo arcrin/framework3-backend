@@ -10,8 +10,8 @@ class TCNode(BaseNode):
     A wrapper around test cases.
     """
 
-    def __init__(self, callable_object: Callable[..., Any]) -> None:
-        super().__init__(callable_object.__name__)
+    def __init__(self, callable_object: Callable[..., Any], name: str | None=None) -> None:
+        super().__init__(callable_object.__name__ if name is None else name)
         self._callable_object = callable_object
         self._result: Any = None
         self.execute = async_timed(self.name)(self.execute)

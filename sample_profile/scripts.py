@@ -8,7 +8,7 @@ def fib(n: int) -> int:
         return (fib(n-1) + fib(n-2))
 
 async def task_func1(task2: bool | None=None, task4: bool | None=None):
-    await trio.sleep(1)
+    await trio.sleep(0)
     print(f"Executed task1 with task2 result {task2} and task4 result {task4}")
     return 1
 
