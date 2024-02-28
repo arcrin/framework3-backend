@@ -5,7 +5,7 @@ from node.tc_node import TCNode
 from typing import List
 import asyncio
 
-class SampleProfile:
+class SampleTestProfile:
     def __init__(self) -> None:
         self._test_case_list: List[BaseNode] = []
 
@@ -100,5 +100,5 @@ async def task_func7():
 
 
 if __name__ == "__main__":
-    sample_profile = SampleProfile()
+    sample_profile = SampleTestProfile()
     draw_graph(sample_profile.test_case_list[0])

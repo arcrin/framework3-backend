@@ -11,10 +11,6 @@ class ConcreteNode(BaseNode):
     async def execute(self):
         self._result = True
 
-    @property
-    def result(self):
-        return self._result
-
 
 class NodeMissingProperty(BaseNode):
     async def execute(self):
@@ -214,3 +210,11 @@ async def test_reset(mocker):
     assert node2.state == NodeState.NOT_PROCESSED
     assert node3.state == NodeState.NOT_PROCESSED
     
+
+def test_error_property():
+    node = ConcreteNode("Node 1")
+    value_error = ValueError("An error occurred")
+
+    node.error = value_error
+    with pytest.raises(ValueError):
+        raise node.error   

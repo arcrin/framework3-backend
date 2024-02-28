@@ -40,7 +40,7 @@ class NodeExecutor:
                 return
             task = asyncio.create_task(self._execute_node(node))
             self._tasks.append(task)
-
+            
             # If the queue is empty, wait for all tasks to complete before continuing
             if len(self._tasks) >= self._max_tasks:
                 done, pending = await asyncio.wait(

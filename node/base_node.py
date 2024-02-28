@@ -1,4 +1,4 @@
-from typing import List, Any, Callable, Awaitable
+from typing import List, Any, Callable, Awaitable, Optional
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -7,6 +7,8 @@ class NodeState(Enum):
     READY_TO_PROCESS = 1
     CLEARED = 2
     NOT_PROCESSED = 3
+    ERROR = 4
+    CANCELLED = 5
 
 
 class BaseNode(ABC):
@@ -14,24 +16,55 @@ class BaseNode(ABC):
     A node represents a single unit of job.
     """
 
-    def __init__(self, name: str = "Node") -> None:
-        self._name = name
+    def __init__(self, name: str = "Node", 
+                 func_parameter_label: str | None=None) -> None:
+        self._name: str = name
         self._dependencies: List["BaseNode"] = []
         self._dependents: List["BaseNode"] = []
-        self._state = NodeState.NOT_PROCESSED
+        self._state: NodeState = NodeState.NOT_PROCESSED
         self._on_ready_callback: Callable[
             ["BaseNode"], Awaitable[None]
         ] = self._default_on_ready_callback
-        self._result = None
+        self._result: Any = None
+        self._error: Optional[Exception] = None
+        self._error_traceback: Optional[str] = ""
+        self._func_parameter_label: str | None = func_parameter_label
 
     @property
-    @abstractmethod
     def result(self) -> Any:
-        raise NotImplementedError("result() not implemented")
+        return self._result
+    
+    @property
+    def error(self) -> Optional[Exception]:
+        return self._error
+    
+    @error.setter
+    def error(self, value: Optional[Exception]) -> None:
+        self.state = NodeState.ERROR
+        self._error = value
+
+    # TODO: Explore a different way to pass parameters, at least a better name for this attribute 
+    @property
+    def func_parameter_label(self) -> str:
+        if self._func_parameter_label is None:
+            raise ValueError("func_parameter_label is not set")
+        return self._func_parameter_label
 
     @property
     def state(self) -> NodeState:
         return self._state
+    
+    @state.setter
+    def state(self, value: NodeState) -> None:
+        self._state = value
+
+    @property
+    def error_traceback(self) -> Optional[str]:
+        return self._error_traceback
+    
+    @error_traceback.setter
+    def error_traceback(self, value: Optional[str]) -> None:
+        self._error_traceback = value
 
     @property
     def name(self) -> str:

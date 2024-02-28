@@ -1,6 +1,6 @@
 from producer_consumer.result_processor import ResultProcessor
 from producer_consumer.node_executor import NodeExecutor
-from sample_profile.profile import SampleProfile
+from sample_profile.profile import SampleTestProfile
 from node.base_node import BaseNode
 from typing import List, Dict
 import asyncio
@@ -39,7 +39,7 @@ class Application:
         # I need to check if a node is ready to be put on the execution queue. I need to find a way to get around this.
         # load_test_case = LoadTCNode(self._nodes, SampleProfile)
         # await self._queue_for_execution.put(load_test_case)
-        profile = SampleProfile()
+        profile = SampleTestProfile()
         for tc_node in profile.test_case_list:
             await self.add_node(tc_node)
 

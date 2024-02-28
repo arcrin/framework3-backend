@@ -1,4 +1,5 @@
 import trio
+import time
 
 
 def fib(n: int) -> int:
@@ -7,51 +8,79 @@ def fib(n: int) -> int:
     else:
         return (fib(n-1) + fib(n-2))
 
-async def task_func1(task2: bool | None=None, task4: bool | None=None):
-    await trio.sleep(0)
-    print(f"Executed task1 with task2 result {task2} and task4 result {task4}")
+async def async_task1():
+    print("Start async task1")
+    await trio.sleep(1)
     return 1
 
-async def task_func2(task3: bool | None=None, task6: bool | None=None):
-    await trio.sleep(1)
-    print(f"Executed task2 with task3 result {task3} and task6 result {task6}")
+async def async_task2():
+    print("Start async task2")
+    await trio.sleep(2)
+    return 2
+
+async def async_task3(task1_parameter: int | None = None, task2_parameter: int | None=None):
+    if task1_parameter is None or task2_parameter is None:
+        raise ValueError("task1_parameter and task2_parameter are required")
+    print("Start async task3")
+    await trio.sleep(3)
+    return task1_parameter + task2_parameter
+
+async def async_task4():
+    print("Start async task4")
+    await trio.sleep(4)
     return True
 
-def task_func3(index: int=30 ,task5: bool | None=None) -> int:
-    result = fib(index)
-    print(f"Task 3: with task5 result {task5}; fib({index}) returns {result}")
-    # raise ValueError("Task 3 failed with ValueError")
-    return result
-
-# async def task_func3(task5: bool | None=None):
-#     await trio.sleep(1)
-#     print(f"Executed task3 with task5 result {task5}")
-#     return True
-
-
-async def task_func4(task5: bool | None=None):
-    try:
-        await trio.sleep(5)    
-        print(f'Executed task4 with task5 result {task5}')
-        return True
-    except trio.Cancelled:
-        print("task4 cancelled")
-
-async def task_func5():
-    await trio.sleep(5)    
-    print('Executed task5')
+async def async_task5():
+    print("Start async task5")
+    await trio.sleep(5)
     return True
 
-async def task_func6(task7: bool | None=None):
-    await trio.sleep(3)    
-    print(f'Executed task6 with task7 result {task7}')
+
+async def async_task6():
+    print("Start async task6")
+    await trio.sleep(6)
     return True
 
-async def task_func7(): 
-    try:
-        await trio.sleep(10)   
-        print("Executed task7")
-        # raise ValueError("Task 7 failed with ValueError")
-        return True
-    except trio.Cancelled:
-        print("task7 cancelled")
+
+async def async_task7():
+    print("Start async task7")
+    await trio.sleep(7)
+    return True
+
+
+def sync_task1():
+    print("Start sync task1")
+    time.sleep(1)
+    return 1
+
+def sync_task2():
+    print("Start sync task2")
+    time.sleep(2)
+    return 2
+
+def sync_task3(task1_parameter: int | None = None, task2_parameter: int | None=None):
+    if task1_parameter is None or task2_parameter is None:
+        raise ValueError("task1_parameter and task2_parameter are required")
+    print("Start sync task3")
+    time.sleep(3)
+    return task1_parameter + task2_parameter
+
+def sync_task4():
+    print("Start sync task4")
+    time.sleep(4)
+    return True
+
+def sync_task5():
+    print("Start sync task5")
+    time.sleep(5)
+    return True
+
+def sync_task6():
+    print("Start sync task6")
+    time.sleep(6)
+    return True
+
+def sync_task7():
+    print("Start sync task7")
+    time.sleep(7)
+    return True
