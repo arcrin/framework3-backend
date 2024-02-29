@@ -125,9 +125,9 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
 
     mock_callback = Mock()
 
-    node.set_on_ready_callback(mock_callback)
+    node.set_scheduling_callback(mock_callback)
 
-    node.on_ready_callback(node)
+    node.scheduling_callback(node)
 
     mock_callback.assert_called_once_with(node)
 
@@ -141,7 +141,7 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
 
     mock_callback = AsyncMock()
 
-    node1.set_on_ready_callback(mock_callback)
+    node1.set_scheduling_callback(mock_callback)
 
     self.assertEqual(node1.state, NodeState.NOT_PROCESSED)
 

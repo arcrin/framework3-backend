@@ -124,9 +124,9 @@ def test_set_on_ready_callback(mocker):
 
     mock_callback = mocker.Mock()
 
-    node.set_on_ready_callback(mock_callback)
+    node.set_scheduling_callback(mock_callback)
 
-    node.on_ready_callback(node)
+    node.scheduling_callback(node)
 
     mock_callback.assert_called_once_with(node)
 
@@ -141,7 +141,7 @@ async def test_notify_dependencies_resolved(mocker):
 
     mock_callback = mocker.AsyncMock()
 
-    node1.set_on_ready_callback(mock_callback)
+    node1.set_scheduling_callback(mock_callback)
 
     assert node1.state == NodeState.NOT_PROCESSED
 
@@ -177,9 +177,9 @@ async def test_reset(mocker):
     node2.add_dependency(node1)
 
     on_ready_callback = mocker.AsyncMock()
-    node1.set_on_ready_callback(on_ready_callback)
-    node2.set_on_ready_callback(on_ready_callback)
-    node3.set_on_ready_callback(on_ready_callback)
+    node1.set_scheduling_callback(on_ready_callback)
+    node2.set_scheduling_callback(on_ready_callback)
+    node3.set_scheduling_callback(on_ready_callback)
 
     await node1.set_cleared()
 
@@ -209,6 +209,21 @@ async def test_reset(mocker):
     # node2 and node3 are not ready to process, since node1 is not cleared yet
     assert node2.state == NodeState.NOT_PROCESSED
     assert node3.state == NodeState.NOT_PROCESSED
+
+async def test_rest_dependents_labeled_as_cancelled():
+    node1 = ConcreteNode("Node 1")
+    node2 = ConcreteNode("Node 2")
+
+    node1.add_dependency(node2)
+
+    node2._state = NodeState.CLEARED
+    node1._state = NodeState.PROCESSING
+
+    await node2.reset()
+    
+    # node2 should be ready for process because it doesn't have any dependency
+    assert node2.state == NodeState.READY_TO_PROCESS
+    assert node1.state == NodeState.CANCEL
     
 
 def test_error_property():

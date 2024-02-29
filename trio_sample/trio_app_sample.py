@@ -32,7 +32,7 @@ async def task7():
     await trio.to_thread.run_sync(sync_task7)
 
 
-jobs = [task1, task2, task3, task4, task5, task6, task7]
+jobs = [task1, task2, task4, task5, task6, task7]
 # jobs = [task_func3, task_func5, task_func7]
 
 

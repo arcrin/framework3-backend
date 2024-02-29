@@ -1,7 +1,7 @@
 # type: ignore
 from producer_consumer.node_executor import NodeExecutor
 from unittest.mock import AsyncMock, MagicMock
-from node.sentinel_node import SentinelNode
+from node.terminal_node import TerminalNode
 from node.base_node import BaseNode
 import unittest
 import asyncio
@@ -31,7 +31,7 @@ class TestNodeExecutor(unittest.IsolatedAsyncioTestCase):
         output_queue = asyncio.Queue()
         node_executor = NodeExecutor(input_queue, output_queue)
         self.assertEqual(node_executor._input_queue, input_queue)
-        self.assertEqual(node_executor._output_queue, output_queue)
+        self.assertEqual(node_executor._send_channel, output_queue)
 
     async def test_process_queue(self):
         input_queue = asyncio.Queue()
@@ -47,7 +47,7 @@ class TestNodeExecutor(unittest.IsolatedAsyncioTestCase):
 
         for node in nodes:
             await input_queue.put(node)
-        await input_queue.put(SentinelNode())
+        await input_queue.put(TerminalNode())
 
         # Start processing the queue
         await node_executor.process_queue()
@@ -56,7 +56,7 @@ class TestNodeExecutor(unittest.IsolatedAsyncioTestCase):
 
         # The first node in the output queue should be the sentinel node
         output_sentinel_node = await output_queue.get()
-        self.assertIsInstance(output_sentinel_node, SentinelNode)
+        self.assertIsInstance(output_sentinel_node, TerminalNode)
 
         for node in nodes:
             output_node = await output_queue.get()
@@ -77,7 +77,7 @@ class TestNodeExecutor(unittest.IsolatedAsyncioTestCase):
                 return None
             
         await input_queue.put(ErrorNode())
-        await input_queue.put(SentinelNode())
+        await input_queue.put(TerminalNode())
 
         # Start processing the queue and check that an error message is printed
         with self.assertRaises(Exception) as cm:

@@ -1,14 +1,16 @@
 from typing import List, Any, Callable, Awaitable, Optional
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import Enum, auto
+import logging
 
 
 class NodeState(Enum):
-    READY_TO_PROCESS = 1
-    CLEARED = 2
-    NOT_PROCESSED = 3
-    ERROR = 4
-    CANCELLED = 5
+    READY_TO_PROCESS = auto()
+    PROCESSING = auto()
+    CLEARED = auto()
+    NOT_PROCESSED = auto()
+    CANCEL = auto()
+    ERROR = auto()
 
 
 class BaseNode(ABC):
@@ -22,13 +24,15 @@ class BaseNode(ABC):
         self._dependencies: List["BaseNode"] = []
         self._dependents: List["BaseNode"] = []
         self._state: NodeState = NodeState.NOT_PROCESSED
-        self._on_ready_callback: Callable[
+        self._scheduling_callback: Callable[
             ["BaseNode"], Awaitable[None]
         ] = self._default_on_ready_callback
         self._result: Any = None
         self._error: Optional[Exception] = None
         self._error_traceback: Optional[str] = ""
         self._func_parameter_label: str | None = func_parameter_label
+        self._logger = logging.getLogger("BaseNode")
+        self._logger.setLevel(logging.DEBUG)
 
     @property
     def result(self) -> Any:
@@ -79,13 +83,14 @@ class BaseNode(ABC):
         return self._dependents
 
     @property
-    def on_ready_callback(self) -> Callable[["BaseNode"], Awaitable[None]]:
-        return self._on_ready_callback
+    def scheduling_callback(self) -> Callable[["BaseNode"], Awaitable[None]]:
+        return self._scheduling_callback
 
     async def _default_on_ready_callback(self, node: "BaseNode") -> None:
         pass
 
     def add_dependency(self, node: "BaseNode") -> None:
+        self._logger.info(f"{node.name} added as a dependency to {self.name}")
         if self._is_reachable(node):
             raise ValueError("Cyclic dependency detected")
         self._dependencies.append(node)
@@ -93,13 +98,16 @@ class BaseNode(ABC):
         self._state = NodeState.NOT_PROCESSED
 
     def remove_dependency(self, node: "BaseNode") -> None:
+        self._logger.info(f"{node.name} removed as a dependency to {self.name}")
         self._dependencies.remove(node)
         node._dependents.remove(self)
 
+    # COMMENT: when a node is cleared, notify all dependents
     async def set_cleared(self) -> None:
+        self._logger.info(f"{self.name} node is cleared")
         self._state = NodeState.CLEARED
         for dep in self._dependents:
-            await dep.notify_dependencies_resolved()
+            await dep.check_dependency_and_schedule_self()
 
     def is_cleared(self) -> bool:
         return self._state == NodeState.CLEARED
@@ -107,25 +115,41 @@ class BaseNode(ABC):
     def ready_to_process(self) -> bool:
         if all([node.is_cleared() for node in self._dependencies]):
             self._state = NodeState.READY_TO_PROCESS
+            self._logger.info(f"{self.name} is ready to process")
             return True
         return False
 
-    async def notify_dependencies_resolved(self) -> None:
+    async def check_dependency_and_schedule_self(self) -> None:
         if all(dep.is_cleared() for dep in self.dependencies):
+            self._logger.info(f"{self.name} is ready to process")
             self._state = NodeState.READY_TO_PROCESS
-            await self._on_ready_callback(self)
+            # TODO: This needs to be handled atop
+            try:
+                await self._scheduling_callback(self)
+                self._logger.info(f"{self.name} is scheduled")
+            except Exception as e:
+                self._logger.error(f"Error while scheduling {self.name}: {e}", exc_info=True)
+                raise
 
-    def set_on_ready_callback(
+    def set_scheduling_callback(
         self, callback: Callable[["BaseNode"], Awaitable[None]]
     ) -> None:
-        self._on_ready_callback = callback
+        self._scheduling_callback = callback
 
     async def reset(self) -> None:
-        self._state = NodeState.NOT_PROCESSED
-        self._result = None
-        await self.notify_dependencies_resolved()
-        for dependency in self.dependents:
-            await dependency.reset()
+        # COMMENT: If the node is processing, label is as CANCELLED. Its results upon completion will be ignored and the node will be rescheduled. The result processing consumer should change the 
+        if self._state == NodeState.PROCESSING:
+            self._state = NodeState.CANCEL
+            self._logger.info(f"{self.name} node cancelled.")
+        else:
+            self._state = NodeState.NOT_PROCESSED
+            self._result = None
+            self._logger.info(f"{self.name} node reset.")
+            # TODO: determine if this needs to be in a try block
+            await self.check_dependency_and_schedule_self()
+        for dependent in self.dependents:
+            # FIXME: Should this be inside a nursery?
+            await dependent.reset()
 
     @abstractmethod
     async def execute(self) -> None:

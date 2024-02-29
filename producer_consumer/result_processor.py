@@ -1,19 +1,15 @@
-from node.sentinel_node import SentinelNode
+from node.terminal_node import TerminalNode
 from node.base_node import BaseNode
-import asyncio
+import trio
 
 class ResultProcessor:
-  def __init__(self, input_queue: asyncio.Queue[BaseNode]):
-    self._input_queue = input_queue
+  def __init__(self, receive_channel: trio.MemoryReceiveChannel[BaseNode]):
+    self._receive_channel = receive_channel
 
-
-  async def process_queue(self):
-    while True:
-      node = await self._input_queue.get()
-      if isinstance(node, SentinelNode):
-        return
-      if node.result:
-        await node.set_cleared()
-
-  def start_processing(self):
-    return asyncio.create_task(self.process_queue())
+  # TODO: Write unit function for this
+  async def process(self):
+    async with trio.open_nursery() as nursery:
+      async with self._receive_channel:
+        async for node in self._receive_channel:
+          if node.result:
+            await node.set_cleared()
