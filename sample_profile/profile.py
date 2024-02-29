@@ -4,6 +4,9 @@ from util.dag_vis import draw_graph
 from node.tc_node import TCNode
 from typing import List
 import time
+import logging
+
+logger = logging.getLogger("Script")
 
 class SampleTestProfile:
     def __init__(self) -> None:
@@ -55,37 +58,37 @@ def fib(n: int) -> int:
         return (fib(n-1) + fib(n-2))
 
 def sync_task1():
-    print("Start sync task1")
+    logger.info("Start sync task1")
     time.sleep(1)
     return 1
 
 def sync_task2():
-    print("Start sync task2")
+    logger.info("Start sync task2")
     time.sleep(2)
     return 2
 
 def sync_task3():
-    print("Start sync task3")
+    logger.info("Start sync task3")
     time.sleep(3)
     return 3
 
 def sync_task4():
-    print("Start sync task4")
+    logger.info("Start sync task4")
     time.sleep(4)
     return True
 
 def sync_task5():
-    print("Start sync task5")
+    logger.info("Start sync task5")
     time.sleep(5)
     return True
 
 def sync_task6():
-    print("Start sync task6")
+    logger.info("Start sync task6")
     time.sleep(6)
     return True
 
 def sync_task7():
-    print("Start sync task7")
+    logger.info("Start sync task7")
     time.sleep(7)
     return True
 

@@ -2,7 +2,6 @@ from node.base_node import BaseNode
 from node.terminal_node import TerminalNode
 from typing import List
 import trio
-import asyncio
 
 
 class NodeExecutor:
@@ -13,7 +12,6 @@ class NodeExecutor:
     ):
         self._receive_channel = receive_channel
         self._send_channel = send_channel
-        self._tasks: List[asyncio.Task[None]] = []
 
     async def _execute_node(self, node: BaseNode):
         try:
