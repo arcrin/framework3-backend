@@ -1,4 +1,4 @@
-from producer_consumer.dependency_checker import DependencyChecker
+from backup.tests.dependency_checker import DependencyChecker
 from node.base_node import BaseNode
 from typing import List
 import asyncio

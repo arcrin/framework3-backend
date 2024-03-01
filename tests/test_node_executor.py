@@ -53,6 +53,6 @@ async def test_process_receive_channel(mocker):
     with node_executor_send_channel:
         await node_executor_send_channel.send(mock_node)
 
-    await node_executor.process()
+    await node_executor.start()
 
     NodeExecutor._execute_node.assert_called_once_with(mock_node)

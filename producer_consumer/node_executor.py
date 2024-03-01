@@ -1,7 +1,7 @@
 from node.base_node import BaseNode
 from node.terminal_node import TerminalNode
-from typing import List
 import trio
+import logging
 
 
 class NodeExecutor:
@@ -12,24 +12,26 @@ class NodeExecutor:
     ):
         self._receive_channel = receive_channel
         self._send_channel = send_channel
+        self._logger = logging.getLogger("NodeExecutor")
 
     async def _execute_node(self, node: BaseNode):
         try:
           await node.execute()
           await self._send_channel.send(node)
+        #TODO: Need to handle BrokenResourceError and CloseResourceError properly, need to make sure the application does not crash, and able to recover from channel related errors
         except Exception as e:
-            # TODO: Handle the exception here
-            print(f"An error occurred while executing node {node.name}: {e}")
+            self._logger.error(f"An error occurred while processing {node.name}: {e}")
             raise e
 
-
-    async def process(self):
+    async def start(self):
         async with trio.open_nursery() as nursery:
             async with self._receive_channel:
                 async for node in self._receive_channel:
                     if isinstance(node, TerminalNode):
-                        # TODO: Test this, make sure this is the proper way to terminate this function
-                        await self._send_channel.aclose()
+                        await self.stop()
                         return
                     else:
                         nursery.start_soon(self._execute_node, node)
+
+    async def stop(self):
+        await self._send_channel.aclose()

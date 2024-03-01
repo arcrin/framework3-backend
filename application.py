@@ -56,5 +56,5 @@ class Application:
         # self._dependency_checker.start_processing()
         # self._node_executor.start_processing()
         async with trio.open_nursery() as nursery:
-            nursery.start_soon(self._node_executor.process)
-            nursery.start_soon(self._result_processor.process)
+            nursery.start_soon(self._node_executor.start)
+            nursery.start_soon(self._result_processor.start)
