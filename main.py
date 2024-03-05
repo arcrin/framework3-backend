@@ -1,5 +1,8 @@
+#type: ignore
 from application import Application
 from util.async_timing import plot_task_timing
+from util.log_handler import WebSocketLogHandler, log_connections
+import json
 import trio
 import logging
 
@@ -26,8 +29,16 @@ console_handler.setFormatter(formatter)
 console_handler.setLevel(logging.DEBUG)
 console_handler.addFilter(TAGAppLoggerFilter())
 
+ws_handler = WebSocketLogHandler(log_connections)
+ws_handler.setFormatter(formatter)
+ws_handler.setLevel(logging.DEBUG)
+ws_handler.addFilter(TAGAppLoggerFilter())
+
+
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
+logger.addHandler(ws_handler)
+
 
 app = Application()
 trio.run(app.start)

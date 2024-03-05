@@ -1,6 +1,7 @@
 from producer_consumer.result_processor import ResultProcessor
 from producer_consumer.node_executor import NodeExecutor
 from sample_profile.profile import SampleTestProfile
+from util.log_handler import run_log_server
 from node.base_node import BaseNode
 from typing import List, Dict
 import trio
@@ -53,8 +54,6 @@ class Application:
 
     async def start(self):
         await self.load_test_case()
-        # self._dependency_checker.start_processing()
-        # self._node_executor.start_processing()
         async with trio.open_nursery() as nursery:
             nursery.start_soon(self._node_executor.start)
-            nursery.start_soon(self._result_processor.start)
+            nursery.start_soon(self._result_processor.start) 
