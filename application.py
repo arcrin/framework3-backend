@@ -30,15 +30,6 @@ class Application:
         self._result_processor_send_channel, self._result_processor_receive_channel = trio.open_memory_channel(50)
 
         self._log_queue: Queue[logging.LogRecord] = Queue()
-
-        self._node_executor: NodeExecutor = NodeExecutor(
-            self._node_executor_receive_channel, self._result_processor_send_channel  # type: ignore
-        )
-
-        self._result_processor = ResultProcessor(self._result_processor_receive_channel) # type: ignore
-
-        self._log_processor = LogProcessor(self._log_queue, self._ws_connections) # type: ignore
-
         root_logger = logging.getLogger()   
         ws_logger_handler = WebSocketLogHandler(self._log_queue)
         if root_logger.handlers:
@@ -47,6 +38,10 @@ class Application:
         ws_logger_handler.addFilter(TAGAppLoggerFilter())
         ws_logger_handler.setLevel(logging.DEBUG)
         root_logger.addHandler(ws_logger_handler)
+
+        self._node_executor: NodeExecutor = NodeExecutor(self._node_executor_receive_channel, self._result_processor_send_channel)  # type: ignore
+        self._result_processor = ResultProcessor(self._result_processor_receive_channel) # type: ignore
+        self._log_processor = LogProcessor(self._log_queue, self._ws_connections) # type: ignore
 
     async def add_node(self, node: BaseNode):
         self._nodes.append(node)

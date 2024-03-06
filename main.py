@@ -2,7 +2,6 @@
 from application import Application
 from util.async_timing import plot_task_timing
 from util.log_filter import TAGAppLoggerFilter
-import json
 import trio
 import logging
 

@@ -2,17 +2,19 @@
 from typing import Set
 from trio_websocket import WebSocketConnection, ConnectionClosed #type: ignore
 from queue import Queue
+from node.terminal_node import TerminalNode
 import trio
 import logging
 
 
 class LogProcessor:
     def __init__(self, 
-                 log_queue: Queue[logging.LogRecord],
+                 log_queue: Queue[logging.LogRecord | TerminalNode],
                  ws_connections: Set[WebSocketConnection]):
         self._log_queue = log_queue 
         self._ws_connections = ws_connections
         self._cancel_scope: trio.CancelScope = None
+        self._stop_flag = False 
 
     async def send_message(self, connection, message):
         try:
@@ -24,15 +26,20 @@ class LogProcessor:
 
     async def start(self):
         formatter = logging.Formatter("%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s")
-        self._cancel_scope = trio.CancelScope()
-        with self._cancel_scope:
-            async with trio.open_nursery() as nursery:
-                while True:
+        async with trio.open_nursery() as nursery:
+            self._cancel_scope = nursery.cancel_scope
+            while True:
+                try:
                     record = await trio.to_thread.run_sync(self._log_queue.get) 
+                    if isinstance(record, TerminalNode):
+                        break   
                     message = formatter.format(record)
                     for connection in self._ws_connections:
                         nursery.start_soon(self.send_message, connection, message)
+                except trio.Cancelled:
+                    print("Log processor cancelled")
+                    break
+                await trio.sleep(0)
 
     def stop(self):
-        if self._cancel_scope is not None:
-            self._cancel_scope.cancel()
+        self._log_queue.put(TerminalNode())
