@@ -21,7 +21,7 @@ async def echo_server(request):
                 try:
                     await ws.send_message(message)
                 except ConnectionClosed:
-                    break
+                    pass
 
     async with trio.open_nursery() as nursery:
         nursery.start_soon(get_input)

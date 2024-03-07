@@ -63,13 +63,16 @@ class Application:
             print(f"WS connection established with:{ws}")
             while True:
                 try:
-                    await ws.get_message()  
+                    message = await ws.get_message()
+                    if message == "loadTC":
+                        print("loadTC")
+                        await self.load_test_case()
                 except ConnectionClosed:
                     print(f"WS connection closed with {ws}")
                     self._ws_connections.remove(ws)   
-                    self._ws_server_cancel_scope.cancel()
-                    self._log_processor.stop()
-                    print("WS server stopped")
+                    # self._ws_server_cancel_scope.cancel()
+                    # self._log_processor.stop()
+                    # print("WS server stopped")
         self._ws_server_cancel_scope = trio.CancelScope()
         with self._ws_server_cancel_scope:
             await serve_websocket(ws_connection_handler, "localhost", 8000, ssl_context=None)
@@ -80,14 +83,12 @@ class Application:
         return self._nodes
 
     async def start(self):
-        await self.load_test_case()
-        
         try:
             async with trio.open_nursery() as nursery:
                 nursery.start_soon(self.start_ws)
                 nursery.start_soon(self._node_executor.start)
                 nursery.start_soon(self._result_processor.start)
-                nursery.start_soon(self._log_processor.start) 
+                nursery.start_soon(self._log_processor.start)
         except Exception as e:
             print(e)
             raise

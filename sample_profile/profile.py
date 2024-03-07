@@ -12,7 +12,7 @@ class SampleTestProfile:
     def __init__(self) -> None:
         self._test_case_list: List[BaseNode] = []
 
-        terminal_node = TerminalNode()
+        # terminal_node = TerminalNode()
 
         tc1 = TCNode(sync_task1, "Test Case 1")
         tc2 = TCNode(sync_task2, "Test Case 2")
@@ -30,7 +30,7 @@ class SampleTestProfile:
         tc2.add_dependency(tc6)
         tc6.add_dependency(tc7) 
         
-        terminal_node.add_dependency(tc1)
+        # terminal_node.add_dependency(tc1)
 
         self._test_case_list.append(tc1)
         self._test_case_list.append(tc2)
@@ -39,7 +39,7 @@ class SampleTestProfile:
         self._test_case_list.append(tc5)
         self._test_case_list.append(tc6)
         self._test_case_list.append(tc7)
-        self._test_case_list.append(terminal_node)
+        # self._test_case_list.append(terminal_node)
 
 
     @property
