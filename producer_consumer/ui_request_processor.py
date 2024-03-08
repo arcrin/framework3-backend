@@ -24,9 +24,13 @@ class UIRequestProcessor:
         self._ws_connection = value 
 
     async def start(self):
-        async with trio.open_nursery() as nursery:
-            async for ui_request in self._receive_channel:
-                await self._ws_connection.send_message(json.dumps(ui_request.message))
-                response = await self._ui_response_receive_channel.receive()
-                ui_request.response = response
+        try:
+            async with trio.open_nursery() as nursery:
+                async for ui_request in self._ui_request_receive_channel:
+                    await self._ws_connection.send_message(json.dumps(ui_request.message))
+                    response = await self._ui_response_receive_channel.receive()
+                    ui_request.response = response
+        except Exception as e:
+            print(e)
+            raise
  

@@ -116,7 +116,7 @@ class Application:
         try:
             with self._ws_server_cancel_scope:
                 await serve_websocket(
-                    ws_connection_handler, "localhost", 443, ssl_context=None
+                    ws_connection_handler, "localhost", 8000, ssl_context=None
                 )
         except Exception as e:
             print(e)
