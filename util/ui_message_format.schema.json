@@ -1,0 +1,36 @@
+{
+    "$id": "https://example.com/userInputRequest.schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "messageType": {
+        "type": "string"
+      },
+      "requestId": {
+        "type": "string"
+      },
+      "testId": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "inputDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "validationPattern": {
+            "type": "string"
+          }
+        },
+        "required": ["type", "prompt"]
+      }
+    },
+    "required": ["messageType", "requestId", "testId", "description", "inputDetails"]
+  }
+  

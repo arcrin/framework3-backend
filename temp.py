@@ -1,5 +1,5 @@
 from node.base_node import BaseNode
-# from node.terminal_node import TerminalNode
+from node.terminal_node import TerminalNode
 from util.dag_vis import draw_graph
 from node.tc_node import TCNode
 from typing import List
@@ -59,8 +59,9 @@ def fib(n: int) -> int:
     else:
         return (fib(n-1) + fib(n-2))
 
-def sync_task1():
+def sync_task1(ui_request: UIRequest):
     logger.info("Start sync task1")
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(1)
     return 1
 
@@ -89,13 +90,19 @@ def sync_task6():
     time.sleep(6)
     return True
 
-def sync_task7(ui_request: UIRequest):
+def sync_task7():
     logger.info("Start sync task7")
-    trio.from_thread.run(ui_request.queue_request)
     time.sleep(7)
     return True
 
 
 if __name__ == "__main__":
-    sample_profile = SampleTestProfile()
-    draw_graph(sample_profile.test_case_list[0])
+    # sample_profile = SampleTestProfile()
+    # draw_graph(sample_profile.test_case_list[0])
+    import inspect
+    sig = inspect.signature(sync_task1)
+    for name, param in sig.parameters.items():
+        print(f"Parameter: {name}, Type: {param.annotation}")
+        if param.annotation is UIRequest:
+            print(f"Parameter {UIRequest} is of type UIRequest")
+    print("test")

@@ -3,6 +3,7 @@ from typing import Set
 from trio_websocket import WebSocketConnection, ConnectionClosed #type: ignore
 from queue import Queue
 from node.terminal_node import TerminalNode
+import json
 import trio
 import logging
 
@@ -34,8 +35,9 @@ class LogProcessor:
                     if isinstance(record, TerminalNode):
                         break   
                     message = formatter.format(record)
+                    json_message = json.dumps({"type": "log", "message": message})
                     for connection in self._ws_connections:
-                        nursery.start_soon(self.send_message, connection, message)
+                        nursery.start_soon(self.send_message, connection, json_message)
                 except trio.Cancelled:
                     print("Log processor cancelled")
                     break

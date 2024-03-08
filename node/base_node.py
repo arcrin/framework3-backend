@@ -1,6 +1,7 @@
 from typing import List, Any, Callable, Awaitable, Optional
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+import trio
 import logging
 
 
@@ -33,6 +34,16 @@ class BaseNode(ABC):
         self._func_parameter_label: str | None = func_parameter_label
         self._logger = logging.getLogger("BaseNode")
         self._logger.setLevel(logging.DEBUG)
+        self._ui_request_send_channel: trio.MemorySendChannel[str]
+
+    @property
+    def ui_request_send_channel(self) -> trio.MemorySendChannel[str]:
+        return self._ui_request_send_channel
+    
+    @ui_request_send_channel.setter
+    def ui_request_send_channel(self, value: trio.MemorySendChannel[str]) -> None:
+        self._ui_request_send_channel = value
+
 
     @property
     def result(self) -> Any:
