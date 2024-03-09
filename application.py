@@ -85,13 +85,14 @@ class Application:
     async def start_ws(self):
         async def ws_connection_handler(request):
             print("waiting for WS connection")
+            # TODO: Avoid connection from the same client
             ws = await request.accept()
             if not self._ws_connections:
                 self._main_connection = ws
                 self._ui_request_processor.ws_connection = ws
             self._ws_connections.add(ws)
             print(f"WS connection established with:{ws}")
-            while True:
+            while True:  
                 try:
                     message = await ws.get_message()
                     data = json.loads(message)
@@ -129,6 +130,7 @@ class Application:
     async def start(self):
         try:
             async with trio.open_nursery() as nursery:
+                # NOTE: Each consumer can be considered as an attachment 
                 nursery.start_soon(self.start_ws)
                 nursery.start_soon(self._node_executor.start)
                 nursery.start_soon(self._result_processor.start)

@@ -61,42 +61,43 @@ def fib(n: int) -> int:
 
 def sync_task1(ui_request: UIRequest):
     logger.info("Start sync task1")
-    trio.from_thread.run(ui_request.queue_request)
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(1)
     return 1
 
 def sync_task2(ui_request: UIRequest):
     logger.info("Start sync task2")
-    trio.from_thread.run(ui_request.queue_request)
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(2)
     return 2
 
 def sync_task3(ui_request: UIRequest):
     logger.info("Start sync task3")
-    trio.from_thread.run(ui_request.queue_request)
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(3)
     return 3
 
 def sync_task4(ui_request: UIRequest):
     logger.info("Start sync task4")
-    trio.from_thread.run(ui_request.queue_request)
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(4)
     return True
 
 def sync_task5(ui_request: UIRequest):
     logger.info("Start sync task5")
-    trio.from_thread.run(ui_request.queue_request)
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(5)
     return True
 
 def sync_task6(ui_request: UIRequest):
     logger.info("Start sync task6")
-    trio.from_thread.run(ui_request.queue_request)
+    # trio.from_thread.run(ui_request.queue_request)
     time.sleep(6)
     return True
 
 def sync_task7(ui_request: UIRequest):
     logger.info("Start sync task7")
+    # TODO: Need to handle user input cancel action
     trio.from_thread.run(ui_request.queue_request)
     time.sleep(7)
     logger.info(f"task7 response: {ui_request.response}") #type: ignore
