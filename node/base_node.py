@@ -1,6 +1,7 @@
 from typing import List, Any, Callable, Awaitable, Optional
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+import uuid
 import trio
 import logging
 
@@ -19,15 +20,16 @@ class BaseNode(ABC):
     A node represents a single unit of job.
     """
 
-    def __init__(self, name: str = "Node", 
-                 func_parameter_label: str | None=None) -> None:
+    def __init__(
+        self, name: str = "Node", func_parameter_label: str | None = None
+    ) -> None:
         self._name: str = name
         self._dependencies: List["BaseNode"] = []
         self._dependents: List["BaseNode"] = []
         self._state: NodeState = NodeState.NOT_PROCESSED
-        self._scheduling_callback: Callable[
-            ["BaseNode"], Awaitable[None]
-        ] = self._default_on_ready_callback
+        self._scheduling_callback: Callable[["BaseNode"], Awaitable[None]] = (
+            self._default_on_ready_callback
+        )
         self._result: Any = None
         self._error: Optional[Exception] = None
         self._error_traceback: Optional[str] = ""
@@ -35,40 +37,42 @@ class BaseNode(ABC):
         self._logger = logging.getLogger("BaseNode")
         self._logger.setLevel(logging.DEBUG)
         self._ui_request_send_channel: trio.MemorySendChannel[str]
+        self._id = uuid.uuid4()
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def ui_request_send_channel(self) -> trio.MemorySendChannel[str]:
         return self._ui_request_send_channel
-    
+
     @ui_request_send_channel.setter
     def ui_request_send_channel(self, value: trio.MemorySendChannel[str]) -> None:
         self._ui_request_send_channel = value
 
-
     @property
     def result(self) -> Any:
         return self._result
-    
+
     @property
     def error(self) -> Optional[Exception]:
         return self._error
-    
+
     @error.setter
     def error(self, value: Optional[Exception]) -> None:
         self.state = NodeState.ERROR
         self._error = value
 
-    # TODO: Explore a different way to pass parameters, at least a better name for this attribute 
+    # TODO: Explore a different way to pass parameters, at least a better name for this attribute
     @property
-    def func_parameter_label(self) -> str:
-        if self._func_parameter_label is None:
-            raise ValueError("func_parameter_label is not set")
+    def func_parameter_label(self) -> str | None:
         return self._func_parameter_label
 
     @property
     def state(self) -> NodeState:
         return self._state
-    
+
     @state.setter
     def state(self, value: NodeState) -> None:
         self._state = value
@@ -76,7 +80,7 @@ class BaseNode(ABC):
     @property
     def error_traceback(self) -> Optional[str]:
         return self._error_traceback
-    
+
     @error_traceback.setter
     def error_traceback(self, value: Optional[str]) -> None:
         self._error_traceback = value
@@ -139,7 +143,9 @@ class BaseNode(ABC):
                 await self._scheduling_callback(self)
                 self._logger.info(f"{self.name} is scheduled")
             except Exception as e:
-                self._logger.error(f"Error while scheduling {self.name}: {e}", exc_info=True)
+                self._logger.error(
+                    f"Error while scheduling {self.name}: {e}", exc_info=True
+                )
                 raise
 
     def set_scheduling_callback(
@@ -148,7 +154,7 @@ class BaseNode(ABC):
         self._scheduling_callback = callback
 
     async def reset(self) -> None:
-        # COMMENT: If the node is processing, label is as CANCELLED. Its results upon completion will be ignored and the node will be rescheduled. The result processing consumer should change the 
+        # COMMENT: If the node is processing, label is as CANCELLED. Its results upon completion will be ignored and the node will be rescheduled. The result processing consumer should change the
         if self._state == NodeState.PROCESSING:
             self._state = NodeState.CANCEL
             self._logger.info(f"{self.name} node cancelled.")

@@ -3,12 +3,15 @@ from producer_consumer.result_processor import ResultProcessor
 from producer_consumer.node_executor import NodeExecutor
 from producer_consumer.log_processor import LogProcessor
 from producer_consumer.ui_request_processor import UIRequestProcessor
+from producer_consumer.tc_data_ws_processor import TCDataWSProcessor
 from sample_profile.profile import SampleTestProfile
 from node.base_node import BaseNode
+from node.tc_node import TCNode
 from typing import List, Dict, Set
 from trio_websocket import ConnectionClosed, serve_websocket
 from util.log_handler import WebSocketLogHandler
 from util.log_filter import TAGAppLoggerFilter
+from util.tc_data_broker import TCDataBroker
 from queue import Queue
 import json
 import math
@@ -49,6 +52,13 @@ class Application:
             trio.open_memory_channel(50)
         )
 
+        self._tc_data_send_channel: trio.MemorySendChannel[List]
+        self._tc_data_receive_channel: trio.MemoryReceiveChannel[List]
+        self._tc_data_send_channel, self._tc_data_receive_channel = (
+            trio.open_memory_channel(50)
+        )
+
+        # NOTE: Consumer initialization
         self._log_queue: Queue[logging.LogRecord] = Queue()
         root_logger = logging.getLogger()
         ws_logger_handler = WebSocketLogHandler(self._log_queue)
@@ -58,7 +68,6 @@ class Application:
         ws_logger_handler.addFilter(TAGAppLoggerFilter())
         ws_logger_handler.setLevel(logging.DEBUG)
         root_logger.addHandler(ws_logger_handler)
-
         self._node_executor: NodeExecutor = NodeExecutor(
             self._node_executor_receive_channel, self._result_processor_send_channel
         )  # type: ignore
@@ -67,11 +76,18 @@ class Application:
         self._ui_request_processor = UIRequestProcessor(
             self._ui_request_receive_channel, self._ui_response_receive_channel
         )
+        self._tc_data_ws_processor = TCDataWSProcessor(self._tc_data_receive_channel)
+
+        self._tc_data = []
 
     async def add_node(self, node: BaseNode):
+        # TODO: where am I adding these node to?
         self._nodes.append(node)
         node.set_scheduling_callback(self._node_ready)
         node.ui_request_send_channel = self._ui_request_send_channel
+        if isinstance(node, TCNode):
+            tc_data_broker = TCDataBroker(self._tc_data_send_channel, self._tc_data)
+            node.tc_data_broker = tc_data_broker
         await node.check_dependency_and_schedule_self()
 
     async def _node_ready(self, node: BaseNode):
@@ -90,9 +106,10 @@ class Application:
             if not self._ws_connections:
                 self._main_connection = ws
                 self._ui_request_processor.ws_connection = ws
+                self._tc_data_ws_processor.ws_connection = ws
             self._ws_connections.add(ws)
             print(f"WS connection established with:{ws}")
-            while True:  
+            while True:
                 try:
                     message = await ws.get_message()
                     data = json.loads(message)
@@ -130,12 +147,13 @@ class Application:
     async def start(self):
         try:
             async with trio.open_nursery() as nursery:
-                # NOTE: Each consumer can be considered as an attachment 
+                # NOTE: Each consumer can be considered as an attachment
                 nursery.start_soon(self.start_ws)
                 nursery.start_soon(self._node_executor.start)
                 nursery.start_soon(self._result_processor.start)
                 nursery.start_soon(self._log_processor.start)
                 nursery.start_soon(self._ui_request_processor.start)
+                nursery.start_soon(self._tc_data_ws_processor.start)
         except Exception as e:
             print(e)
             raise
