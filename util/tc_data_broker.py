@@ -20,21 +20,21 @@ class TCDataBroker:
 
     async def update_test_case(self) -> None:
         self._test_run_data.append(self._tc_data)
-        await self._queue_date()
+        await self._queue_data()
 
     async def update_execution(self, execution_data): # type: ignore 
         self._tc_data["children"].append(execution_data) # type: ignore
-        await self._queue_date()
+        await self._queue_data()
 
     async def update_parameter(self, parameter_data: Dict[Any, Any]) -> None:
         self._tc_data["children"][-1]["children"].append(parameter_data) #type: ignore
-        await self._queue_date()
+        await self._queue_data()
 
     async def update_progress(self, progress_data: int) -> None:
         self._tc_data["data"]["progress"] = progress_data # type: ignore
-        await self._queue_date()
+        await self._queue_data()
 
-    async def _queue_date(self) -> None:
+    async def _queue_data(self) -> None:
         async with trio.open_nursery() as nursery:
             nursery.start_soon(self._send_channel.send, {"type": "tcData", "message": self._test_run_data}) # type: ignore
 

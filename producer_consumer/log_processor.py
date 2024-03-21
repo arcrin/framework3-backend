@@ -1,45 +1,52 @@
-#type: ignore
 from typing import Set
-from trio_websocket import WebSocketConnection, ConnectionClosed #type: ignore
+from trio_websocket import WebSocketConnection, ConnectionClosed  # type: ignore
 from queue import Queue
 from node.terminal_node import TerminalNode
+from comm_modules.ws_comm_module import WSCommModule
 import json
 import trio
 import logging
 
 
 class LogProcessor:
-    def __init__(self, 
-                 log_queue: Queue[logging.LogRecord | TerminalNode],
-                 ws_connections: Set[WebSocketConnection]):
-        self._log_queue = log_queue 
-        self._ws_connections = ws_connections
-        self._cancel_scope: trio.CancelScope = None
-        self._stop_flag = False 
+    def __init__(
+        self,
+        log_queue: Queue[
+            logging.LogRecord | TerminalNode
+        ],  # REMOVE: remove terminal node from the type
+        comm_module: WSCommModule,
+    ):
+        self._log_queue = log_queue
+        self._comm_module = comm_module
+        self._cancel_scope: trio.CancelScope | None = None
+        self._stop_flag = False
+        self._logger = logging.getLogger("LogProcessor")    
 
-    async def send_message(self, connection, message):
+    async def send_message(self, connection: WebSocketConnection, message: str):  # type: ignore
         try:
-            await connection.send_message(message)
+            await connection.send_message(message)  # type: ignore
         except ConnectionClosed:
-            self._ws_connections.remove(connection)
-            logging.error("Connection closed, removing from connection list")
-
+            self._logger.error(
+                f"Connection {connection} closed, removing from connection list"
+            )
 
     async def start(self):
-        formatter = logging.Formatter("%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s")
+        formatter = logging.Formatter(
+            "%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s"
+        )
         async with trio.open_nursery() as nursery:
             self._cancel_scope = nursery.cancel_scope
             while True:
                 try:
-                    record = await trio.to_thread.run_sync(self._log_queue.get) 
+                    record = await trio.to_thread.run_sync(self._log_queue.get)
                     if isinstance(record, TerminalNode):
-                        break   
+                        break
                     message = formatter.format(record)
                     json_message = json.dumps({"type": "log", "message": message})
-                    for connection in self._ws_connections:
+                    for connection in self._comm_module.all_ws_connection:
                         nursery.start_soon(self.send_message, connection, json_message)
                 except trio.Cancelled:
-                    print("Log processor cancelled")
+                    self._logger.error("Log processor cancelled")
                     break
                 await trio.sleep(0)
 

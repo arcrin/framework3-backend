@@ -81,22 +81,6 @@ class TCNode(BaseNode):
                             if d.func_parameter_label == p_name:
                                 func_parameters[p_name] = d.result
 
-            # user_input_required = False
-            # for _, param in inspect.signature(self._callable_object).parameters.items():
-            #     if param.annotation is UIRequest:
-            #         user_input_required = True
-            #         break
-
-            # if (
-            #     inspect.signature(self._callable_object).parameters
-            #     and user_input_required is False
-            # ) or (
-            #     len(inspect.signature(self._callable_object).parameters) > 1
-            #     and user_input_required is True
-            # ):
-            #     for dependency in self.dependencies:
-            #         func_parameters[dependency.func_parameter_label] = dependency.result
-
             if inspect.iscoroutinefunction(self._callable_object):
                 # Execute coroutine
                 self._logger.info("Executing coroutine")

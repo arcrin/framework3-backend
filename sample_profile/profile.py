@@ -118,7 +118,7 @@ def sync_task6(tc_data_broker: TCDataBroker = None):  # type: ignore
     return True
 
 
-def sync_task7(ui_request: UIRequest = None, tc_data_broker: TCDataBroker = None):
+def sync_task7(ui_request: UIRequest = None, tc_data_broker: TCDataBroker = None, tc6=None):
     logger.info("Start sync task7")
     time.sleep(1)
 

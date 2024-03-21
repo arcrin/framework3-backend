@@ -1,11 +1,10 @@
-#type: ignore
 from queue import Queue
-import logging
-import trio
+from node.terminal_node import TerminalNode
+import logging 
 
 
 class WebSocketLogHandler(logging.Handler):
-    def __init__(self, log_queue: Queue[logging.LogRecord]):
+    def __init__(self, log_queue: Queue[logging.LogRecord | TerminalNode]):
         super().__init__()
         self._log_queue = log_queue 
         
