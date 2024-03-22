@@ -54,9 +54,10 @@ class WSCommModule:
                     # TODO: how to hand over the control and which connection to hand the control to
                     self._ws_control_connection = None
                 self._all_ws_connection.remove(ws)
+                break
 
     
-    async def  start_server(self):
+    async def  start(self):
         self._server_cancel_scope = trio.CancelScope()
         try:
             with self._server_cancel_scope:

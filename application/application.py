@@ -127,7 +127,7 @@ class Application:
         try:
             async with trio.open_nursery() as nursery:
                 # NOTE: Each consumer can be considered as an attachment
-                nursery.start_soon(self._ws_comm_module.start_server)
+                nursery.start_soon(self._ws_comm_module.start)
                 nursery.start_soon(self._node_executor.start)
                 nursery.start_soon(self._result_processor.start)
                 nursery.start_soon(self._log_processor.start)
