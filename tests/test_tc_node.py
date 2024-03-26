@@ -1,4 +1,4 @@
-from node.tc_node import TCNode
+from _Node._TCNode import TCNode
 from sample_profile.scripts import fib, sync_task1, sync_task2, sync_task3, async_task1, async_task2, async_task3
 from functools import partial
 import pytest

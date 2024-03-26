@@ -1,5 +1,5 @@
 from queue import Queue
-from node.terminal_node import TerminalNode
+from _Node._TerminalNode import TerminalNode
 import logging 
 
 

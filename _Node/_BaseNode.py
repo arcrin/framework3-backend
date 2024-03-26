@@ -1,9 +1,12 @@
-from typing import List, Any, Callable, Awaitable, Optional
+from typing import List, Any, Callable, Awaitable, Optional, TYPE_CHECKING
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-import uuid
+from uuid import uuid4
 import trio
 import logging
+
+if TYPE_CHECKING:
+    from _Application._SystemEventBus import SystemEventBus
 
 
 class NodeState(Enum):
@@ -21,7 +24,9 @@ class BaseNode(ABC):
     """
 
     def __init__(
-        self, name: str = "Node", func_parameter_label: str | None = None
+        self, 
+        name: str = "Node",
+        func_parameter_label: str | None = None
     ) -> None:
         self._name: str = name
         self._dependencies: List["BaseNode"] = []
@@ -37,7 +42,16 @@ class BaseNode(ABC):
         self._logger = logging.getLogger("BaseNode")
         self._logger.setLevel(logging.DEBUG)
         self._ui_request_send_channel: trio.MemorySendChannel[str]
-        self._id = uuid.uuid4()
+        self._event_bus: "SystemEventBus | None" = None
+        self._id = uuid4().hex
+
+    @property
+    def event_bus(self) -> "SystemEventBus | None":
+        return self._event_bus
+    
+    @event_bus.setter
+    def event_bus(self, value: "SystemEventBus"):
+        self._event_bus = value
 
     @property
     def id(self):

@@ -1,4 +1,4 @@
-from node.tc_node import TCNode
+from _Node._TCNode import TCNode
 
 class LoadProfileNode(TCNode):
   pass

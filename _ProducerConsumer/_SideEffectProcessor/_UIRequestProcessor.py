@@ -1,4 +1,4 @@
-from comm_modules.ws_comm_module import WSCommModule
+from _CommunicationModules._WSCommModule import WSCommModule
 import json
 import trio_websocket
 import trio
@@ -11,8 +11,8 @@ class UIRequestProcessor:
         ui_response_receive_channel: trio.MemoryReceiveChannel[str],
         comm_module: WSCommModule
     ):
-        self._ui_request_receive_channel: trio.MemoryReceiveChannel = ui_request_receive_channel
-        self._ui_response_receive_channel: trio.MemoryReceiveChannel = ui_response_receive_channel  
+        self._ui_request_receive_channel: trio.MemoryReceiveChannel[str] = ui_request_receive_channel
+        self._ui_response_receive_channel: trio.MemoryReceiveChannel[str] = ui_response_receive_channel  
         self._comm_module: WSCommModule = comm_module
 
     @property

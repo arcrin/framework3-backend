@@ -1,14 +1,17 @@
-from node.base_node import BaseNode
-from typing import Callable, Any, Dict
+# from util.tc_data_broker import TCDataBroker
 from util.async_timing import async_timed
-from functools import partial
+from typing import Callable, Any, TYPE_CHECKING
 from util.ui_request import UIRequest
-from util.tc_data_broker import TCDataBroker
+from _Node._BaseNode import BaseNode
+from functools import partial
 import traceback
 import logging
 import inspect
 import trio
 import sys
+
+if TYPE_CHECKING:
+    from _Application._DomainEntity._TestRun import TestRun
 
 
 class TCNode(BaseNode):
@@ -26,41 +29,55 @@ class TCNode(BaseNode):
         self._callable_object = callable_object
         self.execute = async_timed(self.name)(self.execute)
         self._logger = logging.getLogger("TCNode")
-        self._tc_data_broker: TCDataBroker | None = None
+        # self._tc_data_broker: TCDataBroker | None = None
         self._execution: int = 0
-        self._data: Dict[Any, Any] = {
-            "key": str(self.id),
-            "data": {"name": self.name, "status": True, "progress": 0},
-            "children": [],
-        }
+        # self._data: Dict[Any, Any] = {
+        #     "key": str(self.id),
+        #     "data": {"name": self.name, "status": True, "progress": 0},
+        #     "children": [],
+        # }
+        self._parent_test_run: "TestRun | None" = None
+        self._logger.info(f"TCNode {self.id} created")
+
+
+    # @property
+    # def tc_data_broker(self) -> TCDataBroker | None:
+    #     return self._tc_data_broker
+
+    # @tc_data_broker.setter
+    # def tc_data_broker(self, value: TCDataBroker):
+    #     self._tc_data_broker = value
+    #     self._tc_data_broker.tc_data = self._data
 
     @property
-    def tc_data_broker(self) -> TCDataBroker | None:
-        return self._tc_data_broker
-
-    @tc_data_broker.setter
-    def tc_data_broker(self, value: TCDataBroker):
-        self._tc_data_broker = value
-        self._tc_data_broker.tc_data = self._data
+    def parent_test_run(self):
+        return self._parent_test_run
+    
+    @parent_test_run.setter
+    def parent_test_run(self, value: "TestRun"):
+        if not self._parent_test_run:
+            self._parent_test_run = value
+        else:
+            raise Exception("A TCNode can only have one parent TestRun")
 
     async def execute(self):
         try:
             # TODO: Update unit test to cover signature checking
-            if self._tc_data_broker is not None:
-                self._execution += 1
-                execution_data = {  # type: ignore
-                    "key": self._execution,
-                    "data": {
-                        "name": f"execution {self._execution}",
-                    },
-                    "children": [],
-                }
-                await self._tc_data_broker.update_test_case()
-                await self._tc_data_broker.update_execution(execution_data)  # type: ignore
-            else:
-                raise Exception(
-                    f"A data model needs to be assigned to test node{self.name}"
-                )
+            # if self._tc_data_broker is not None:
+            #     self._execution += 1
+            #     execution_data = {  # type: ignore
+            #         "key": self._execution,
+            #         "data": {
+            #             "name": f"execution {self._execution}",
+            #         },
+            #         "children": [],
+            #     }
+            #     await self._tc_data_broker.update_test_case()
+            #     await self._tc_data_broker.update_execution(execution_data)  # type: ignore
+            # else:
+            #     raise Exception(
+            #         f"A data model needs to be assigned to test node{self.name}"
+            #     )
 
             func_parameters = {}
             dependency_parameter_labels = [
@@ -73,8 +90,8 @@ class TCNode(BaseNode):
             ).parameters.items():
                 if p_obj.annotation is UIRequest:
                     func_parameters[p_name] = UIRequest(self._ui_request_send_channel)
-                elif p_obj.annotation is TCDataBroker:
-                    func_parameters[p_name] = self._tc_data_broker
+                # elif p_obj.annotation is TCDataBroker:
+                #     func_parameters[p_name] = self._tc_data_broker
                 else:
                     if p_name in dependency_parameter_labels:
                         for d in self.dependencies:

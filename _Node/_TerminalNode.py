@@ -1,4 +1,4 @@
-from node.base_node import BaseNode
+from _Node._BaseNode import BaseNode
 
 class TerminalNode(BaseNode):
   def __init__(self):

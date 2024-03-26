@@ -1,4 +1,4 @@
-from node.base_node import BaseNode
+from _Node._BaseNode import BaseNode
 from typing import List, Type, Any
 
 class LoadTCNode(BaseNode):

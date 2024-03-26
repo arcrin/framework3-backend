@@ -1,8 +1,8 @@
 from typing import Set
 from trio_websocket import WebSocketConnection, ConnectionClosed  # type: ignore
 from queue import Queue
-from node.terminal_node import TerminalNode
-from comm_modules.ws_comm_module import WSCommModule
+from _Node._TerminalNode import TerminalNode
+from _CommunicationModules._WSCommModule import WSCommModule
 import json
 import trio
 import logging

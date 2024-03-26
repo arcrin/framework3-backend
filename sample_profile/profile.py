@@ -1,7 +1,7 @@
 # type: ignore
-from node.base_node import BaseNode
+from _Node._BaseNode import BaseNode
 from util.dag_vis import draw_graph
-from node.tc_node import TCNode
+from _Node._TCNode import TCNode
 from typing import List
 from util.ui_request import UIRequest
 from util.tc_data_broker import TCDataBroker
@@ -60,211 +60,197 @@ def fib(n: int) -> int:
         return fib(n - 1) + fib(n - 2)
 
 
-def sync_task1(td_data_broker: TCDataBroker = None):  # type: ignore
+def sync_task1():  # type: ignore
     logger.info("Start sync task1")
     time.sleep(1)
-    trio.from_thread.run(td_data_broker.update_progress, 100)
     return 1
 
 
-def sync_task2(tc_data_broker: TCDataBroker = None):
+def sync_task2():
     logger.info("Start sync task2")
     time.sleep(2)
-    trio.from_thread.run(tc_data_broker.update_progress, 100)
     return 2
 
 
-def sync_task3(tc_data_broker: TCDataBroker = None):
+def sync_task3():
     logger.info("Start sync task3")
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 33)
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 66)
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 100)
     return 3
 
 
-def sync_task4(tc_data_broker: TCDataBroker = None):
+def sync_task4():
     logger.info("Start sync task4")
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 25)
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 50)
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 75)
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 100)
     return True
 
 
-def sync_task5(tc_data_broker: TCDataBroker = None):
+def sync_task5():
     logger.info("Start sync task5")
     time.sleep(2)
-    trio.from_thread.run(tc_data_broker.update_progress, 40)
     time.sleep(3)
-    trio.from_thread.run(tc_data_broker.update_progress, 100)
     return True
 
 
-def sync_task6(tc_data_broker: TCDataBroker = None):  # type: ignore
+def sync_task6():  # type: ignore
     logger.info("Start sync task6")
     time.sleep(1)
-    trio.from_thread.run(tc_data_broker.update_progress, 17)
     time.sleep(3)
-    trio.from_thread.run(tc_data_broker.update_progress, 67)
     time.sleep(2)
-    trio.from_thread.run(tc_data_broker.update_progress, 100)
     return True
 
 
-def sync_task7(ui_request: UIRequest = None, tc_data_broker: TCDataBroker = None, tc6=None):
+def sync_task7(ui_request: UIRequest = None, tc6=None):
     logger.info("Start sync task7")
     time.sleep(1)
 
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter1",
-            "data": {
-                "name": "parameter1",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 1",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 10)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter1",
+    #         "data": {
+    #             "name": "parameter1",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 1",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 10)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter2",
-            "data": {
-                "name": "parameter2",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 2",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 20)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter2",
+    #         "data": {
+    #             "name": "parameter2",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 2",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 20)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter3",
-            "data": {
-                "name": "parameter3",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 3",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 30)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter3",
+    #         "data": {
+    #             "name": "parameter3",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 3",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 30)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter4",
-            "data": {
-                "name": "parameter4",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 4",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 40)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter4",
+    #         "data": {
+    #             "name": "parameter4",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 4",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 40)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter5",
-            "data": {
-                "name": "parameter5",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 5",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 50)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter5",
+    #         "data": {
+    #             "name": "parameter5",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 5",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 50)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter6",
-            "data": {
-                "name": "parameter6",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 6",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 60)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter6",
+    #         "data": {
+    #             "name": "parameter6",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 6",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 60)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter7",
-            "data": {
-                "name": "parameter7",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 7",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 70)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter7",
+    #         "data": {
+    #             "name": "parameter7",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 7",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 70)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter8",
-            "data": {
-                "name": "parameter8",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 8",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 80)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter8",
+    #         "data": {
+    #             "name": "parameter8",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 8",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 80)
     time.sleep(1)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "parameter9",
-            "data": {
-                "name": "parameter9",
-                "expected": "expected",
-                "measured": "measured",
-                "description": "Description 9",
-            },
-        },
-    )
-    trio.from_thread.run(tc_data_broker.update_progress, 90)
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "parameter9",
+    #         "data": {
+    #             "name": "parameter9",
+    #             "expected": "expected",
+    #             "measured": "measured",
+    #             "description": "Description 9",
+    #         },
+    #     },
+    # )
+    # trio.from_thread.run(tc_data_broker.update_progress, 90)
     time.sleep(1)
 
     # TODO: Need to handle user input cancel action
     trio.from_thread.run(ui_request.queue_request)
-    trio.from_thread.run(
-        tc_data_broker.update_parameter,
-        {
-            "key": "user_input",
-            "data": {
-                "name": "User Input",
-                "expected": 123,
-                "measured": ui_request.response,
-                "description": "User input verification",
-            },
-        },
-    )
+    # trio.from_thread.run(
+    #     tc_data_broker.update_parameter,
+    #     {
+    #         "key": "user_input",
+    #         "data": {
+    #             "name": "User Input",
+    #             "expected": 123,
+    #             "measured": ui_request.response,
+    #             "description": "User input verification",
+    #         },
+    #     },
+    # )
     logger.info(f"task7 response: {ui_request.response}")  # type: ignore
-    trio.from_thread.run(tc_data_broker.update_progress, 100)
+    # trio.from_thread.run(tc_data_broker.update_progress, 100)
     return True
 
 

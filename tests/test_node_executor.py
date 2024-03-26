@@ -1,6 +1,6 @@
 # type: ignore
-from producer_consumer.node_executor import NodeExecutor
-from node.base_node import BaseNode
+from _ProducerConsumer.node_executor import NodeExecutor
+from _Node._BaseNode import BaseNode
 import trio
 import trio.testing
 import pytest

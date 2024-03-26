@@ -1,5 +1,5 @@
 # type: ignore
-from node.base_node import BaseNode, NodeState
+from _Node._BaseNode import BaseNode, NodeState
 import pytest
 
 

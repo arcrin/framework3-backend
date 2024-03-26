@@ -1,5 +1,5 @@
-from node.base_node import BaseNode
-from node.terminal_node import TerminalNode
+from _Node._BaseNode import BaseNode
+from _Node._TerminalNode import TerminalNode
 import trio
 import logging
 
