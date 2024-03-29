@@ -10,6 +10,7 @@ class SystemEventBus:
         self, listener: Callable[[BaseEvent], Coroutine[Any, Any, None]]
     ):
         self._listeners.append(listener)
+        
 
     async def publish(self, event: BaseEvent):
         for listener in self._listeners:
