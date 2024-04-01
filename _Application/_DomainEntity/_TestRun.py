@@ -52,7 +52,12 @@ class TestRun:
         tc_node.ui_request_send_channel = self._ui_request_send_channel
         tc_node.event_bus = self._event_bus
         assert tc_node.event_bus is not None, "TCNode must have event bus"
-        new_test_case_event = NewTestCaseEvent({"test_name": tc_node.name})
+        new_test_case_event = NewTestCaseEvent(           
+             {
+                 "id": tc_node.id,      # type: ignore
+                 "name": tc_node.name,  # type: ignore
+             }
+            )                           # type: ignore
         await self._event_bus.publish(new_test_case_event)
         await tc_node.check_dependency_and_schedule_self()
 

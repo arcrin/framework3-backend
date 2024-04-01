@@ -60,7 +60,7 @@ class ApplicationStateManager:
 
     async def event_handler(self, event: BaseEvent):
         if isinstance(event, NewTestCaseEvent):
-            self._logger.info(f"New test case added to test run {event.payload["test_name"]}")
+            self._logger.info(f"New test case added to test run {event.payload["name"]} ")
             async with trio.open_nursery() as nursery:
                 nursery.start_soon(self._tc_data_send_channel.send, {"type": "tcData", "message": event.payload})
             
