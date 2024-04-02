@@ -1,10 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import Any, Union
+from typing import Any, Union, Dict
 
 
 class Parameter(ABC):
     def __init__(self, parameter_name: str):
         self._parameter_name: str = parameter_name
+        self._description: str = ""
+
+    @property
+    def name(self) -> str:
+        return self._parameter_name
+
+    @property
+    def description(self) -> str:
+        return self._description
+    
+    @description.setter
+    def description(self, value: str) -> None:
+        self._description = value   
 
     @property
     @abstractmethod
@@ -19,6 +32,10 @@ class Parameter(ABC):
     @measured_value.setter
     @abstractmethod
     def measured_value(self, value: Any) -> None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def as_dict(self) -> Dict[str, Any]:
         raise NotImplementedError
     
 class SingleValueParameter(Parameter):
@@ -39,3 +56,12 @@ class SingleValueParameter(Parameter):
     @measured_value.setter
     def measured_value(self, value: Union[str, int, float]) -> None:
         self._measured_value = value
+
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "expected": self.expected_value,
+            "measured": self.measured_value,
+            "description": self.description
+        }

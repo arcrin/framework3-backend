@@ -1,6 +1,7 @@
-# from util.tc_data_broker import TCDataBroker
-from util.async_timing import async_timed
+from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
+from _Application._SystemEventBus import SystemEventBus
 from typing import Callable, Any, TYPE_CHECKING
+from util.async_timing import async_timed
 from util.ui_request import UIRequest
 from _Node._BaseNode import BaseNode
 from functools import partial
@@ -24,47 +25,47 @@ class TCNode(BaseNode):
         callable_object: Callable[..., Any],
         name: str,
         func_parameter_label: str | None = None,
+        description: str = "",
     ) -> None:
-        super().__init__(name=name, func_parameter_label=func_parameter_label)
+        super().__init__(
+            name=name, func_parameter_label=func_parameter_label
+        )
         self._callable_object = callable_object
         self.execute = async_timed(self.name)(self.execute)
         self._logger = logging.getLogger("TCNode")
         self._execution: int = 0
-        # self._data: Dict[Any, Any] = {
-        #     "key": str(self.id),
-        #     "data": {"name": self.name, "status": True, "progress": 0},
-        #     "children": [],
-        # }
         self._parent_test_run: "TestRun | None" = None
         self._logger.info(f"TCNode {self.id} created")
+        self._description = description
+        self._data_model = TestCaseDataModel(self._id, self._name, self._description)
 
     # TODO: TCDataBroker should be replaced by event bus
-
+        
     @property
-    def parent_test_run(self):
-        return self._parent_test_run
-    
-    @parent_test_run.setter
-    def parent_test_run(self, value: "TestRun"):
-        if not self._parent_test_run:
-            self._parent_test_run = value
-        else:
-            raise Exception("A TCNode can only have one parent TestRun")
+    def data_model(self) -> TestCaseDataModel:
+        return self._data_model
 
     async def execute(self):
+        await self.data_model.add_repetition()
+        self._data_model.event_bus = self.event_bus
+        assert self.data_model.event_bus is not None, "TCNode must be connected to a system event bus"
+        assert self.data_model.parent_test_run is not None, "TCNode must be associated with a test run"  
+    
         try:
             # TODO: Update unit test to cover function signature check
             func_parameters = {}
             dependency_parameter_labels = [
                 d.func_parameter_label
                 for d in self.dependencies
-                if d.func_parameter_label is not None # type: ignore
-            ]  
+                if d.func_parameter_label is not None  # type: ignore
+            ]
             for p_name, p_obj in inspect.signature(
                 self._callable_object
             ).parameters.items():
                 if p_obj.annotation is UIRequest:
                     func_parameters[p_name] = UIRequest(self._ui_request_send_channel)
+                elif p_obj.annotation is TestCaseDataModel:
+                    func_parameters[p_name] = self.data_model
                 else:
                     if p_name in dependency_parameter_labels:
                         for d in self.dependencies:

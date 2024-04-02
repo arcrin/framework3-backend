@@ -1,10 +1,11 @@
 # type: ignore
+from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
+from _Application._DomainEntity._Parameter import SingleValueParameter
+from util.ui_request import UIRequest
 from _Node._BaseNode import BaseNode
 from util.dag_vis import draw_graph
 from _Node._TCNode import TCNode
 from typing import List
-from util.ui_request import UIRequest
-from util.tc_data_broker import TCDataBroker
 import trio
 import time
 import logging
@@ -60,196 +61,222 @@ def fib(n: int) -> int:
         return fib(n - 1) + fib(n - 2)
 
 
-def sync_task1():  # type: ignore
+def sync_task1(data_model: TestCaseDataModel = None):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task1")
+
+    parameter = SingleValueParameter("parameter1", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
     return 1
 
 
-def sync_task2():
+def sync_task2(data_model: TestCaseDataModel = None):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task2")
+
+    parameter = SingleValueParameter("parameter1", "expected")
     time.sleep(2)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
     return 2
 
 
-def sync_task3():
+def sync_task3(data_model: TestCaseDataModel = None):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task3")
+
+    parameter = SingleValueParameter("parameter1", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
     return 3
 
 
-def sync_task4():
+def sync_task4(data_model: TestCaseDataModel = None):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task4")
+    parameter = SingleValueParameter("parameter1", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter4", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter5", "expected")
+    time.sleep(3)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter6", "expected")
+    time.sleep(2)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter7", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
     return True
 
 
-def sync_task5():
+def sync_task5(data_model: TestCaseDataModel = None):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task5")
+
+    parameter = SingleValueParameter("parameter1", "expected")
     time.sleep(2)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(3)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
     return True
 
 
-def sync_task6():  # type: ignore
+def sync_task6(data_model: TestCaseDataModel = None):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task6")
+
+    parameter = SingleValueParameter("parameter1", "expected")
     time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(3)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+
+    parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(2)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
     return True
 
 
-def sync_task7(ui_request: UIRequest = None, tc6=None):
+def sync_task7(
+    data_model: TestCaseDataModel = None, ui_request: UIRequest = None, tc6=None
+):
+    assert data_model is not None, "Must have a data model"
     logger.info("Start sync task7")
-    time.sleep(1)
 
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter1",
-    #         "data": {
-    #             "name": "parameter1",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 1",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 10)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter2",
-    #         "data": {
-    #             "name": "parameter2",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 2",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 20)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter3",
-    #         "data": {
-    #             "name": "parameter3",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 3",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 30)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter4",
-    #         "data": {
-    #             "name": "parameter4",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 4",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 40)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter5",
-    #         "data": {
-    #             "name": "parameter5",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 5",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 50)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter6",
-    #         "data": {
-    #             "name": "parameter6",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 6",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 60)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter7",
-    #         "data": {
-    #             "name": "parameter7",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 7",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 70)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter8",
-    #         "data": {
-    #             "name": "parameter8",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 8",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 80)
-    time.sleep(1)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "parameter9",
-    #         "data": {
-    #             "name": "parameter9",
-    #             "expected": "expected",
-    #             "measured": "measured",
-    #             "description": "Description 9",
-    #         },
-    #     },
-    # )
-    # trio.from_thread.run(tc_data_broker.update_progress, 90)
-    time.sleep(1)
-
+    parameter = SingleValueParameter("parameter1", "expected")
     # TODO: Need to handle user input cancel action
     trio.from_thread.run(ui_request.queue_request)
-    # trio.from_thread.run(
-    #     tc_data_broker.update_parameter,
-    #     {
-    #         "key": "user_input",
-    #         "data": {
-    #             "name": "User Input",
-    #             "expected": 123,
-    #             "measured": ui_request.response,
-    #             "description": "User input verification",
-    #         },
-    #     },
-    # )
-    logger.info(f"task7 response: {ui_request.response}")  # type: ignore
+    parameter.measured_value = ui_request.response
+    parameter.description = "User input verification"
+    logger.info(f"task7 parameter 1 response: {ui_request.response}") 
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 10)
+
+    parameter = SingleValueParameter("parameter2", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"   
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 20)
+
+    parameter = SingleValueParameter("parameter3", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 30)
+
+    parameter = SingleValueParameter("parameter4", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 40)
+
+    parameter = SingleValueParameter("parameter5", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 50)
+
+    parameter = SingleValueParameter("parameter6", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 60)
+
+    parameter = SingleValueParameter("parameter7", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 70)
+
+    parameter = SingleValueParameter("parameter8", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 80)
+
+    parameter = SingleValueParameter("parameter9", "expected")
+    time.sleep(1)
+    parameter.measured_value = "measured"
+    parameter.description = "description"
+    trio.from_thread.run(data_model.update_parameter, parameter)
+    # trio.from_thread.run(tc_data_broker.update_progress, 90)
+
+    parameter = SingleValueParameter("parameter10", "expected")
+    # TODO: Need to handle user input cancel action
+    trio.from_thread.run(ui_request.queue_request)
+    parameter.measured_value = ui_request.response
+    parameter.description = "User input verification"
+    logger.info(f"task7 response: {ui_request.response}") 
+    trio.from_thread.run(data_model.update_parameter, parameter)
     # trio.from_thread.run(tc_data_broker.update_progress, 100)
     return True
 

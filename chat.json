@@ -37800,6 +37800,7 @@
     },
     {
       "message": {
+        "text": "wait, you didn't define these values, just setter methods",
         "parts": [
           {
             "range": {
@@ -37815,8 +37816,7 @@
             "text": "wait, you didn't define these values, just setter methods",
             "kind": "text"
           }
-        ],
-        "text": "wait, you didn't define these values, just setter methods"
+        ]
       },
       "variableData": {
         "variables": []
@@ -37917,6 +37917,7 @@
     },
     {
       "message": {
+        "text": "I think I should use @abstractmethod and @property together",
         "parts": [
           {
             "range": {
@@ -37932,8 +37933,7 @@
             "text": "I think I should use @abstractmethod and @property together",
             "kind": "text"
           }
-        ],
-        "text": "I think I should use @abstractmethod and @property together"
+        ]
       },
       "variableData": {
         "variables": []
@@ -38034,6 +38034,7 @@
     },
     {
       "message": {
+        "text": "is there a way to raise an exception for an attribure?]",
         "parts": [
           {
             "range": {
@@ -38049,8 +38050,7 @@
             "text": "is there a way to raise an exception for an attribure?]",
             "kind": "text"
           }
-        ],
-        "text": "is there a way to raise an exception for an attribure?]"
+        ]
       },
       "variableData": {
         "variables": []
@@ -38151,6 +38151,7 @@
     },
     {
       "message": {
+        "text": "@workspace /explain \"expected_value\" incorrectly overrides property of same name in class \"Parameter\"\n  Property method \"fset\" is missing in override",
         "parts": [
           {
             "kind": "agent",
@@ -38224,8 +38225,7 @@
             "text": " \"expected_value\" incorrectly overrides property of same name in class \"Parameter\"\n  Property method \"fset\" is missing in override",
             "kind": "text"
           }
-        ],
-        "text": "@workspace /explain \"expected_value\" incorrectly overrides property of same name in class \"Parameter\"\n  Property method \"fset\" is missing in override"
+        ]
       },
       "variableData": {
         "variables": []
@@ -38358,6 +38358,7 @@
     },
     {
       "message": {
+        "text": "I just realized that I don't need a setter for expected value. The expected value or range is set when the parameter object is instantiated ",
         "parts": [
           {
             "range": {
@@ -38373,8 +38374,7 @@
             "text": "I just realized that I don't need a setter for expected value. The expected value or range is set when the parameter object is instantiated ",
             "kind": "text"
           }
-        ],
-        "text": "I just realized that I don't need a setter for expected value. The expected value or range is set when the parameter object is instantiated "
+        ]
       },
       "variableData": {
         "variables": []
@@ -38475,6 +38475,7 @@
     },
     {
       "message": {
+        "text": "For SingleValueParamter, the expected value is types like str, int, float, etc. How do I enforce this ",
         "parts": [
           {
             "range": {
@@ -38490,8 +38491,7 @@
             "text": "For SingleValueParamter, the expected value is types like str, int, float, etc. How do I enforce this ",
             "kind": "text"
           }
-        ],
-        "text": "For SingleValueParamter, the expected value is types like str, int, float, etc. How do I enforce this "
+        ]
       },
       "variableData": {
         "variables": []
@@ -38592,6 +38592,7 @@
     },
     {
       "message": {
+        "text": "I see. What about the type annotation",
         "parts": [
           {
             "range": {
@@ -38607,8 +38608,7 @@
             "text": "I see. What about the type annotation",
             "kind": "text"
           }
-        ],
-        "text": "I see. What about the type annotation"
+        ]
       },
       "variableData": {
         "variables": []
@@ -38709,6 +38709,7 @@
     },
     {
       "message": {
+        "text": "cool, let's start with this",
         "parts": [
           {
             "range": {
@@ -38724,8 +38725,7 @@
             "text": "cool, let's start with this",
             "kind": "text"
           }
-        ],
-        "text": "cool, let's start with this"
+        ]
       },
       "variableData": {
         "variables": []
@@ -38818,6 +38818,204 @@
               "startLineNumber": 1,
               "startColumn": 1,
               "endLineNumber": 36,
+              "endColumn": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "text": "@workspace /explain Cannot assign member \"event_bus\" for type \"TestCaseDataModel\"\n  Type \"SystemEventBus | None\" cannot be assigned to type \"SystemEventBus\"\n    \"None\" is incompatible with \"SystemEventBus\"",
+        "parts": [
+          {
+            "kind": "agent",
+            "range": {
+              "start": 0,
+              "endExclusive": 10
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 11
+            },
+            "agent": {
+              "id": "workspace",
+              "metadata": {
+                "description": "Ask about your workspace",
+                "themeIcon": {
+                  "id": "code"
+                },
+                "hasSlashCommands": true,
+                "hasFollowups": true,
+                "isSecondary": true,
+                "sampleRequest": "How do I build this project?",
+                "supportIssueReporting": false
+              }
+            }
+          },
+          {
+            "range": {
+              "start": 10,
+              "endExclusive": 11
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 11,
+              "endLineNumber": 1,
+              "endColumn": 12
+            },
+            "text": " ",
+            "kind": "text"
+          },
+          {
+            "range": {
+              "start": 11,
+              "endExclusive": 19
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 12,
+              "endLineNumber": 1,
+              "endColumn": 20
+            },
+            "command": {
+              "name": "explain",
+              "description": "Explain how the selected code works"
+            },
+            "kind": "subcommand"
+          },
+          {
+            "range": {
+              "start": 19,
+              "endExclusive": 205
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 20,
+              "endLineNumber": 3,
+              "endColumn": 49
+            },
+            "text": " Cannot assign member \"event_bus\" for type \"TestCaseDataModel\"\n  Type \"SystemEventBus | None\" cannot be assigned to type \"SystemEventBus\"\n    \"None\" is incompatible with \"SystemEventBus\"",
+            "kind": "text"
+          }
+        ]
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "kind": "progressMessage",
+          "content": {
+            "value": "Searching for relevant definitions...",
+            "uris": {}
+          }
+        },
+        {
+          "value": "It seems like you're trying to assign a value of type `SystemEventBus | None` to a member [`event_bus`](command:_github.copilot.openSymbolInFile?%5B%22_Node%2F_BaseNode.py%22%2C%22event_bus%22%5D \"_Node/_BaseNode.py\") of type `SystemEventBus`. The error is because `None` is not compatible with `SystemEventBus`.\n\nIn Python, `None` is a special constant that represents the absence of a value or a null value. It is an object of its own datatype, the `NoneType`. \n\nThe `|` symbol is used for type hinting in Python, indicating that a variable can be of either type on either side of the `|`. So `SystemEventBus | None` means that the variable can be of type `SystemEventBus` or it can be `None`.\n\nThe error message is indicating that you're trying to assign `None` to a variable that should be of type `SystemEventBus`, which is not allowed.\n\nTo fix this, you should ensure that [`event_bus`](command:_github.copilot.openSymbolInFile?%5B%22_Node%2F_BaseNode.py%22%2C%22event_bus%22%5D \"_Node/_BaseNode.py\") is always of type `SystemEventBus` and is never assigned `None`, or change the type hint of [`event_bus`](command:_github.copilot.openSymbolInFile?%5B%22_Node%2F_BaseNode.py%22%2C%22event_bus%22%5D \"_Node/_BaseNode.py\") to `SystemEventBus | None` to allow it to accept `None` as a value.",
+          "isTrusted": {
+            "enabledCommands": [
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile"
+            ]
+          },
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 56,
+          "totalElapsed": 11909
+        },
+        "metadata": {
+          "responseId": "75e9ac7c-86bf-4c7a-9c72-9dd920478039"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "workspace",
+          "subCommand": "explain",
+          "message": "What are some best practices for handling exceptions in Python?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "workspace",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "Ask about your workspace",
+          "themeIcon": {
+            "id": "code"
+          },
+          "hasSlashCommands": true,
+          "hasFollowups": true,
+          "isSecondary": true,
+          "sampleRequest": "How do I build this project?",
+          "supportIssueReporting": false
+        }
+      },
+      "slashCommand": {
+        "name": "explain",
+        "description": "Explain how the selected code works"
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Node\\_BaseNode.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Node/_BaseNode.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Node/_BaseNode.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 32,
+              "startColumn": 1,
+              "endLineNumber": 78,
+              "endColumn": 57
+            }
+          }
+        },
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Python312\\Lib\\logging\\__init__.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Python312/Lib/logging/__init__.py",
+              "path": "/c:/Python312/Lib/logging/__init__.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 2353,
               "endColumn": 1
             }
           }

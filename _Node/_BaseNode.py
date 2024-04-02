@@ -25,7 +25,8 @@ class BaseNode(ABC):
 
     def __init__(
         self, 
-        name: str = "Node",
+        name: str,
+        event_bus: "SystemEventBus | None" = None,
         func_parameter_label: str | None = None
     ) -> None:
         self._name: str = name
@@ -42,7 +43,7 @@ class BaseNode(ABC):
         self._logger = logging.getLogger("BaseNode")
         self._logger.setLevel(logging.DEBUG)
         self._ui_request_send_channel: trio.MemorySendChannel[str]
-        self._event_bus: "SystemEventBus | None" = None
+        self._event_bus: "SystemEventBus | None" = event_bus
         self._id = uuid4().hex
 
     @property
@@ -168,7 +169,9 @@ class BaseNode(ABC):
         self._scheduling_callback = callback
 
     async def reset(self) -> None:
-        # COMMENT: If the node is processing, label is as CANCELLED. Its results upon completion will be ignored and the node will be rescheduled. The result processing consumer should change the
+        # COMMENT: If the node is processing, label is set as CANCELLED. 
+        #   Its results upon completion will be ignored and the node will be rescheduled. 
+        #   The result processing consumer should change the
         if self._state == NodeState.PROCESSING:
             self._state = NodeState.CANCEL
             self._logger.info(f"{self.name} node cancelled.")
@@ -179,7 +182,7 @@ class BaseNode(ABC):
             # TODO: determine if this needs to be in a try block
             await self.check_dependency_and_schedule_self()
         for dependent in self.dependents:
-            # FIXME: Should this be inside a nursery?
+            # TODO: Should this be inside a nursery?
             await dependent.reset()
 
     @abstractmethod
