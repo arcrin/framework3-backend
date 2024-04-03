@@ -70,6 +70,7 @@ def sync_task1(data_model: TestCaseDataModel = None):
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 100)
     return 1
 
 
@@ -82,6 +83,7 @@ def sync_task2(data_model: TestCaseDataModel = None):
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 100)
     return 2
 
 
@@ -94,18 +96,21 @@ def sync_task3(data_model: TestCaseDataModel = None):
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 33)
 
     parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 66)
 
     parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 100)
     return 3
 
 
@@ -117,42 +122,49 @@ def sync_task4(data_model: TestCaseDataModel = None):
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 10)
 
     parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 20)
 
     parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 30)
 
     parameter = SingleValueParameter("parameter4", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 40)
 
     parameter = SingleValueParameter("parameter5", "expected")
     time.sleep(3)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 70)
 
     parameter = SingleValueParameter("parameter6", "expected")
     time.sleep(2)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 90)
 
     parameter = SingleValueParameter("parameter7", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 100)
 
     return True
 
@@ -166,12 +178,14 @@ def sync_task5(data_model: TestCaseDataModel = None):
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 40)
 
     parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(3)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 100)
     return True
 
 
@@ -184,18 +198,21 @@ def sync_task6(data_model: TestCaseDataModel = None):
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 16)
 
     parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(3)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 65)
 
     parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(2)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
+    trio.from_thread.run(data_model.update_progress, 100)
     return True
 
 
@@ -212,63 +229,63 @@ def sync_task7(
     parameter.description = "User input verification"
     logger.info(f"task7 parameter 1 response: {ui_request.response}") 
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 10)
+    trio.from_thread.run(data_model.update_progress, 10)
 
     parameter = SingleValueParameter("parameter2", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"   
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 20)
+    trio.from_thread.run(data_model.update_progress, 20)
 
     parameter = SingleValueParameter("parameter3", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 30)
+    trio.from_thread.run(data_model.update_progress, 30)
 
     parameter = SingleValueParameter("parameter4", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 40)
+    trio.from_thread.run(data_model.update_progress, 40)
 
     parameter = SingleValueParameter("parameter5", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 50)
+    trio.from_thread.run(data_model.update_progress, 50)
 
     parameter = SingleValueParameter("parameter6", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 60)
+    trio.from_thread.run(data_model.update_progress, 60)
 
     parameter = SingleValueParameter("parameter7", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 70)
+    trio.from_thread.run(data_model.update_progress, 70)
 
     parameter = SingleValueParameter("parameter8", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 80)
+    trio.from_thread.run(data_model.update_progress, 80)
 
     parameter = SingleValueParameter("parameter9", "expected")
     time.sleep(1)
     parameter.measured_value = "measured"
     parameter.description = "description"
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 90)
+    trio.from_thread.run(data_model.update_progress, 90)
 
     parameter = SingleValueParameter("parameter10", "expected")
     # TODO: Need to handle user input cancel action
@@ -277,7 +294,7 @@ def sync_task7(
     parameter.description = "User input verification"
     logger.info(f"task7 response: {ui_request.response}") 
     trio.from_thread.run(data_model.update_parameter, parameter)
-    # trio.from_thread.run(tc_data_broker.update_progress, 100)
+    trio.from_thread.run(data_model.update_progress, 100)
     return True
 
 

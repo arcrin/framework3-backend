@@ -56,11 +56,12 @@ class TestRun:
         assert tc_node.event_bus is not None, "TCNode must have event bus"
         new_test_case_event = NewTestCaseEvent(
             {
-                "id": tc_node.id,  # type: ignore
+                "tc_id": tc_node.id,  # type: ignore
                 "name": tc_node.name,  # type: ignore
                 "tr_id": tc_node.data_model.parent_test_run.id, # type: ignore
                 "panel_id": tc_node.data_model.parent_test_run.parent_panel.id, # type: ignore
-                "session_id": tc_node.data_model.parent_test_run.parent_panel.parent_control_session.id # type: ignore
+                "session_id": tc_node.data_model.parent_test_run.parent_panel.parent_control_session.id, # type: ignore
+                "progress": 0
             }
         )
         await self._event_bus.publish(new_test_case_event)

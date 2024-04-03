@@ -1,7 +1,10 @@
 from typing import List, TYPE_CHECKING
 from datetime import datetime
 from _Application._DomainEntity._Parameter import Parameter
-from _Application._SystemEvent import ParameterUpdateEvent
+from _Application._SystemEvent import (
+    ParameterUpdateEvent,
+    ProgressUpdateEvent
+)
 
 if TYPE_CHECKING:
     from _SystemEventBus import SystemEventBus
@@ -92,9 +95,15 @@ class TestCaseDataModel:
     async def update_parameter(self, parameter: Parameter):
         assert self.event_bus is not None, "TCNode must be connected to a system event bus"
         self._repetition[-1].update_parameter(parameter)
-        # TODO: add NewParameterEvent
 
         parameter_update_event = ParameterUpdateEvent(
             {"tc_id": self._tc_id, "parameter": {parameter.name: parameter.as_dict()}} # type: ignore
         )
         await self.event_bus.publish(parameter_update_event)
+
+    async def update_progress(self, progress: int):
+        assert self.event_bus is not None, "TCNode must be connected to a system event bus"
+        progress_update_event = ProgressUpdateEvent(
+            {"tc_id": self._tc_id, "progress": progress}
+        )
+        await self.event_bus.publish(progress_update_event)

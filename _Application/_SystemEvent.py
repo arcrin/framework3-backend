@@ -18,3 +18,8 @@ class NewTestCaseEvent(BaseEvent):
 class ParameterUpdateEvent(BaseEvent):
     def __init__(self, payload):  # type: ignore
         super().__init__(payload)
+
+
+class ProgressUpdateEvent(BaseEvent):
+    def __init__(self, payload):  # type: ignore
+        super().__init__(payload)

@@ -1,4 +1,8 @@
-from _Application._SystemEvent import NewTestCaseEvent, ParameterUpdateEvent
+from _Application._SystemEvent import (
+    NewTestCaseEvent,
+    ParameterUpdateEvent,
+    ProgressUpdateEvent,
+)
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import BaseEvent
 from typing import TYPE_CHECKING, Dict, Any
@@ -69,7 +73,11 @@ class ApplicationStateManager:
             async with trio.open_nursery() as nursery:
                 nursery.start_soon(
                     self._tc_data_send_channel.send,
-                    {"type": "newTC", "message": event.payload},
+                    {
+                        "type": "tc_data",
+                        "event_type": "newTC",
+                        "payload": event.payload,
+                    },
                 )
         elif isinstance(event, ParameterUpdateEvent):
             self._logger.info(
@@ -78,5 +86,23 @@ class ApplicationStateManager:
             async with trio.open_nursery() as nursery:
                 nursery.start_soon(
                     self._tc_data_send_channel.send,
-                    {"type": "parameterUpdate", "message": event.payload},
+                    {
+                        "type": "tc_data",
+                        "event_type": "parameterUpdate",
+                        "payload": event.payload,
+                    },
+                )
+
+        elif isinstance(event, ProgressUpdateEvent):
+            self._logger.info(
+                f"Progress updated for test case {event.payload['tc_id']}"
+            )
+            async with trio.open_nursery() as nursery:
+                nursery.start_soon(
+                    self._tc_data_send_channel.send,
+                    {
+                        "type": "tc_data",
+                        "event_type": "progressUpdate",
+                        "payload": event.payload,
+                    },
                 )
