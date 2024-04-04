@@ -15,11 +15,21 @@ class NewTestCaseEvent(BaseEvent):
         super().__init__(payload)
 
 
+class NewTestExecutionEvent(BaseEvent):
+    def __init__(self, payload):  # type: ignore
+        super().__init__(payload)
+
+
 class ParameterUpdateEvent(BaseEvent):
     def __init__(self, payload):  # type: ignore
         super().__init__(payload)
 
 
 class ProgressUpdateEvent(BaseEvent):
+    def __init__(self, payload):  # type: ignore
+        super().__init__(payload)
+
+
+class TestRunTerminationEvent(BaseEvent):
     def __init__(self, payload):  # type: ignore
         super().__init__(payload)

@@ -2,42 +2,42 @@ from typing import List, TYPE_CHECKING
 from datetime import datetime
 from _Application._DomainEntity._Parameter import Parameter
 from _Application._SystemEvent import (
-    ParameterUpdateEvent,
-    ProgressUpdateEvent
-)
+    ParameterUpdateEvent, 
+    ProgressUpdateEvent,
+    NewTestExecutionEvent
+    )
 
 if TYPE_CHECKING:
     from _SystemEventBus import SystemEventBus
     from _Application._DomainEntity._TestRun import TestRun
 
 
-class TestRepetition:
+class TestExecution:
     def __init__(
         self,
-        repetition_count: int,
-        timestamp: datetime,
+        execution_id: int,
     ):
-        self._repetition_count: int = repetition_count
-        self._timestamp: datetime = timestamp
+        self._execution_id: int = execution_id
+        self._timestamp: datetime = datetime.now()
         self._test_duration: float = 0.0
         self._parameters: List[Parameter] = []
 
     @property
-    def repetition_count(self) -> int:
-        return self._repetition_count
+    def execution_id(self) -> int:
+        return self._execution_id
 
-    @repetition_count.setter
-    def repetition_count(self, value: int):
-        self._repetition_count = value
+    @execution_id.setter
+    def execution_id(self, value: int):
+        self._execution_id = value
 
     @property
     def timestamp(self) -> datetime:
         return self._timestamp
-    
+
     @property
     def test_duration(self) -> float:
         return self._test_duration
-    
+
     @test_duration.setter
     def test_duration(self, value: float):
         self._test_duration = value
@@ -64,7 +64,7 @@ class TestCaseDataModel:
         self._test_case_name: str = test_case_name
         self._test_description: str = test_description
         self._tc_id: str = tc_id
-        self._repetition: List[TestRepetition] = []
+        self._execution: List[TestExecution] = []
         self._event_bus: "SystemEventBus | None" = None
         self._parent_test_run: "TestRun | None" = None
 
@@ -86,23 +86,40 @@ class TestCaseDataModel:
             self._parent_test_run = value
         else:
             raise Exception("A TCNode can only have one parent TestRun")
+        
+    @property
+    def current_execution(self) -> TestExecution:
+        return self._execution[-1]
 
-    async def add_repetition(self):
-        repetition = TestRepetition(len(self._repetition), datetime.now())
-        self._repetition.append(repetition)
-        # TODO: add NewTestRepetitionEvent
+    async def add_execution(self):
+        assert (
+            self.event_bus is not None
+        ), "TCNode must be connected to a system event bus"
+        execution = TestExecution(len(self._execution))
+        self._execution.append(execution)
+        new_test_execution_event = NewTestExecutionEvent(
+            {"tc_id": self._tc_id, "execution_id": execution.execution_id}
+        )
+        await self.event_bus.publish(new_test_execution_event)
 
     async def update_parameter(self, parameter: Parameter):
-        assert self.event_bus is not None, "TCNode must be connected to a system event bus"
-        self._repetition[-1].update_parameter(parameter)
+        assert (
+            self.event_bus is not None
+        ), "TCNode must be connected to a system event bus"
+        assert len(self._execution) > 0, "No execution to update parameter"
+        self.current_execution.update_parameter(parameter)
 
         parameter_update_event = ParameterUpdateEvent(
-            {"tc_id": self._tc_id, "parameter": {parameter.name: parameter.as_dict()}} # type: ignore
+            {"tc_id": self._tc_id, 
+             "execution_id": self.current_execution.execution_id,
+             "parameter": {parameter.name: parameter.as_dict()}}  # type: ignore
         )
         await self.event_bus.publish(parameter_update_event)
 
     async def update_progress(self, progress: int):
-        assert self.event_bus is not None, "TCNode must be connected to a system event bus"
+        assert (
+            self.event_bus is not None
+        ), "TCNode must be connected to a system event bus"
         progress_update_event = ProgressUpdateEvent(
             {"tc_id": self._tc_id, "progress": progress}
         )

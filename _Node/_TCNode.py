@@ -11,9 +11,6 @@ import inspect
 import trio
 import sys
 
-if TYPE_CHECKING:
-    from _Application._DomainEntity._TestRun import TestRun
-
 
 class TCNode(BaseNode):
     """
@@ -27,30 +24,35 @@ class TCNode(BaseNode):
         func_parameter_label: str | None = None,
         description: str = "",
     ) -> None:
-        super().__init__(
-            name=name, func_parameter_label=func_parameter_label
-        )
+        super().__init__(name=name, func_parameter_label=func_parameter_label)
         self._callable_object = callable_object
         self.execute = async_timed(self.name)(self.execute)
         self._logger = logging.getLogger("TCNode")
-        self._execution: int = 0
-        self._parent_test_run: "TestRun | None" = None
         self._logger.info(f"TCNode {self.id} created")
-        self._description = description
-        self._data_model = TestCaseDataModel(self._id, self._name, self._description)
+        self._auto_retry_count: int = 1
+        self._data_model = TestCaseDataModel(self._id, self._name, description)
 
     # TODO: TCDataBroker should be replaced by event bus
-        
+
+    @property
+    def auto_retry_count(self) -> int:
+        return self._auto_retry_count
+
     @property
     def data_model(self) -> TestCaseDataModel:
         return self._data_model
 
     async def execute(self):
-        await self.data_model.add_repetition()
         self._data_model.event_bus = self.event_bus
-        assert self.data_model.event_bus is not None, "TCNode must be connected to a system event bus"
-        assert self.data_model.parent_test_run is not None, "TCNode must be associated with a test run"  
-    
+        await self.data_model.add_execution()
+        self._auto_retry_count -= self.data_model.current_execution.execution_id
+        assert (
+            self.data_model.event_bus is not None
+        ), "TCNode must be connected to a system event bus"
+        assert (
+            self.data_model.parent_test_run is not None
+        ), "TCNode must be associated with a test run"
+
         try:
             # TODO: Update unit test to cover function signature check
             func_parameters = {}

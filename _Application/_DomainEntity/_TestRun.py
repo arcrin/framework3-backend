@@ -1,4 +1,4 @@
-from _Node._TerminalNode import TerminalNode
+from _Node._TestRunTerminalNode import TestRunTerminalNode
 from _Application._SystemEvent import NewTestCaseEvent
 from typing import List, TYPE_CHECKING
 from uuid import uuid4
@@ -18,11 +18,10 @@ class TestRun:
         node_executor_send_channel: "MemorySendChannel[BaseNode]",
         ui_request_send_channel: "MemorySendChannel[str]",
         event_bus: "SystemEventBus",
-        test_profile,
-    ):  # type: ignore
+        test_profile # type: ignore
+    ):  
         self._id: str = uuid4().hex
         self._tc_nodes: List["TCNode"] = []
-        self._terminal_node = TerminalNode()
         self._node_executor_send_channel = node_executor_send_channel
         self._ui_request_send_channel = ui_request_send_channel
         self._event_bus = event_bus
@@ -30,6 +29,9 @@ class TestRun:
         # TODO: profile is downloaded once and stored somewhere, either Panel or Session
         self._test_profile = test_profile  # type: ignore
         self._logger = logging.getLogger("TestRun")
+        self._test_run_terminal_node = TestRunTerminalNode(self.id)
+        self._test_run_terminal_node.event_bus = self._event_bus
+        self._test_run_terminal_node.set_scheduling_callback(self._node_scheduling_callback)
 
     @property
     def id(self) -> str:
@@ -47,7 +49,7 @@ class TestRun:
             raise Exception("A test run can only have one parent panel")
 
     async def add_tc_node(self, tc_node: "TCNode"):  # TODO: add test case event
-        self._terminal_node.add_dependency(tc_node)
+        self._test_run_terminal_node.add_dependency(tc_node)
         self._tc_nodes.append(tc_node)
         tc_node.set_scheduling_callback(self._node_scheduling_callback)
         tc_node.data_model.parent_test_run = self
@@ -56,7 +58,7 @@ class TestRun:
         assert tc_node.event_bus is not None, "TCNode must have event bus"
         new_test_case_event = NewTestCaseEvent(
             {
-                "tc_id": tc_node.id,  # type: ignore
+                "id": tc_node.id,  # type: ignore
                 "name": tc_node.name,  # type: ignore
                 "tr_id": tc_node.data_model.parent_test_run.id, # type: ignore
                 "panel_id": tc_node.data_model.parent_test_run.parent_panel.id, # type: ignore

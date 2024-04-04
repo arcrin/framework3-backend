@@ -1,7 +1,7 @@
 from typing import Set
 from trio_websocket import WebSocketConnection, ConnectionClosed  # type: ignore
 from queue import Queue
-from _Node._TerminalNode import TerminalNode
+from _Node._TestRunTerminalNode import TestRunTerminalNode
 from _CommunicationModules._WSCommModule import WSCommModule
 import json
 import trio
@@ -12,7 +12,7 @@ class LogProcessor:
     def __init__(
         self,
         log_queue: Queue[
-            logging.LogRecord | TerminalNode
+            logging.LogRecord | TestRunTerminalNode
         ],  # REMOVE: remove terminal node from the type
         comm_module: WSCommModule,
     ):
@@ -39,7 +39,7 @@ class LogProcessor:
             while True:
                 try:
                     record = await trio.to_thread.run_sync(self._log_queue.get)
-                    if isinstance(record, TerminalNode):
+                    if isinstance(record, TestRunTerminalNode):
                         break
                     message = formatter.format(record)
                     json_message = json.dumps({"type": "log", "message": message})
@@ -51,4 +51,4 @@ class LogProcessor:
                 await trio.sleep(0)
 
     def stop(self):
-        self._log_queue.put(TerminalNode())
+        self._log_queue.put(TestRunTerminalNode())

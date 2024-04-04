@@ -1,4 +1,6 @@
-from _ProducerConsumer._WorkflowProcessor._ResultProcessor import ResultProcessor
+from _ProducerConsumer._WorkflowProcessor._NodeResultProcessor import (
+    NodeResultProcessor,
+)
 from _ProducerConsumer._WorkflowProcessor._NodeExecutor import NodeExecutor
 from _ProducerConsumer._SideEffectProcessor._AppCommandProcessor import (
     AppCommandProcessor,
@@ -6,6 +8,7 @@ from _ProducerConsumer._SideEffectProcessor._AppCommandProcessor import (
 from _ProducerConsumer._SideEffectProcessor._UIRequestProcessor import (
     UIRequestProcessor,
 )
+from _ProducerConsumer._WorkflowProcessor._NodeFailureProcessor import NodeFailureProcessor
 from _ProducerConsumer._SideEffectProcessor._TCDataWSProcessor import TCDataWSProcessor
 from _ProducerConsumer._SideEffectProcessor._LogProcessor import LogProcessor
 from _Application._SystemEventBus import SystemEventBus
@@ -14,7 +17,7 @@ from _CommunicationModules._WSCommModule import WSCommModule
 from sample_profile.profile import SampleTestProfile
 from util.log_handler import WebSocketLogHandler
 from util.log_filter import TAGAppLoggerFilter
-from _Node._TerminalNode import TerminalNode
+from _Node._TestRunTerminalNode import TestRunTerminalNode
 
 from typing import Dict, Any, TYPE_CHECKING
 from queue import Queue
@@ -37,9 +40,18 @@ class Application:
             trio.open_memory_channel["BaseNode"](50)
         )
 
-        self._result_processor_send_channel: trio.MemorySendChannel["BaseNode"]
-        self._result_processor_receive_channel: trio.MemoryReceiveChannel["BaseNode"]
-        self._result_processor_send_channel, self._result_processor_receive_channel = (
+        self._node_result_processor_send_channel: trio.MemorySendChannel["BaseNode"]
+        self._node_result_processor_receive_channel: trio.MemoryReceiveChannel[
+            "BaseNode"
+        ]
+        (
+            self._node_result_processor_send_channel,
+            self._node_result_processor_receive_channel,
+        ) = trio.open_memory_channel(50)
+
+        self._node_failure_send_channel: trio.MemorySendChannel["BaseNode"]
+        self._node_failure_receive_channel: trio.MemoryReceiveChannel["BaseNode"]
+        self._node_failure_send_channel, self._node_failure_receive_channel = (
             trio.open_memory_channel(50)
         )
 
@@ -67,9 +79,8 @@ class Application:
             trio.open_memory_channel[Dict[Any, Any]](50)
         )
 
-    
         # COMMENT: Custom log handler and filter installation
-        self._log_queue: Queue[logging.LogRecord | TerminalNode] = Queue()
+        self._log_queue: Queue[logging.LogRecord | TestRunTerminalNode] = Queue()
         root_logger = logging.getLogger()
         ws_logger_handler = WebSocketLogHandler(self._log_queue)
         if root_logger.handlers:
@@ -81,11 +92,13 @@ class Application:
 
         # COMMENT: Application state manager initialization
         self._system_event_bus = SystemEventBus()
-        self._asm = ApplicationStateManager(self._system_event_bus, 
-                                    self._tc_data_send_channel, # type: ignore 
-                                    self._node_executor_send_channel, # type: ignore
-                                    self._ui_request_send_channel, # type: ignore
-                                    SampleTestProfile)
+        self._asm = ApplicationStateManager(
+            self._system_event_bus,
+            self._tc_data_send_channel,  # type: ignore
+            self._node_executor_send_channel,  # type: ignore
+            self._ui_request_send_channel,  # type: ignore
+            SampleTestProfile,
+        )
 
         # COMMENT: Consumer initialization
 
@@ -98,9 +111,17 @@ class Application:
 
         self._node_executor: NodeExecutor = NodeExecutor(
             self._node_executor_receive_channel,  # type: ignore
-            self._result_processor_send_channel,  # type: ignore
+            self._node_result_processor_send_channel,  # type: ignore
         )
-        self._result_processor = ResultProcessor(self._result_processor_receive_channel)  # type: ignore
+        self._node_result_processor = NodeResultProcessor(
+            self._node_result_processor_receive_channel, # type: ignore
+            self._node_failure_send_channel,  # type: ignore
+        )
+
+        self._node_failure_processor = NodeFailureProcessor(
+            self._node_failure_receive_channel # type: ignore
+        )
+
         self._log_processor = LogProcessor(self._log_queue, self._ws_comm_module)
         self._ui_request_processor = UIRequestProcessor(
             self._ui_request_receive_channel,  # type: ignore
@@ -136,7 +157,8 @@ class Application:
                 # NOTE: Each consumer can be considered as an attachment
                 nursery.start_soon(self._ws_comm_module.start)
                 nursery.start_soon(self._node_executor.start)
-                nursery.start_soon(self._result_processor.start)
+                nursery.start_soon(self._node_result_processor.start)
+                nursery.start_soon(self._node_failure_processor.start)
                 nursery.start_soon(self._log_processor.start)
                 nursery.start_soon(self._ui_request_processor.start)
                 nursery.start_soon(self._tc_data_ws_processor.start)

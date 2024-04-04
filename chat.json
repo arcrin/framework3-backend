@@ -39021,6 +39021,1016 @@
           }
         }
       ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 132
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 133
+            },
+            "text": "the highlighted code has a pattern of: initializing parameter, start measurement, stop measurement. Is there a way to simplify this?",
+            "kind": "text"
+          }
+        ],
+        "text": "the highlighted code has a pattern of: initializing parameter, start measurement, stop measurement. Is there a way to simplify this?"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "Yes, you can simplify this by creating a helper function that encapsulates the repeated pattern of initializing a parameter, starting a measurement, and stopping a measurement. Here's an example:\n\n```python\nasync def measure_parameter(name: str, expected: str, measured: str, description: str, data_model: TestCaseDataModel, progress: int):\n    parameter = SingleValueParameter(name)\n    parameter.start_measurement(expected)\n    time.sleep(1)\n    parameter.stop_measurement(measured, description, True)\n    await trio.to_thread.run(data_model.update_parameter, parameter)\n    await trio.to_thread.run(data_model.update_progress, progress)\n\ndef sync_task7(data_model: TestCaseDataModel = None, ui_request: UIRequest = None, tc6=None):\n    assert data_model is not None, \"Must have a data model\"\n    logger.info(\"Start sync task7\")\n\n    trio.run(measure_parameter, \"parameter1\", \"expected\", ui_request.response, \"User input verification\", data_model, 10)\n    trio.run(measure_parameter, \"parameter2\", \"expected\", \"measured\", \"description\", data_model, 20)\n    trio.run(measure_parameter, \"parameter3\", \"expected\", \"measured\", \"description\", data_model, 30)\n    trio.run(measure_parameter, \"parameter4\", \"expected\", \"measured\", \"description\", data_model, 40)\n    trio.run(measure_parameter, \"parameter5\", \"expected\", \"measured\", \"description\", data_model, 50)\n    trio.run(measure_parameter, \"parameter6\", \"expected\", \"measured\", \"description\", data_model, 60)\n    trio.run(measure_parameter, \"parameter7\", \"expected\", \"measured\", \"description\", data_model, 70)\n    trio.run(measure_parameter, \"parameter8\", \"expected\", \"measured\", \"description\", data_model, 80)\n    trio.run(measure_parameter, \"parameter9\", \"expected\", \"measured\", \"description\", data_model, 90)\n    trio.run(measure_parameter, \"parameter10\", \"expected\", ui_request.response, \"description\", data_model, 100)\n\n    return True\n```\n\nIn this code, the `measure_parameter` function takes care of initializing a parameter, starting a measurement, stopping a measurement, updating the parameter in the data model, and updating the progress. The `sync_task7` function then just needs to call `measure_parameter` for each parameter. This greatly simplifies the `sync_task7` function and makes the code more DRY (Don't Repeat Yourself).",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 3349,
+          "totalElapsed": 23798
+        },
+        "metadata": {
+          "responseId": "339efaaa-63c6-48bb-a566-4a0e6d35ddd8"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "How can I handle errors or exceptions when measuring parameters in my code?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\sample_profile\\profile.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/sample_profile/profile.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/sample_profile/profile.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 219,
+              "startColumn": 1,
+              "endLineNumber": 296,
+              "endColumn": 16
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 277
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 278
+            },
+            "text": "That's not it. The operation between start_measurement and stop_measurement will be more complicated than time.sleep(). My concern is someone would forget to call stop_measurement and the data record will be lost. I am thinkg using context manager to enforce the function calls",
+            "kind": "text"
+          }
+        ],
+        "text": "That's not it. The operation between start_measurement and stop_measurement will be more complicated than time.sleep(). My concern is someone would forget to call stop_measurement and the data record will be lost. I am thinkg using context manager to enforce the function calls"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "You're right, a context manager is a great way to ensure that `stop_measurement` is always called, even if an error occurs during the operation between `start_measurement` and `stop_measurement`. \n\nHere's how you can modify the `SingleValueParameter` class to use a context manager:\n\n```python\nfrom contextlib import contextmanager\n\nclass SingleValueParameter(Parameter):\n    def __init__(self, parameter_name: str, expected_value: Union[str, int, float]):\n        super().__init__(parameter_name)\n        if not isinstance(expected_value, (str, int, float)):\n            raise TypeError(\"Expected value must be a str, int, or float\")\n        self._expected_value: Union[str, int, float] = expected_value\n        self._measured_value: Any = None\n\n    @property\n    def expected_value(self) -> Union[str, int, float]:\n        if self._expected_value is None:\n            raise ValueError(\"Expected value is not set\")\n        return self._expected_value\n\n    @property\n    def measured_value(self) -> Any:\n        if self._measured_value is None:\n            raise ValueError(\"Measured value is not set\")\n        return self._measured_value\n    \n    @measured_value.setter\n    def measured_value(self, value: Any) -> None:\n        self._measured_value = value\n\n    @contextmanager\n    def measurement(self, expected_value: Union[str, int, float], description: str):\n        self.start_measurement(expected_value)\n        try:\n            yield\n        finally:\n            self.stop_measurement(self._measured_value, description, True)\n```\n\nNow, you can use the `measurement` context manager in your `sync_task7` function like this:\n\n```python\ndef sync_task7(data_model: TestCaseDataModel = None, ui_request: UIRequest = None, tc6=None):\n    assert data_model is not None, \"Must have a data model\"\n    logger.info(\"Start sync task7\")\n\n    with SingleValueParameter(\"parameter1\").measurement(\"expected\", \"User input verification\") as parameter:\n        trio.from_thread.run(ui_request.queue_request)\n        parameter.measured_value = ui_request.response\n        logger.info(f\"task7 parameter 1 response: {ui_request.response}\") \n        trio.from_thread.run(data_model.update_parameter, parameter)\n        trio.from_thread.run(data_model.update_progress, 10)\n\n    # Repeat for other parameters...\n```\n\nIn this code, the `measurement` context manager ensures that `stop_measurement` is always called, even if an error occurs inside the `with` block. This ensures that the data record is never lost.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 2581,
+          "totalElapsed": 31210
+        },
+        "metadata": {
+          "responseId": "de8c5e31-3fe1-47b3-b9a1-da0a0bfd663f"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "How can I use a context manager to ensure that the `stop_measurement` method is always called in my code?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\sample_profile\\profile.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/sample_profile/profile.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/sample_profile/profile.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 219,
+              "startColumn": 1,
+              "endLineNumber": 296,
+              "endColumn": 16
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 199
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 200
+            },
+            "text": "This is redundant. You are assigning the measured_value explicitly, then calling the stop_measurement method inside the context manager. Maybe context manager is not the best solution for what I want",
+            "kind": "text"
+          }
+        ],
+        "text": "This is redundant. You are assigning the measured_value explicitly, then calling the stop_measurement method inside the context manager. Maybe context manager is not the best solution for what I want"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "I see your point. If you want to enforce the sequence of operations and reduce redundancy, you might consider using a decorator. A decorator can wrap the function that performs the operation between `start_measurement` and `stop_measurement`, ensuring that `start_measurement` and `stop_measurement` are always called before and after the operation, respectively.\n\nHere's an example of how you can create such a decorator:\n\n```python\nfrom functools import wraps\n\ndef measure(parameter: SingleValueParameter, expected_value: Union[str, int, float], description: str):\n    def decorator(func):\n        @wraps(func)\n        def wrapper(*args, **kwargs):\n            parameter.start_measurement(expected_value)\n            try:\n                result = func(*args, **kwargs)\n            finally:\n                parameter.stop_measurement(parameter.measured_value, description, True)\n            return result\n        return wrapper\n    return decorator\n```\n\nYou can use this decorator in your `sync_task7` function like this:\n\n```python\n@measure(parameter=SingleValueParameter(\"parameter1\"), expected_value=\"expected\", description=\"User input verification\")\ndef operation1(ui_request):\n    trio.from_thread.run(ui_request.queue_request)\n    return ui_request.response\n\ndef sync_task7(data_model: TestCaseDataModel = None, ui_request: UIRequest = None, tc6=None):\n    assert data_model is not None, \"Must have a data model\"\n    logger.info(\"Start sync task7\")\n\n    parameter1 = SingleValueParameter(\"parameter1\")\n    parameter1.measured_value = operation1(ui_request)\n    trio.from_thread.run(data_model.update_parameter, parameter1)\n    trio.from_thread.run(data_model.update_progress, 10)\n\n    # Repeat for other parameters...\n```\n\nIn this code, the `measure` decorator ensures that `start_measurement` and `stop_measurement` are always called before and after the operation, respectively. This enforces the sequence of operations and reduces redundancy.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 2663,
+          "totalElapsed": 22993
+        },
+        "metadata": {
+          "responseId": "d48bd57a-fd53-4594-80a8-b4cbf2ae8bdf"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "How can I create a unit test for the `sync_task7` function?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Application\\_DomainEntity\\_Parameter.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Application/_DomainEntity/_Parameter.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Application/_DomainEntity/_Parameter.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 69,
+              "startColumn": 1,
+              "endLineNumber": 99,
+              "endColumn": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "kind": "agent",
+            "range": {
+              "start": 0,
+              "endExclusive": 10
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 11
+            },
+            "agent": {
+              "id": "workspace",
+              "metadata": {
+                "description": "Ask about your workspace",
+                "themeIcon": {
+                  "id": "code"
+                },
+                "hasSlashCommands": true,
+                "hasFollowups": true,
+                "isSecondary": true,
+                "sampleRequest": "How do I build this project?",
+                "supportIssueReporting": false
+              }
+            }
+          },
+          {
+            "range": {
+              "start": 10,
+              "endExclusive": 11
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 11,
+              "endLineNumber": 1,
+              "endColumn": 12
+            },
+            "text": " ",
+            "kind": "text"
+          },
+          {
+            "range": {
+              "start": 11,
+              "endExclusive": 19
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 12,
+              "endLineNumber": 1,
+              "endColumn": 20
+            },
+            "command": {
+              "name": "explain",
+              "description": "Explain how the selected code works"
+            },
+            "kind": "subcommand"
+          },
+          {
+            "range": {
+              "start": 19,
+              "endExclusive": 819
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 20,
+              "endLineNumber": 36,
+              "endColumn": 1
+            },
+            "text": " Write an explanation for the active selection as paragraphs of text.\n\n```python\nfrom abc import ABC\r\n\r\n\r\nclass BaseEvent(ABC):\r\n    def __init__(self, payload):  # type: ignore\r\n        self._payload = payload\r\n\r\n    @property\r\n    def payload(self):\r\n        return self._payload\r\n\r\n\r\nclass NewTestCaseEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\r\n\r\n\r\nclass NewTestRepetitionEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\r\n\r\n\r\nclass ParameterUpdateEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\r\n\r\n\r\nclass ProgressUpdateEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\n```\n\n",
+            "kind": "text"
+          }
+        ],
+        "text": "@workspace /explain Write an explanation for the active selection as paragraphs of text.\n\n```python\nfrom abc import ABC\r\n\r\n\r\nclass BaseEvent(ABC):\r\n    def __init__(self, payload):  # type: ignore\r\n        self._payload = payload\r\n\r\n    @property\r\n    def payload(self):\r\n        return self._payload\r\n\r\n\r\nclass NewTestCaseEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\r\n\r\n\r\nclass NewTestRepetitionEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\r\n\r\n\r\nclass ParameterUpdateEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\r\n\r\n\r\nclass ProgressUpdateEvent(BaseEvent):\r\n    def __init__(self, payload):  # type: ignore\r\n        super().__init__(payload)\n```\n\n"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "This code defines a base class [`BaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22BaseEvent%22%5D \"_Application/_SystemEvent.py\") and several subclasses that represent different types of events. All these classes are part of an event-driven system, where events are used to signal changes in the system's state.\n\nThe [`BaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22BaseEvent%22%5D \"_Application/_SystemEvent.py\") class is an abstract base class (ABC), as indicated by the inheritance from `ABC`. This means it provides a common interface for its subclasses, but cannot be instantiated itself. The [`BaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22BaseEvent%22%5D \"_Application/_SystemEvent.py\") class has an initializer method ([`__init__`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22__init__%22%5D \"_Application/_SystemEvent.py\")) that takes a single argument [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\"). This [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") is stored as an instance variable [`_payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22_payload%22%5D \"_Application/_SystemEvent.py\"), which is intended to be private (as indicated by the underscore prefix). The [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") is then exposed through a public property [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\"), which allows read-only access to [`_payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22_payload%22%5D \"_Application/_SystemEvent.py\").\n\nThe subclasses [`NewTestCaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22NewTestCaseEvent%22%5D \"_Application/_SystemEvent.py\"), [`NewTestRepetitionEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22NewTestRepetitionEvent%22%5D \"_Application/_SystemEvent.py\"), [`ParameterUpdateEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22ParameterUpdateEvent%22%5D \"_Application/_SystemEvent.py\"), and [`ProgressUpdateEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22ProgressUpdateEvent%22%5D \"_Application/_SystemEvent.py\") all inherit from [`BaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22BaseEvent%22%5D \"_Application/_SystemEvent.py\"). They each define their own initializer method, which simply calls the initializer of the superclass ([`BaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22BaseEvent%22%5D \"_Application/_SystemEvent.py\")) with the [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") argument. This means that these subclasses inherit the [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") property from [`BaseEvent`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22BaseEvent%22%5D \"_Application/_SystemEvent.py\"), and their instances can be created with a [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") that can be accessed through this property.\n\nThe `# type: ignore` comments are used to suppress type checking warnings from a static type checker like mypy. This might be because the [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") can be of any type, and the type checker cannot verify that all usages of [`payload`](command:_github.copilot.openSymbolInFile?%5B%22_Application%2F_SystemEvent.py%22%2C%22payload%22%5D \"_Application/_SystemEvent.py\") are type-safe.\n\nIn summary, this code defines a hierarchy of event classes for an event-driven system. Each event carries a payload, which can be any data associated with the event. The specific type of event is represented by the class of the event object.",
+          "isTrusted": {
+            "enabledCommands": [
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile",
+              "_github.copilot.openRelativePath",
+              "_github.copilot.openSymbolInFile"
+            ]
+          },
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 6471,
+          "totalElapsed": 21777
+        },
+        "metadata": {
+          "responseId": "fb80513c-500d-4ae8-9f1e-3add0dbb5105"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "workspace",
+          "subCommand": "explain",
+          "message": "How can I handle errors or exceptions when using the context manager for measuring parameters?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "workspace",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "Ask about your workspace",
+          "themeIcon": {
+            "id": "code"
+          },
+          "hasSlashCommands": true,
+          "hasFollowups": true,
+          "isSecondary": true,
+          "sampleRequest": "How do I build this project?",
+          "supportIssueReporting": false
+        }
+      },
+      "slashCommand": {
+        "name": "explain",
+        "description": "Explain how the selected code works"
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Application\\_SystemEvent.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 31,
+              "endColumn": 1
+            }
+          }
+        },
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Users\\wbai\\.vscode\\extensions\\ms-python.vscode-pylance-2024.4.1\\dist\\typeshed-fallback\\stdlib\\builtins.pyi",
+              "_sep": 1,
+              "external": "file:///c%3A/Users/wbai/.vscode/extensions/ms-python.vscode-pylance-2024.4.1/dist/typeshed-fallback/stdlib/builtins.pyi",
+              "path": "/c:/Users/wbai/.vscode/extensions/ms-python.vscode-pylance-2024.4.1/dist/typeshed-fallback/stdlib/builtins.pyi",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 211,
+              "startColumn": 7,
+              "endLineNumber": 211,
+              "endColumn": 12
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 44
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 45
+            },
+            "text": "do you think I could use a better structure?",
+            "kind": "text"
+          }
+        ],
+        "text": "do you think I could use a better structure?"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "Your current structure is quite good if you want to represent different types of events with different classes. It provides a clear and simple way to handle different types of events in an event-driven system. However, if the only difference between these event classes is their type (i.e., their class name), and they don't have any unique behavior or additional properties, you might consider simplifying your structure.\n\nOne way to do this is to use a single `Event` class that takes an event type as an argument. Here's an example:\n\n```python\nclass Event:\n    def __init__(self, event_type, payload):  # type: ignore\n        self._event_type = event_type\n        self._payload = payload\n\n    @property\n    def event_type(self):\n        return self._event_type\n\n    @property\n    def payload(self):\n        return self._payload\n```\n\nYou can then create events of different types like this:\n\n```python\nnew_test_case_event = Event('NewTestCaseEvent', payload)\nnew_test_repetition_event = Event('NewTestRepetitionEvent', payload)\nparameter_update_event = Event('ParameterUpdateEvent', payload)\nprogress_update_event = Event('ProgressUpdateEvent', payload)\n```\n\nThis structure is simpler and more flexible, as you can easily create events of new types without having to define new classes. However, it doesn't provide the same level of type safety as your original structure, as the event type is just a string and could be any value. If you want to enforce that the event type is one of a specific set of values, you could use an enumeration (enum) for the event type.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 1861,
+          "totalElapsed": 17409
+        },
+        "metadata": {
+          "responseId": "4c0ff859-ba76-4fdc-921b-c546ea53890e"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "What are some best practices for designing an event-driven system?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Application\\_SystemEvent.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 31,
+              "endColumn": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 98
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 99
+            },
+            "text": "I see. I don't want to use strings to define types, in case of typos. I rather use structured data",
+            "kind": "text"
+          }
+        ],
+        "text": "I see. I don't want to use strings to define types, in case of typos. I rather use structured data"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "If you want to avoid using strings for event types and prefer structured data, you can use Python's Enum class. This allows you to define a set of symbolic names (members) bound to unique, constant values. The members of an enum are distinct and cannot be duplicated.\n\nHere's how you can define an Enum for your event types:\n\n```python\nfrom enum import Enum\n\nclass EventType(Enum):\n    NEW_TEST_CASE = 1\n    NEW_TEST_REPETITION = 2\n    PARAMETER_UPDATE = 3\n    PROGRESS_UPDATE = 4\n```\n\nThen, you can modify your `BaseEvent` class to take an `EventType` as an argument:\n\n```python\nfrom abc import ABC\n\nclass BaseEvent(ABC):\n    def __init__(self, event_type: EventType, payload):  # type: ignore\n        self._event_type = event_type\n        self._payload = payload\n\n    @property\n    def event_type(self):\n        return self._event_type\n\n    @property\n    def payload(self):\n        return self._payload\n```\n\nNow, you can create events of different types like this:\n\n```python\nnew_test_case_event = BaseEvent(EventType.NEW_TEST_CASE, payload)\nnew_test_repetition_event = BaseEvent(EventType.NEW_TEST_REPETITION, payload)\nparameter_update_event = BaseEvent(EventType.PARAMETER_UPDATE, payload)\nprogress_update_event = BaseEvent(EventType.PROGRESS_UPDATE, payload)\n```\n\nThis approach gives you the benefits of using structured data for your event types, while still allowing you to use a single `BaseEvent` class for all events. It also provides type safety, as the event type must be a member of the `EventType` enum.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 1893,
+          "totalElapsed": 22685
+        },
+        "metadata": {
+          "responseId": "42645611-ff9b-4d4c-aa28-d5eff55d8fc0"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "How can I handle different types of events in an event-driven system without using strings for event types?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Application\\_SystemEvent.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 31,
+              "endColumn": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 88
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 89
+            },
+            "text": "I see. Is there any cons about my current implementation? If not, I will keep it for now",
+            "kind": "text"
+          }
+        ],
+        "text": "I see. Is there any cons about my current implementation? If not, I will keep it for now"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "Your current implementation is quite solid and follows good object-oriented design principles. It provides a clear hierarchy and structure, which can make the code easier to understand and maintain. However, there are a few potential downsides to consider:\n\n1. **Overhead of class definitions**: Each new event type requires a new class. If you have many event types, this can lead to a lot of code.\n\n2. **Flexibility**: If you need to add a new event type, you have to define a new class. This might not be a problem if the set of event types is fixed, but it could be a limitation if you need more flexibility.\n\n3. **Duplication**: The subclasses in your current implementation don't add any new behavior or properties. They only provide a way to create instances of `BaseEvent` with a specific type. This could be seen as unnecessary duplication.\n\n4. **Type Safety**: The `# type: ignore` comments suggest that you're suppressing some type checking warnings. This could potentially hide bugs related to incorrect types.\n\nIf none of these potential issues are a concern for your specific use case, then your current implementation is perfectly fine. It's always a good idea to choose the design that best fits your needs, taking into account factors like the complexity of your system, the size of your codebase, and your team's familiarity with different design patterns.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 1992,
+          "totalElapsed": 13681
+        },
+        "metadata": {
+          "responseId": "8ff1a200-f1b7-415c-a266-34d55d6a4ec4"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "What are some best practices for designing event-driven systems?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Application\\_SystemEvent.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 31,
+              "endColumn": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": {
+        "parts": [
+          {
+            "range": {
+              "start": 0,
+              "endExclusive": 87
+            },
+            "editorRange": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 1,
+              "endColumn": 88
+            },
+            "text": "if I expect behavior difference in events, I should keep the class based implementation",
+            "kind": "text"
+          }
+        ],
+        "text": "if I expect behavior difference in events, I should keep the class based implementation"
+      },
+      "variableData": {
+        "variables": []
+      },
+      "response": [
+        {
+          "value": "Yes, if you expect different behaviors among different types of events, keeping the class-based implementation is a good idea. This way, you can override methods or add new methods in each subclass to provide the unique behavior for each event type.\n\nFor example, if `NewTestCaseEvent` should have a method `start_test_case` that isn't applicable to other events, you can add this method to the `NewTestCaseEvent` class:\n\n```python\nclass NewTestCaseEvent(BaseEvent):\n    def __init__(self, payload):  # type: ignore\n        super().__init__(payload)\n\n    def start_test_case(self):\n        # Implement the behavior here\n        pass\n```\n\nThis is one of the main benefits of using a class hierarchy: it allows you to use polymorphism to handle different types of objects (in this case, events) in a uniform way, while still being able to provide different behavior for each type.",
+          "isTrusted": false,
+          "supportThemeIcons": false,
+          "supportHtml": false
+        }
+      ],
+      "result": {
+        "timings": {
+          "firstProgress": 1994,
+          "totalElapsed": 9385
+        },
+        "metadata": {
+          "responseId": "3b090138-ddd5-47d0-b65b-741f598904be"
+        }
+      },
+      "followups": [
+        {
+          "kind": "reply",
+          "agentId": "copilot",
+          "message": "What are some best practices for handling events in an event-driven system?"
+        }
+      ],
+      "isCanceled": false,
+      "agent": {
+        "id": "copilot",
+        "extensionId": {
+          "value": "GitHub.copilot-chat",
+          "_lower": "github.copilot-chat"
+        },
+        "metadata": {
+          "description": "",
+          "fullName": "GitHub Copilot",
+          "hasSlashCommands": false,
+          "hasFollowups": true,
+          "isDefault": true,
+          "helpTextPrefix": "You can ask me general programming questions, or chat with the following agents which have specialized expertise and can perform actions:",
+          "helpTextVariablesPrefix": "You can also help me understand your question by using the following variables to give me extra context:",
+          "helpTextPostfix": {
+            "value": "To have a great conversation, ask me questions as if I was a real programmer:\n\n* **Show me the code** you want to talk about by having the files open and selecting the most important lines.\n* **Make refinements** by asking me follow-up questions, adding clarifications, providing errors, etc.\n* **Review my suggested code** and tell me about issues or improvements, so I can iterate on it.\n\nYou can also ask me questions about your editor selection by [starting an inline chat session](command:inlineChat.start).\n\nLearn more about [GitHub Copilot](https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode) in [Visual Studio Code](https://code.visualstudio.com/docs/editor/artificial-intelligence).",
+            "isTrusted": {
+              "enabledCommands": [
+                "inlineChat.start"
+              ]
+            },
+            "supportThemeIcons": false,
+            "supportHtml": false,
+            "uris": {
+              "command:inlineChat.start": {
+                "$mid": 1,
+                "path": "inlineChat.start",
+                "scheme": "command"
+              },
+              "https://docs.github.com/copilot/getting-started-with-github-copilot?tool=vscode": {
+                "$mid": 1,
+                "path": "/copilot/getting-started-with-github-copilot",
+                "scheme": "https",
+                "authority": "docs.github.com",
+                "query": "tool=vscode"
+              },
+              "https://code.visualstudio.com/docs/editor/artificial-intelligence": {
+                "$mid": 1,
+                "path": "/docs/editor/artificial-intelligence",
+                "scheme": "https",
+                "authority": "code.visualstudio.com"
+              }
+            }
+          },
+          "supportIssueReporting": false
+        }
+      },
+      "contentReferences": [
+        {
+          "kind": "reference",
+          "reference": {
+            "uri": {
+              "$mid": 1,
+              "fsPath": "c:\\Projects\\Delta\\new_framwork\\framework3_backend\\_Application\\_SystemEvent.py",
+              "_sep": 1,
+              "external": "file:///c%3A/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "path": "/c:/Projects/Delta/new_framwork/framework3_backend/_Application/_SystemEvent.py",
+              "scheme": "file"
+            },
+            "range": {
+              "startLineNumber": 1,
+              "startColumn": 1,
+              "endLineNumber": 31,
+              "endColumn": 1
+            }
+          }
+        }
+      ]
     }
   ],
   "providerId": "copilot"
