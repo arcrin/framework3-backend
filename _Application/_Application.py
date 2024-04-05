@@ -8,7 +8,9 @@ from _ProducerConsumer._SideEffectProcessor._AppCommandProcessor import (
 from _ProducerConsumer._SideEffectProcessor._UIRequestProcessor import (
     UIRequestProcessor,
 )
-from _ProducerConsumer._WorkflowProcessor._NodeFailureProcessor import NodeFailureProcessor
+from _ProducerConsumer._WorkflowProcessor._NodeFailureProcessor import (
+    NodeFailureProcessor,
+)
 from _ProducerConsumer._SideEffectProcessor._TCDataWSProcessor import TCDataWSProcessor
 from _ProducerConsumer._SideEffectProcessor._LogProcessor import LogProcessor
 from _Application._SystemEventBus import SystemEventBus
@@ -32,6 +34,7 @@ class Application:
     def __init__(self):
         self._command_mapping = {
             "loadTC": self.start_test_run,
+            "retest": self.retest,
         }
 
         self._node_executor_send_channel: trio.MemorySendChannel["BaseNode"]
@@ -55,8 +58,8 @@ class Application:
             trio.open_memory_channel(50)
         )
 
-        self._app_command_send_channel: trio.MemorySendChannel[str]
-        self._app_command_receive_channel: trio.MemoryReceiveChannel[str]
+        self._app_command_send_channel: trio.MemorySendChannel[Dict[Any, Any]]
+        self._app_command_receive_channel: trio.MemoryReceiveChannel[Dict[Any, Any]]
         self._app_command_send_channel, self._app_command_receive_channel = (
             trio.open_memory_channel(50)
         )
@@ -114,12 +117,12 @@ class Application:
             self._node_result_processor_send_channel,  # type: ignore
         )
         self._node_result_processor = NodeResultProcessor(
-            self._node_result_processor_receive_channel, # type: ignore
+            self._node_result_processor_receive_channel,  # type: ignore
             self._node_failure_send_channel,  # type: ignore
         )
 
         self._node_failure_processor = NodeFailureProcessor(
-            self._node_failure_receive_channel # type: ignore
+            self._node_failure_receive_channel  # type: ignore
         )
 
         self._log_processor = LogProcessor(self._log_queue, self._ws_comm_module)
@@ -137,7 +140,7 @@ class Application:
             self._app_command_receive_channel,  # type: ignore
             self._command_mapping,
         )
-                                 
+
         self._logger = logging.getLogger("Application")
 
     async def start_test_run(self):
@@ -150,6 +153,13 @@ class Application:
             await panel.add_test_run()
             if panel.test_run is not None:
                 await panel.test_run.load_test_case()
+
+    async def retest(self, tc_id: str | None = None):
+        if self._asm.control_session is None:
+            self._logger.error("Control session not established")
+            raise Exception("Control session not established")
+        if tc_id is not None and self._asm.control_session.panels[0].test_run is not None:
+            await self._asm.control_session.panels[0].test_run.retest_failed_test_cases(tc_id)
 
     async def start(self):
         try:

@@ -29,6 +29,10 @@ class ProgressUpdateEvent(BaseEvent):
     def __init__(self, payload):  # type: ignore
         super().__init__(payload)
 
+class TestCaseFailEvent(BaseEvent):
+    def __init__(self, payload):  # type: ignore
+        super().__init__(payload)   
+
 
 class TestRunTerminationEvent(BaseEvent):
     def __init__(self, payload):  # type: ignore

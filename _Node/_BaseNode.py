@@ -10,12 +10,14 @@ if TYPE_CHECKING:
 
 
 class NodeState(Enum):
-    READY_TO_PROCESS = auto()
-    PROCESSING = auto()
-    CLEARED = auto()
-    NOT_PROCESSED = auto()
-    CANCEL = auto()
-    ERROR = auto()
+    READY_TO_PROCESS = "ready_to_process"
+    CLEARED = "cleared"
+    NOT_PROCESSED = "not_processed"
+    CANCEL = "cancel"
+    ERROR = "error"
+    PROCESSING = "processing"
+    PASSED = "passed"
+    FAILED = "failed"
 
 
 class BaseNode(ABC):
@@ -85,10 +87,12 @@ class BaseNode(ABC):
         return self._func_parameter_label
 
     @property
+    @abstractmethod
     def state(self) -> NodeState:
         return self._state
 
     @state.setter
+    @abstractmethod
     def state(self, value: NodeState) -> None:
         self._state = value
 
@@ -120,12 +124,15 @@ class BaseNode(ABC):
         pass
 
     def add_dependency(self, node: "BaseNode") -> None:
-        self._logger.info(f"{node.name} added as a dependency to {self.name}")
         if self._is_reachable(node):
             raise ValueError("Cyclic dependency detected")
+        if node in self._dependencies:
+            self._logger.info(f"{node.name} is already a dependency to {self.name}")
+            return
         self._dependencies.append(node)
         node._dependents.append(self)
-        self._state = NodeState.NOT_PROCESSED
+        self._logger.info(f"{node.name} added as a dependency to {self.name}")
+        self.state = NodeState.NOT_PROCESSED
 
     def remove_dependency(self, node: "BaseNode") -> None:
         self._logger.info(f"{node.name} removed as a dependency to {self.name}")
@@ -135,16 +142,16 @@ class BaseNode(ABC):
     # COMMENT: when a node is cleared, notify all dependents
     async def set_cleared(self) -> None:
         self._logger.info(f"{self.name} node is cleared")
-        self._state = NodeState.CLEARED
+        self.state = NodeState.CLEARED
         for dep in self._dependents:
             await dep.check_dependency_and_schedule_self()
 
     def is_cleared(self) -> bool:
-        return self._state == NodeState.CLEARED
+        return self.state == NodeState.CLEARED
 
     def ready_to_process(self) -> bool:
         if all([node.is_cleared() for node in self._dependencies]):
-            self._state = NodeState.READY_TO_PROCESS
+            self.state = NodeState.READY_TO_PROCESS
             self._logger.info(f"{self.name} is ready to process")
             return True
         return False
@@ -152,7 +159,7 @@ class BaseNode(ABC):
     async def check_dependency_and_schedule_self(self) -> None:
         if all(dep.is_cleared() for dep in self.dependencies):
             self._logger.info(f"{self.name} is ready to process")
-            self._state = NodeState.READY_TO_PROCESS
+            self.state = NodeState.READY_TO_PROCESS
             # TODO: This needs to be handled atop
             try:
                 await self._scheduling_callback(self)
@@ -172,11 +179,11 @@ class BaseNode(ABC):
         # COMMENT: If the node is processing, label is set as CANCELLED. 
         #   Its results upon completion will be ignored and the node will be rescheduled. 
         #   The result processing consumer should change the
-        if self._state == NodeState.PROCESSING:
-            self._state = NodeState.CANCEL
+        if self.state == NodeState.PROCESSING:
+            self.state = NodeState.CANCEL
             self._logger.info(f"{self.name} node cancelled.")
         else:
-            self._state = NodeState.NOT_PROCESSED
+            self.state = NodeState.NOT_PROCESSED
             self._result = None
             self._logger.info(f"{self.name} node reset.")
             # TODO: determine if this needs to be in a try block

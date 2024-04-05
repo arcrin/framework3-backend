@@ -1,9 +1,10 @@
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 from _Application._SystemEventBus import SystemEventBus
 from typing import Callable, Any, TYPE_CHECKING
+from _Application._SystemEvent import TestCaseFailEvent
 from util.async_timing import async_timed
 from util.ui_request import UIRequest
-from _Node._BaseNode import BaseNode
+from _Node._BaseNode import BaseNode, NodeState
 from functools import partial
 import traceback
 import logging
@@ -25,14 +26,22 @@ class TCNode(BaseNode):
         description: str = "",
     ) -> None:
         super().__init__(name=name, func_parameter_label=func_parameter_label)
+        self._data_model = TestCaseDataModel(self._id, self._name, description)
         self._callable_object = callable_object
         self.execute = async_timed(self.name)(self.execute)
         self._logger = logging.getLogger("TCNode")
         self._logger.info(f"TCNode {self.id} created")
         self._auto_retry_count: int = 1
-        self._data_model = TestCaseDataModel(self._id, self._name, description)
+        self._data_model.state = NodeState.NOT_PROCESSED
 
-    # TODO: TCDataBroker should be replaced by event bus
+
+    @property
+    def state(self) -> NodeState:
+        return self._data_model.state
+    
+    @state.setter
+    def state(self, value: NodeState) -> None:
+        self._data_model.state = value
 
     @property
     def auto_retry_count(self) -> int:
@@ -41,8 +50,17 @@ class TCNode(BaseNode):
     @property
     def data_model(self) -> TestCaseDataModel:
         return self._data_model
+    
+    async def quarantine(self) -> None:
+        assert self._data_model.parent_test_run is not None, "TCNode must be associated with a test run"
+        self._data_model.parent_test_run.add_to_failed_test_cases(self)
+        self.state = NodeState.FAILED
+        test_case_failed_event = TestCaseFailEvent({"tc_id": self.id})
+        assert self.event_bus is not None, "TCNode must be connected to a system event bus"
+        await self.event_bus.publish(test_case_failed_event)
 
     async def execute(self):
+        self.state = NodeState.PROCESSING
         self._data_model.event_bus = self.event_bus
         await self.data_model.add_execution()
         self._auto_retry_count -= self.data_model.current_execution.execution_id

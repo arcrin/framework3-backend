@@ -13,3 +13,6 @@ class NodeFailureProcessor:
                 async for node in self._receive_channel:
                     if isinstance(node, TCNode) and node.auto_retry_count > 0:
                         nursery.start_soon(node.check_dependency_and_schedule_self)
+                    else:
+                        if isinstance(node, TCNode):
+                            nursery.start_soon(node.quarantine)

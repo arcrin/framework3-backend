@@ -28,4 +28,4 @@ logger.addHandler(console_handler)
 
 app = Application()
 trio.run(app.start)
-plot_task_timing()
+# plot_task_timing()

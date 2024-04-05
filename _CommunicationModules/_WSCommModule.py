@@ -48,9 +48,7 @@ class WSCommModule:
                 message = await self._asm.control_session.connection.get_message()  # type: ignore
                 data = json.loads(message)  # type: ignore
                 if data["type"] == "command":
-                    if data["value"] == "loadTC":
-                        self._logger.info("loadTC command received")
-                        await self._command_send_channel.send("loadTC")
+                    await self._command_send_channel.send(data)
                 elif data["type"] == "ui-response":
                     await self._ui_response_send_channel.send(data["value"])
 

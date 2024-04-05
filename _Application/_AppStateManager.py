@@ -3,7 +3,8 @@ from _Application._SystemEvent import (
     ParameterUpdateEvent,
     ProgressUpdateEvent,
     NewTestExecutionEvent,
-    TestRunTerminationEvent
+    TestRunTerminationEvent,
+    TestCaseFailEvent
 )
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import BaseEvent
@@ -25,8 +26,8 @@ class ApplicationStateManager:
         tc_data_send_channel: "MemorySendChannel[Dict[Any, Any]]",
         node_executor_send_channel: "MemorySendChannel[BaseNode]",
         ui_request_send_channel: "MemorySendChannel[str]",
-        test_profile,# type: ignore
-    ):  
+        test_profile,  # type: ignore
+    ):
         self._app_state = {}
         self._control_context = {}
         self._app_data = {}
@@ -108,7 +109,7 @@ class ApplicationStateManager:
                         "payload": event.payload,
                     },
                 )
-        elif isinstance(event, NewTestExecutionEvent): 
+        elif isinstance(event, NewTestExecutionEvent):
             self._logger.info(
                 f"New execution added to test case {event.payload['tc_id']}"
             )
@@ -118,8 +119,8 @@ class ApplicationStateManager:
                     {
                         "type": "tc_data",
                         "event_type": "newExecution",
-                        "payload": event.payload
-                    }
+                        "payload": event.payload,
+                    },
                 )
 
         elif isinstance(event, TestRunTerminationEvent):
@@ -130,5 +131,16 @@ class ApplicationStateManager:
                     {
                         "type": "tc_data",
                         "event_type": "testRunTermination",
-                    }
+                    },
+                )
+        elif isinstance(event, TestCaseFailEvent):
+            self._logger.info(f"Test case {event.payload['tc_id']} failed")
+            async with trio.open_nursery() as nursery:
+                nursery.start_soon(
+                    self._tc_data_send_channel.send,
+                    {
+                        "type": "tc_data",
+                        "event_type": "testCaseFail",
+                        "payload": event.payload,
+                    },
                 )
