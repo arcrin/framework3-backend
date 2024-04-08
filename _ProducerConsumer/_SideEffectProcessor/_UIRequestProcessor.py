@@ -20,14 +20,7 @@ class UIRequestProcessor:
         )
         self._comm_module: WSCommModule = comm_module
         self._logger = logging.getLogger("UIRequestProcessor")
-
-    # @property
-    # def ws_connection(self) -> trio_websocket.WebSocketConnection:
-    #     return self._ws_connection
-
-    # @ws_connection.setter
-    # def ws_connection(self, value: trio_websocket.WebSocketConnection) -> None:
-    #     self._ws_connection = value
+        
 
     async def start(self):
         try:

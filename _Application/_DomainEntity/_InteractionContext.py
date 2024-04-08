@@ -20,6 +20,10 @@ class InteractionContext:
         self._response = None
 
     @property
+    def id(self):
+        return self._id
+
+    @property
     def response(self): # type: ignore
         return self._response # type: ignore
     

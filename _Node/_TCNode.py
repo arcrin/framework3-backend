@@ -82,7 +82,7 @@ class TCNode(BaseNode):
                 self._callable_object
             ).parameters.items():
                 if p_obj.annotation is UIRequest:
-                    func_parameters[p_name] = UIRequest(self._ui_request_send_channel)
+                    func_parameters[p_name] = UIRequest(self._ui_request_send_channel) # FIXME: This should be removed after implementing InteractionContext
                 elif p_obj.annotation is TestCaseDataModel:
                     func_parameters[p_name] = self.data_model
                 else:

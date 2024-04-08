@@ -5,11 +5,13 @@ from _Application._SystemEvent import (
     NewTestExecutionEvent,
     TestRunTerminationEvent,
     TestCaseFailEvent,
+    UserInteractionEvent
 )
 from _Application._DomainEntity._Session import Session, ControlSession, ViewSession
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import BaseEvent
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
+from _Application._DomainEntity._InteractionContext import InteractionContext
 from _Node._TCNode import TCNode
 from typing import TYPE_CHECKING, Dict, Any
 import trio
@@ -167,3 +169,13 @@ class ApplicationStateManager:
                         "payload": event.payload,
                     },
                 )
+
+        elif isinstance(event, UserInteractionEvent):
+            if isinstance(event.payload, InteractionContext):
+                self._logger.info(f"User interaction id {event.payload.id}")
+                async with trio.open_nursery() as nursery:
+                    nursery.start_soon(
+                        self._ui_request_send_channel.send, event.payload
+                    )
+            else:
+                raise TypeError("User interaction event payload is not of type InteractionContext")

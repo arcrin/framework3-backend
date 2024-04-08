@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from _Node._TCNode import TCNode
     from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
+    from _Application._DomainEntity._InteractionContext import InteractionContext
 
 
 class BaseEvent(ABC):
@@ -44,5 +45,5 @@ class TestRunTerminationEvent(BaseEvent):
         super().__init__(payload)
 
 class UserInteractionEvent(BaseEvent):
-    def __init__(self, payload):  # type: ignore
+    def __init__(self, payload: "InteractionContext"): 
         super().__init__(payload)
