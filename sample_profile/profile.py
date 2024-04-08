@@ -231,7 +231,7 @@ def sync_task7(
     parameter.stop_measurement(
         ui_request.response, "User input verification", ui_request.response == "1"
     )
-   
+
     logger.info(f"task7 parameter 1 response: {ui_request.response}")
     trio.from_thread.run(data_model.update_parameter, parameter)
     trio.from_thread.run(data_model.update_progress, 10)

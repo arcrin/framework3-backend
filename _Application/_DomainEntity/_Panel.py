@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from _Application._DomainEntity._TestRun import TestRun
 import logging
 
@@ -17,13 +17,11 @@ class Panel:
         node_executor_send_channel: "MemorySendChannel[BaseNode]",
         ui_request_send_channel: "MemorySendChannel[str]",
         event_bus: "SystemEventBus",
-        test_profile, # type: ignore
-    ):  
+        test_profile,  # type: ignore
+    ):
         self._id = panel_id
-        self._test_run: "TestRun | None " = (
-            None  # COMMENT: each panel can only have one TestRun
-        )
-        self._parent_control_session: "ControlSession | None" = None
+        self._test_run: "TestRun | None " = None
+        self._parent_control_session: "ControlSession" = cast("ControlSession", None)
         self._node_executor_send_channel = node_executor_send_channel
         self._ui_request_send_channel = ui_request_send_channel
         self._event_bus = event_bus
@@ -34,6 +32,10 @@ class Panel:
     @property
     def id(self):
         return self._id
+
+    @property
+    def parent_control_session_id(self):
+        return self._parent_control_session.id
 
     @property
     def parent_control_session(self):
@@ -53,8 +55,8 @@ class Panel:
                 self._node_executor_send_channel,
                 self._ui_request_send_channel,
                 self._event_bus,
-                self._test_profile, # type: ignore
-            )  
+                self._test_profile,  # type: ignore
+            )
             self._logger.info(f"TestRun {self._test_run.id} added")
             self._test_run.parent_panel = self
         else:

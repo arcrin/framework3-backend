@@ -1,6 +1,6 @@
 from typing import List, Any, Callable, Awaitable, Optional, TYPE_CHECKING
 from abc import ABC, abstractmethod
-from enum import Enum, auto
+from enum import Enum
 from uuid import uuid4
 import trio
 import logging

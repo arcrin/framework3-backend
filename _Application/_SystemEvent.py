@@ -1,4 +1,9 @@
 from abc import ABC
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _Node._TCNode import TCNode
+    from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 
 
 class BaseEvent(ABC):
@@ -11,7 +16,7 @@ class BaseEvent(ABC):
 
 
 class NewTestCaseEvent(BaseEvent):
-    def __init__(self, payload):  # type: ignore
+    def __init__(self, payload: "TCNode"):  
         super().__init__(payload)
 
 
@@ -26,7 +31,7 @@ class ParameterUpdateEvent(BaseEvent):
 
 
 class ProgressUpdateEvent(BaseEvent):
-    def __init__(self, payload):  # type: ignore
+    def __init__(self, payload: "TestCaseDataModel"):
         super().__init__(payload)
 
 class TestCaseFailEvent(BaseEvent):
@@ -35,5 +40,9 @@ class TestCaseFailEvent(BaseEvent):
 
 
 class TestRunTerminationEvent(BaseEvent):
+    def __init__(self, payload):  # type: ignore
+        super().__init__(payload)
+
+class UserInteractionEvent(BaseEvent):
     def __init__(self, payload):  # type: ignore
         super().__init__(payload)

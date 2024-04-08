@@ -1,6 +1,5 @@
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
-from _Application._SystemEventBus import SystemEventBus
-from typing import Callable, Any, TYPE_CHECKING
+from typing import Callable, Any
 from _Application._SystemEvent import TestCaseFailEvent
 from util.async_timing import async_timed
 from util.ui_request import UIRequest

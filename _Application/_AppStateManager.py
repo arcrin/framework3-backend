@@ -4,12 +4,14 @@ from _Application._SystemEvent import (
     ProgressUpdateEvent,
     NewTestExecutionEvent,
     TestRunTerminationEvent,
-    TestCaseFailEvent
+    TestCaseFailEvent,
 )
+from _Application._DomainEntity._Session import Session, ControlSession, ViewSession
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import BaseEvent
+from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
+from _Node._TCNode import TCNode
 from typing import TYPE_CHECKING, Dict, Any
-from _Application._DomainEntity._Session import Session, ControlSession, ViewSession
 import trio
 import logging
 
@@ -70,18 +72,25 @@ class ApplicationStateManager:
 
     async def event_handler(self, event: BaseEvent):
         if isinstance(event, NewTestCaseEvent):
-            self._logger.info(
-                f"New test case added to test run {event.payload["name"]} "
-            )
-            async with trio.open_nursery() as nursery:
-                nursery.start_soon(
-                    self._tc_data_send_channel.send,
-                    {
-                        "type": "tc_data",
-                        "event_type": "newTC",
-                        "payload": event.payload,
-                    },
+            if isinstance(
+                event.payload, TCNode
+            ):  # FIXME: Is this necessary for type checking?
+                self._logger.info(
+                    f"New test case added to test run {event.payload.name} "
                 )
+                tc_node = event.payload
+                react_ui_data_payload = {
+                    "type": "tc_data",
+                    "event_type": "newTC",
+                    "payload": tc_node.data_model.react_ui_payload,
+                }
+                async with trio.open_nursery() as nursery:
+                    nursery.start_soon(
+                        self._tc_data_send_channel.send, react_ui_data_payload
+                    )
+            else:
+                self._logger.error("New test case event payload is not of type TCNode")
+                raise (TypeError("New test case event payload is not of type TCNode"))
         elif isinstance(event, ParameterUpdateEvent):
             self._logger.info(
                 f"Parameter updated for test case {event.payload['tc_id']}"
@@ -97,17 +106,31 @@ class ApplicationStateManager:
                 )
 
         elif isinstance(event, ProgressUpdateEvent):
-            self._logger.info(
-                f"Progress updated for test case {event.payload['tc_id']}"
-            )
-            async with trio.open_nursery() as nursery:
-                nursery.start_soon(
-                    self._tc_data_send_channel.send,
-                    {
-                        "type": "tc_data",
-                        "event_type": "progressUpdate",
-                        "payload": event.payload,
+            tc_data_model = event.payload
+            if isinstance(tc_data_model, TestCaseDataModel):
+                self._logger.info(
+                    f"Progress updated for test case {tc_data_model.id}"
+                )
+                react_ui_data_payload = {
+                    "type": "tc_data",
+                    "event_type": "progressUpdate",
+                    "payload": {
+                        "tc_id": tc_data_model.id,
+                        "progress": tc_data_model.progress,   
                     },
+                }
+                async with trio.open_nursery() as nursery:
+                    nursery.start_soon(
+                        self._tc_data_send_channel.send, react_ui_data_payload
+                    )
+            else:
+                self._logger.error(
+                    "Progress update event payload is not of type TestCaseDataModel"
+                )
+                raise (
+                    TypeError(
+                        "Progress update event payload is not of type TestCaseDataModel"
+                    )
                 )
         elif isinstance(event, NewTestExecutionEvent):
             self._logger.info(

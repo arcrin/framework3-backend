@@ -1,9 +1,9 @@
-from trio_websocket import (
+from trio_websocket import ( # type: ignore
     ConnectionClosed,
-    serve_websocket,
+    serve_websocket, # type: ignore
     WebSocketRequest,
-    WebSocketConnection,
-)  # type: ignore
+    WebSocketConnection, # type: ignore
+)  
 from typing import TYPE_CHECKING
 import logging
 import json
