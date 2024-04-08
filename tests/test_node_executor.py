@@ -1,89 +1,58 @@
 # type: ignore
-from producer_consumer.node_executor import NodeExecutor
-from unittest.mock import AsyncMock, MagicMock
-from node.sentinel_node import SentinelNode
-from node.base_node import BaseNode
-import unittest
-import asyncio
+from _ProducerConsumer.node_executor import NodeExecutor
+from _Node._BaseNode import BaseNode
+import trio
+import trio.testing
+import pytest
 
-class ConcreteNode(BaseNode):
-  def __init__(self, name: str="Node") -> None:
-    super().__init__(name)
-    self._result = None
+
+
+node_executor_send_channel, node_executor_receive_channel = trio.open_memory_channel(50)
+result_processor_send_channel, result_processor_receive_channel = trio.open_memory_channel(50)
+
+
+@pytest.mark.trio
+async def test_execute_node(mocker):
+    node_executor = NodeExecutor(node_executor_receive_channel, result_processor_send_channel)
+    mock_node = mocker.Mock(spec=BaseNode)
+    mock_node.name = "MockNode"
+
+    await node_executor._execute_node(mock_node)
+
+    mock_node.execute.assert_called_once()
+
+    sent_node = await result_processor_receive_channel.receive()
+
+    assert sent_node == mock_node
+
+@pytest.mark.trio
+async def test_execute_node_with_exception(mocker):
+    node_executor = NodeExecutor(node_executor_receive_channel, result_processor_send_channel)
+    mock_node = mocker.Mock(spec=BaseNode)
+    mock_node.name = "MockNode"
+
+    mock_node.execute.side_effect = ValueError("An error occurred")
+
+    with pytest.raises(ValueError) as exc:
+        await node_executor._execute_node(mock_node)
+
+    assert str(exc.value) == "An error occurred"
+
+    mock_node.execute.assert_called_once()
+
+
+@pytest.mark.trio
+async def test_process_receive_channel(mocker):
+    node_executor = NodeExecutor(node_executor_receive_channel, result_processor_send_channel)
+
+    mock_node = mocker.Mock(spec=BaseNode)
+    mock_node.name = "MockNode"
+
+    mocker.patch.object(NodeExecutor, "_execute_node", return_value=None)
     
-  async def execute(self):
-    self._result = True
+    with node_executor_send_channel:
+        await node_executor_send_channel.send(mock_node)
 
-  @property
-  def result(self):
-    return self._result
+    await node_executor.start()
 
-
-class TestNodeExecutor(unittest.IsolatedAsyncioTestCase):
-    def setUp(self):
-        input_queue = MagicMock()
-        output_queue = AsyncMock()
-        self.node_executor = NodeExecutor(input_queue, output_queue)
-        self.loop = asyncio.get_event_loop()
-
-    def test_node_executor_init(self):
-        input_queue = asyncio.Queue()
-        output_queue = asyncio.Queue()
-        node_executor = NodeExecutor(input_queue, output_queue)
-        self.assertEqual(node_executor._input_queue, input_queue)
-        self.assertEqual(node_executor._output_queue, output_queue)
-
-    async def test_process_queue(self):
-        input_queue = asyncio.Queue()
-        output_queue = asyncio.Queue()
-        node_executor = NodeExecutor(input_queue, output_queue)
-        node1 = ConcreteNode("Node 1")
-        node2 = ConcreteNode("Node 2")
-        node3 = ConcreteNode("Node 3")
-        node4 = ConcreteNode("Node 4")
-        node5 = ConcreteNode("Node 5")
-
-        nodes = [node1, node2, node3, node4, node5]
-
-        for node in nodes:
-            await input_queue.put(node)
-        await input_queue.put(SentinelNode())
-
-        # Start processing the queue
-        await node_executor.process_queue()
-
-        # Check that all nodes were processed and added to the output queue
-
-        # The first node in the output queue should be the sentinel node
-        output_sentinel_node = await output_queue.get()
-        self.assertIsInstance(output_sentinel_node, SentinelNode)
-
-        for node in nodes:
-            output_node = await output_queue.get()
-            self.assertEqual(node, output_node)
-
-
-    async def test_process_queue_error_handling(self):
-        input_queue = asyncio.Queue()
-        output_queue = asyncio.Queue()
-        node_executor = NodeExecutor(input_queue, output_queue)
-
-        class ErrorNode(BaseNode):
-            async def execute(self):
-                raise Exception("Error")
-
-            @property
-            def result(self):
-                return None
-            
-        await input_queue.put(ErrorNode())
-        await input_queue.put(SentinelNode())
-
-        # Start processing the queue and check that an error message is printed
-        with self.assertRaises(Exception) as cm:
-            await node_executor.process_queue()
-        self.assertEqual(str(cm.exception), "Error")
-
-
-if __name__ == "__main__":
-    unittest.main()
+    NodeExecutor._execute_node.assert_called_once_with(mock_node)

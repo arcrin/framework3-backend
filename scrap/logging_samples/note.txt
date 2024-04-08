@@ -1,0 +1,1 @@
+Add filters to handlers rather than the loggers to achieve global filter.

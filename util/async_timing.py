@@ -2,17 +2,14 @@
 from typing import Callable, Any, TypeVar, Coroutine, Dict, List
 import matplotlib.pyplot as plt
 import os
-import asyncio
 import functools
 import time
+import logging
+
+
+logger = logging.getLogger("Timing")
 
 task_timing: List[Dict[str, Any]] = []
-
-async def delay(delay_seconds: int) -> int:
-  print(f"sleeping for {delay_seconds} seconds")
-  await asyncio.sleep(delay_seconds)
-  print(f"finished sleeping for {delay_seconds} seconds")
-  return delay_seconds
 
 T = TypeVar("T")
 
@@ -27,7 +24,7 @@ def async_timed(node_name: str):
       finally:
         end = time.time()
         total = end - start 
-        print(f"finished {func} in {total:.4f} seconds\n")
+        logger.info(f"finished {func} in {total:.4f} seconds\n")
         task_timing.append({"task": node_name, 
                             "start_time": start,
                             "end_time": end})

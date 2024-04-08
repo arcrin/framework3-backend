@@ -1,60 +1,73 @@
-from node.tc_node import TCNode
-from node.tj_config_node import TJConfigNode
-from node.product_info_node import ProductInfoNode
-from node.load_profile_node import LoadProfileNode
-from sample_profile.scripts import task_func1, task_func3
-import asyncio
-import unittest
+from _Node._TCNode import TCNode
+from sample_profile.scripts import fib, sync_task1, sync_task2, sync_task3, async_task1, async_task2, async_task3
+from functools import partial
+import pytest
 
 
-class TestExecutableNode(unittest.IsolatedAsyncioTestCase):
-  async def test_executable_node_result(self):
-    node = TCNode(task_func1)
-    self.assertEqual(node.result, None)
+async def sample_test_case():
+    raise ValueError("Value error in sample test case")
+
+
+def test_func_parameter_label():
+    node = TCNode(sync_task1, name="Test Case 1")
+    with pytest.raises(ValueError):
+        node.func_parameter_label
+
+    node = TCNode(sync_task1, 
+                  name="Test Case 1", 
+                  func_parameter_label="task1_parameter")
+    assert node.func_parameter_label == "task1_parameter"
+
+async def test_tc_node_result():
+    node = TCNode(async_task1, "Test Case")
+    assert node.result is None
     await node.execute()
-    self.assertEqual(node.result, True)
+    assert node.result == 1
 
-  async def test_executable_node_with_async_executable(self):
-    node = TCNode(task_func1)
-    self.assertEqual(node.name, "task_func1")
+async def test_tc_node_with_async_executable():
+    node = TCNode(async_task1, "Test Case")
+    assert node.name == "Test Case"
     await node.execute()
-    self.assertEqual(node.result, True)
+    assert node.result == 1
 
-  async def test_executable_node_with_sync_executable(self):
-    node = TCNode(task_func3)
-    self.assertEqual(node.name, "task_func3")
+async def test_tc_node_with_sync_executable():
+    node = TCNode(partial(fib, 10), name="task_func3")
+    assert node.name == "task_func3"
     await node.execute()
-    self.assertEqual(node.result, 55)
+    assert node.result == 55
 
-class TestTJConfigNode(unittest.IsolatedAsyncioTestCase):
-  async def test_tj_config_node_init(self):
-    async def tj_config_func():
-      await asyncio.sleep(1)
-      return {"tj_config": True}
-    node = TJConfigNode(tj_config_func)
+async def test_tc_node_execute_with_error():
+    node = TCNode(sample_test_case, "Test Case")
     await node.execute()
-    self.assertEqual(node.result, {"tj_config": True})
+    assert isinstance(node.error, ValueError)
+    assert str(node.error) == "Value error in sample test case"
+    print(node.error_traceback)
+
+async def test_parameter_passing_for_sync_task():
+    node1 = TCNode(sync_task1, name="Test Case 1", func_parameter_label="task1_parameter")
+    node2 = TCNode(sync_task2, name="Test Case 2", func_parameter_label="task2_parameter")
+    node3 = TCNode(sync_task3, name="Test Case 3", func_parameter_label="task3_parameter")
+
+    node3.add_dependency(node1)
+    node3.add_dependency(node2)
+
+    await node1.execute()
+    await node2.execute()
+
+    await node3.execute()
+    assert node3.result == 3
 
 
-class TestProductInfoNode(unittest.IsolatedAsyncioTestCase):
-  async def test_product_info_node_init(self):
-    async def product_info_func():
-      await asyncio.sleep(1)
-      return {"product_info": True}
-    node = ProductInfoNode(product_info_func)
-    await node.execute()
-    self.assertEqual(node.result, {"product_info": True}) 
+async def test_parameter_passing_for_async_task():
+    node1 = TCNode(async_task1, name="Test Case 1", func_parameter_label="task1_parameter")
+    node2 = TCNode(async_task2, name="Test Case 2", func_parameter_label="task2_parameter")
+    node3 = TCNode(async_task3, name="Test Case 3", func_parameter_label="task3_parameter")
 
+    node3.add_dependency(node1)
+    node3.add_dependency(node2)
 
-class TestLoadProfileNode(unittest.IsolatedAsyncioTestCase):
-  async def test_load_profile_node_init(self):
-    async def load_profile_func():
-      await asyncio.sleep(1)
-      return {"load_profile": True}
-    node = LoadProfileNode(load_profile_func)
-    await node.execute()
-    self.assertEqual(node.result, {"load_profile": True})
+    await node1.execute()
+    await node2.execute()
 
-
-if __name__ == "__main__":
-  unittest.main()
+    await node3.execute()
+    assert node3.result == 3
