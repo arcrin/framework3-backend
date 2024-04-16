@@ -1,7 +1,6 @@
 # type: ignore
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 from _Application._DomainEntity._Parameter import SingleValueParameter
-from util.ui_request import UIRequest
 from _Node._BaseNode import BaseNode
 from util.dag_vis import draw_graph
 from _Node._TCNode import TCNode
@@ -217,9 +216,7 @@ def sync_task6(data_model: TestCaseDataModel = None):
     return True
 
 
-def sync_task7(
-    data_model: TestCaseDataModel = None, ui_request: UIRequest = None, tc6=None
-):
+def sync_task7(data_model: TestCaseDataModel = None, tc6=None):
     over_all_result = True
     assert data_model is not None, "Must have a data model"
     logger.info("Start sync task7")
@@ -227,17 +224,19 @@ def sync_task7(
     parameter = SingleValueParameter("parameter1")
     parameter.start_measurement("1")
     # TODO: Need to handle user input cancel action
-    trio.from_thread.run(ui_request.queue_request)
-    parameter.stop_measurement(
-        ui_request.response, "User input verification", ui_request.response == "1"
-    )
+    # TODO: replace UI Request with interaction context
+    # trio.from_thread.run(ui_request.queue_request)
+    # parameter.stop_measurement(
+    #     ui_request.response, "User input verification", ui_request.response == "1"
+    # )
 
-    logger.info(f"task7 parameter 1 response: {ui_request.response}")
+    # logger.info(f"task7 parameter 1 response: {ui_request.response}")
     trio.from_thread.run(data_model.update_parameter, parameter)
     trio.from_thread.run(data_model.update_progress, 10)
-    if ui_request.response != "1":
-        over_all_result = False
-        return over_all_result
+    # TODO: replace UI Request with interaction context
+    # if ui_request.response != "1":
+    #     over_all_result = False
+    #     return over_all_result
 
     parameter = SingleValueParameter("parameter2")
     parameter.start_measurement("expected")
@@ -299,9 +298,10 @@ def sync_task7(
     parameter = SingleValueParameter("parameter10")
     parameter.start_measurement("expected")
     # TODO: Need to handle user input cancel action
-    trio.from_thread.run(ui_request.queue_request)
-    parameter.stop_measurement(ui_request.response, "description", True)
-    logger.info(f"task7 response: {ui_request.response}")
+    # TODO: Replace UI Request with interaction context
+    # trio.from_thread.run(ui_request.queue_request)
+    # parameter.stop_measurement(ui_request.response, "description", True)
+    # logger.info(f"task7 response: {ui_request.response}")
     trio.from_thread.run(data_model.update_parameter, parameter)
     trio.from_thread.run(data_model.update_progress, 100)
     return True

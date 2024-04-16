@@ -73,7 +73,6 @@ class TestRun:
         self._tc_nodes.append(tc_node)
         tc_node.set_scheduling_callback(self._node_scheduling_callback)
         tc_node.data_model.parent_test_run = self
-        tc_node.ui_request_send_channel = self._ui_request_send_channel
         tc_node.event_bus = self._event_bus
         assert tc_node.event_bus is not None, "TCNode must have event bus"
         await tc_node.check_dependency_and_schedule_self()

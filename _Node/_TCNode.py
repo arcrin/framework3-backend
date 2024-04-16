@@ -2,7 +2,6 @@ from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 from typing import Callable, Any
 from _Application._SystemEvent import TestCaseFailEvent
 from util.async_timing import async_timed
-from util.ui_request import UIRequest
 from _Node._BaseNode import BaseNode, NodeState
 from functools import partial
 import traceback
@@ -81,9 +80,7 @@ class TCNode(BaseNode):
             for p_name, p_obj in inspect.signature(
                 self._callable_object
             ).parameters.items():
-                if p_obj.annotation is UIRequest:
-                    func_parameters[p_name] = UIRequest(self._ui_request_send_channel) # FIXME: This should be removed after implementing InteractionContext
-                elif p_obj.annotation is TestCaseDataModel:
+                if p_obj.annotation is TestCaseDataModel:
                     func_parameters[p_name] = self.data_model
                 else:
                     if p_name in dependency_parameter_labels:

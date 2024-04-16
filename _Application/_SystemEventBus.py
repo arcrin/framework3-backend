@@ -3,7 +3,15 @@ from typing import Callable, List, Coroutine, Any
 
 
 class SystemEventBus:
-    def __init__(self):
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(SystemEventBus, cls).__new__(cls)
+            cls._instance.init()
+        return cls._instance
+    
+    def init(self):
         self._listeners: List[Callable[[BaseEvent], Coroutine[Any, Any, None]]] = []
 
     def subscribe(

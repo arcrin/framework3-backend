@@ -61,14 +61,6 @@ class BaseNode(ABC):
         return self._id
 
     @property
-    def ui_request_send_channel(self) -> trio.MemorySendChannel[str]:
-        return self._ui_request_send_channel
-
-    @ui_request_send_channel.setter
-    def ui_request_send_channel(self, value: trio.MemorySendChannel[str]) -> None:
-        self._ui_request_send_channel = value
-
-    @property
     def result(self) -> Any:
         return self._result
 
