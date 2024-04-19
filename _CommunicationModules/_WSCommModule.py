@@ -50,7 +50,7 @@ class WSCommModule:
                 if data["type"] == "command":
                     await self._command_send_channel.send(data)
                 elif data["type"] == "ui-response":
-                    await self._ui_response_send_channel.send(data["value"])
+                    await self._ui_response_send_channel.send(data["payload"])
 
             except ConnectionClosed:
                 self._logger.info(f"WS connection closed with {ws}")

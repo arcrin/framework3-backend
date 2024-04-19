@@ -33,6 +33,7 @@ class SampleTestProfile:
         tc3.add_dependency(tc5)
         tc2.add_dependency(tc6)
         tc6.add_dependency(tc7)
+        # tc5.add_dependency(tc7)
 
         # terminal_node.add_dependency(tc1)
 
@@ -173,9 +174,11 @@ def sync_task5(data_model: TestCaseDataModel = None):
     logger.info("Start sync task5")
 
     parameter = SingleValueParameter("parameter1")
-    parameter.start_measurement("expected")
-    time.sleep(2)
-    parameter.stop_measurement("measured", "description", True)
+    parameter.start_measurement("2")
+    user_response = trio.from_thread.run(
+        data_model.user_input_request, "Test Case 5\nParameter 1\n Type 2 in the box"
+    )
+    parameter.stop_measurement(user_response, f"User response {user_response}", True)
     trio.from_thread.run(data_model.update_parameter, parameter)
     trio.from_thread.run(data_model.update_progress, 40)
 
@@ -225,18 +228,18 @@ def sync_task7(data_model: TestCaseDataModel = None, tc6=None):
     parameter.start_measurement("1")
     # TODO: Need to handle user input cancel action
     # TODO: replace UI Request with interaction context
-    # trio.from_thread.run(ui_request.queue_request)
-    # parameter.stop_measurement(
-    #     ui_request.response, "User input verification", ui_request.response == "1"
-    # )
+    response = trio.from_thread.run(
+        data_model.user_input_request, "Test Case 7\nParameter 1\nType 1 in the box"
+    )
+    parameter.stop_measurement(response, "User input verification", response == "1")
 
-    # logger.info(f"task7 parameter 1 response: {ui_request.response}")
+    logger.info(f"task7 parameter 1 response: {response}")
     trio.from_thread.run(data_model.update_parameter, parameter)
     trio.from_thread.run(data_model.update_progress, 10)
     # TODO: replace UI Request with interaction context
-    # if ui_request.response != "1":
-    #     over_all_result = False
-    #     return over_all_result
+    if response != "1":
+        over_all_result = False
+        return over_all_result
 
     parameter = SingleValueParameter("parameter2")
     parameter.start_measurement("expected")
@@ -302,6 +305,7 @@ def sync_task7(data_model: TestCaseDataModel = None, tc6=None):
     # trio.from_thread.run(ui_request.queue_request)
     # parameter.stop_measurement(ui_request.response, "description", True)
     # logger.info(f"task7 response: {ui_request.response}")
+    parameter.stop_measurement("measured", "description", True)
     trio.from_thread.run(data_model.update_parameter, parameter)
     trio.from_thread.run(data_model.update_progress, 100)
     return True

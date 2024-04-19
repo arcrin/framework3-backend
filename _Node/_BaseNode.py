@@ -1,12 +1,10 @@
-from typing import List, Any, Callable, Awaitable, Optional, TYPE_CHECKING
+from _Application._SystemEventBus import SystemEventBus
+from _Application._SystemEvent import NodeReadyEvent
+from typing import List, Any, Optional
 from abc import ABC, abstractmethod
 from enum import Enum
 from uuid import uuid4
-import trio
 import logging
-
-if TYPE_CHECKING:
-    from _Application._SystemEventBus import SystemEventBus
 
 
 class NodeState(Enum):
@@ -28,33 +26,21 @@ class BaseNode(ABC):
     def __init__(
         self, 
         name: str,
-        event_bus: "SystemEventBus | None" = None,
         func_parameter_label: str | None = None
     ) -> None:
         self._name: str = name
         self._dependencies: List["BaseNode"] = []
         self._dependents: List["BaseNode"] = []
         self._state: NodeState = NodeState.NOT_PROCESSED
-        self._scheduling_callback: Callable[["BaseNode"], Awaitable[None]] = (
-            self._default_on_ready_callback
-        )
         self._result: Any = None
         self._error: Optional[Exception] = None
         self._error_traceback: Optional[str] = ""
         self._func_parameter_label: str | None = func_parameter_label
         self._logger = logging.getLogger("BaseNode")
         self._logger.setLevel(logging.DEBUG)
-        self._ui_request_send_channel: trio.MemorySendChannel[str]
-        self._event_bus: "SystemEventBus | None" = event_bus
+        self._event_bus = SystemEventBus()
         self._id = uuid4().hex
 
-    @property
-    def event_bus(self) -> "SystemEventBus | None":
-        return self._event_bus
-    
-    @event_bus.setter
-    def event_bus(self, value: "SystemEventBus"):
-        self._event_bus = value
 
     @property
     def id(self):
@@ -108,10 +94,6 @@ class BaseNode(ABC):
     def dependents(self) -> List["BaseNode"]:
         return self._dependents
 
-    @property
-    def scheduling_callback(self) -> Callable[["BaseNode"], Awaitable[None]]:
-        return self._scheduling_callback
-
     async def _default_on_ready_callback(self, node: "BaseNode") -> None:
         pass
 
@@ -154,18 +136,15 @@ class BaseNode(ABC):
             self.state = NodeState.READY_TO_PROCESS
             # TODO: This needs to be handled atop
             try:
-                await self._scheduling_callback(self)
+                # await self._scheduling_callback(self)
+                node_ready_event = NodeReadyEvent(self)
+                await self._event_bus.publish(node_ready_event)
                 self._logger.info(f"{self.name} is scheduled")
             except Exception as e:
                 self._logger.error(
                     f"Error while scheduling {self.name}: {e}", exc_info=True
                 )
                 raise
-
-    def set_scheduling_callback(
-        self, callback: Callable[["BaseNode"], Awaitable[None]]
-    ) -> None:
-        self._scheduling_callback = callback
 
     async def reset(self) -> None:
         # COMMENT: If the node is processing, label is set as CANCELLED. 

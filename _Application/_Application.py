@@ -11,9 +11,11 @@ from _ProducerConsumer._SideEffectProcessor._UIRequestProcessor import (
 from _ProducerConsumer._WorkflowProcessor._NodeFailureProcessor import (
     NodeFailureProcessor,
 )
+from _ProducerConsumer._SideEffectProcessor._UIResponseProcessor import (
+    UIResponseProcessor,
+)
 from _ProducerConsumer._SideEffectProcessor._TCDataWSProcessor import TCDataWSProcessor
 from _ProducerConsumer._SideEffectProcessor._LogProcessor import LogProcessor
-from _Application._SystemEventBus import SystemEventBus
 from _Application._AppStateManager import ApplicationStateManager
 from _CommunicationModules._WSCommModule import WSCommModule
 from sample_profile.profile import SampleTestProfile
@@ -94,9 +96,7 @@ class Application:
         root_logger.addHandler(ws_logger_handler)
 
         # COMMENT: Application state manager initialization
-        self._system_event_bus = SystemEventBus()
         self._asm = ApplicationStateManager(
-            self._system_event_bus,
             self._tc_data_send_channel,  # type: ignore
             self._node_executor_send_channel,  # type: ignore
             self._ui_request_send_channel,  # type: ignore
@@ -128,9 +128,9 @@ class Application:
         self._log_processor = LogProcessor(self._log_queue, self._ws_comm_module)
         self._ui_request_processor = UIRequestProcessor(
             self._ui_request_receive_channel,  # type: ignore
-            self._ui_response_receive_channel,  # type: ignore
             self._ws_comm_module,
         )
+        self._ui_response_processor = UIResponseProcessor(self._ui_response_receive_channel) # type: ignore
         self._tc_data_ws_processor = TCDataWSProcessor(
             self._tc_data_receive_channel,  # type: ignore
             self._ws_comm_module,
@@ -171,8 +171,14 @@ class Application:
                 nursery.start_soon(self._node_failure_processor.start)
                 nursery.start_soon(self._log_processor.start)
                 nursery.start_soon(self._ui_request_processor.start)
+                nursery.start_soon(self._ui_response_processor.start)
                 nursery.start_soon(self._tc_data_ws_processor.start)
                 nursery.start_soon(self._app_command_processor.start)
         except Exception as e:
             self._logger.error(e)
             raise
+
+
+# TODO: add a prompt upon test run termination
+# TODO: handle prompt cancel action
+# TODO: handle multi-user connection

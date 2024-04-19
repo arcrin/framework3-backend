@@ -1,7 +1,8 @@
 from abc import ABC
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
+    from _Node._BaseNode import BaseNode
     from _Node._TCNode import TCNode
     from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
     from _Application._DomainEntity._InteractionContext import InteractionContext
@@ -18,6 +19,10 @@ class BaseEvent(ABC):
 
 class NewTestCaseEvent(BaseEvent):
     def __init__(self, payload: "TCNode"):  
+        super().__init__(payload)
+
+class NodeReadyEvent(BaseEvent):
+    def __init__(self, payload: "BaseNode"):
         super().__init__(payload)
 
 
@@ -46,4 +51,8 @@ class TestRunTerminationEvent(BaseEvent):
 
 class UserInteractionEvent(BaseEvent):
     def __init__(self, payload: "InteractionContext"): 
+        super().__init__(payload)
+
+class UserResponseEvent(BaseEvent):
+    def __init__(self, payload: Dict[str, str]):  # type: ignore
         super().__init__(payload)

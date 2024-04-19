@@ -6,22 +6,30 @@ from trio import Event
 
 
 class InteractionType(Enum):
-    InputRequest = auto()
-    Notification = auto()
-    Decision = auto()
+    InputRequest = "input_request"
+    Notification = "notification"
+    Decision = "decision"
 
 
 class InteractionContext:
-    def __init__(self, interaction_type: InteractionType, payload: Dict[str, Any]):
+    def __init__(self, interaction_type: InteractionType, message: str):
         self._id = uuid4().hex
         self._interaction_type = interaction_type
-        self._payload = payload
+        self._message = message
         self._response_ready_flag = Event()
         self._response = None
 
     @property
     def id(self):
         return self._id
+    
+    @property
+    def message(self):
+        return self._message
+    
+    @property
+    def interaction_type(self):
+        return self._interaction_type
 
     @property
     def response(self): # type: ignore

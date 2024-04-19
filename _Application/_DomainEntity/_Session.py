@@ -1,14 +1,12 @@
+from _Application._SystemEventBus import SystemEventBus
+from _Application._DomainEntity._Panel import Panel
 from typing import List, TYPE_CHECKING
 from uuid import uuid4
-from _Application._DomainEntity._Panel import Panel
 import logging
 
 if TYPE_CHECKING:
     from _Application._DomainEntity._Panel import Panel
     from trio_websocket import WebSocketConnection  # type: ignore
-    from trio import MemorySendChannel
-    from _Node._BaseNode import BaseNode
-    from _Application._SystemEventBus import SystemEventBus
 
 
 class Session:
@@ -32,9 +30,6 @@ class ControlSession(Session):
     def __init__(
         self,
         ws_connection: "WebSocketConnection",
-        node_executor_send_channel: "MemorySendChannel[BaseNode]",
-        ui_request_send_channel: "MemorySendChannel[str]",
-        event_bus: "SystemEventBus",
         test_profile,  # type: ignore
         panel_limit: int = 1,
     ):
@@ -42,9 +37,7 @@ class ControlSession(Session):
         self._panels: List[Panel] = []
         self._logger = logging.getLogger("ControlSession")
         self._panel_limit = panel_limit
-        self._node_executor_send_channel = node_executor_send_channel
-        self._ui_request_send_channel = ui_request_send_channel
-        self._event_bus = event_bus 
+        self._event_bus = SystemEventBus()
         self._test_profile = test_profile  # type: ignore
         for i in range(panel_limit):
             self._logger.info(f"Adding panel {i + 1}")
@@ -66,9 +59,6 @@ class ControlSession(Session):
             )  # TODO: depends on how we label the panels on the test jig
             new_panel = Panel(
                 panel_id,
-                self._node_executor_send_channel,
-                self._ui_request_send_channel,
-                self._event_bus,
                 self._test_profile,  # type: ignore
             )
             self._panels.append(new_panel)

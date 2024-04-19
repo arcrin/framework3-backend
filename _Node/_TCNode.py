@@ -54,17 +54,12 @@ class TCNode(BaseNode):
         self._data_model.parent_test_run.add_to_failed_test_cases(self)
         self.state = NodeState.FAILED
         test_case_failed_event = TestCaseFailEvent({"tc_id": self.id})
-        assert self.event_bus is not None, "TCNode must be connected to a system event bus"
-        await self.event_bus.publish(test_case_failed_event)
+        await self._event_bus.publish(test_case_failed_event)
 
     async def execute(self):
         self.state = NodeState.PROCESSING
-        self._data_model.event_bus = self.event_bus
         await self.data_model.add_execution()
         self._auto_retry_count -= self.data_model.current_execution.execution_id
-        assert (
-            self.data_model.event_bus is not None
-        ), "TCNode must be connected to a system event bus"
         assert (
             self.data_model.parent_test_run is not None
         ), "TCNode must be associated with a test run"

@@ -1,16 +1,16 @@
 from typing import List, TYPE_CHECKING, cast, Dict, Any
-from datetime import datetime
 from _Application._DomainEntity._InteractionContext import InteractionContext, InteractionType
 from _Application._DomainEntity._Parameter import Parameter
+from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import (
     ParameterUpdateEvent,
     ProgressUpdateEvent,
     NewTestExecutionEvent,
     UserInteractionEvent
 )
+from datetime import datetime
 
 if TYPE_CHECKING:
-    from _SystemEventBus import SystemEventBus
     from _Application._DomainEntity._TestRun import TestRun
     from _Node._BaseNode import NodeState
 
@@ -84,7 +84,7 @@ class TestCaseDataModel:
         self._test_description: str = test_description
         self._tc_id: str = tc_id
         self._execution: List[TestExecution] = []
-        self._event_bus: "SystemEventBus" = cast("SystemEventBus", None)
+        self._event_bus = SystemEventBus()
         self._parent_test_run: "TestRun" = cast("TestRun", None)
         self._state: "NodeState"
 
@@ -122,15 +122,7 @@ class TestCaseDataModel:
     @state.setter
     def state(self, value: "NodeState"):
         self._state = value
-
-    @property
-    def event_bus(self) -> "SystemEventBus":
-        return self._event_bus
-
-    @event_bus.setter
-    def event_bus(self, value: "SystemEventBus"):
-        self._event_bus = value
-
+    
     @property
     def parent_test_run(self) -> "TestRun | None":
         return self._parent_test_run
@@ -166,9 +158,6 @@ class TestCaseDataModel:
         return payload
 
     async def add_execution(self):
-        assert (
-            self.event_bus is not None
-        ), "TCNode must be connected to a system event bus"
         execution = TestExecution(len(self._execution))
         self._execution.append(execution)
         new_test_execution_event = NewTestExecutionEvent(
@@ -178,12 +167,9 @@ class TestCaseDataModel:
                 "tc_state": self.state.value,
             }
         )
-        await self.event_bus.publish(new_test_execution_event)
+        await self._event_bus.publish(new_test_execution_event)
 
     async def update_parameter(self, parameter: Parameter):
-        assert (
-            self.event_bus is not None
-        ), "TCNode must be connected to a system event bus"
         assert len(self._execution) > 0, "No execution to update parameter"
         self.current_execution.update_parameter(parameter)
 
@@ -194,20 +180,17 @@ class TestCaseDataModel:
                 "parameter": {parameter.name: parameter.as_dict()},
             }  # type: ignore
         )
-        await self.event_bus.publish(parameter_update_event)
+        await self._event_bus.publish(parameter_update_event)
 
     async def update_progress(self, progress: int):
-        assert (
-            self.event_bus is not None
-        ), "TCNode must be connected to a system event bus"
         self._execution[-1].progress = progress
         progress_update_event = ProgressUpdateEvent(self)
-        await self.event_bus.publish(progress_update_event)
+        await self._event_bus.publish(progress_update_event)
 
-    async def user_input_request(self): # type: ignore
-        interaction_context = InteractionContext(InteractionType.InputRequest, {"message": "Type 1 in the box"})
+    async def user_input_request(self, message: str) -> str:
+        interaction_context = InteractionContext(InteractionType.InputRequest, message)
         user_interaction_event = UserInteractionEvent(interaction_context)
-        await self.event_bus.publish(user_interaction_event)
+        await self._event_bus.publish(user_interaction_event)
         await interaction_context.response_ready()
         return interaction_context.response # type: ignore
 

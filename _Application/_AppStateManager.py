@@ -5,13 +5,16 @@ from _Application._SystemEvent import (
     NewTestExecutionEvent,
     TestRunTerminationEvent,
     TestCaseFailEvent,
-    UserInteractionEvent
+    UserInteractionEvent,
+    NodeReadyEvent,
+    UserResponseEvent
 )
 from _Application._DomainEntity._Session import Session, ControlSession, ViewSession
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import BaseEvent
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 from _Application._DomainEntity._InteractionContext import InteractionContext
+from _Node._BaseNode import BaseNode
 from _Node._TCNode import TCNode
 from typing import TYPE_CHECKING, Dict, Any
 import trio
@@ -20,29 +23,28 @@ import logging
 if TYPE_CHECKING:
     from trio import MemorySendChannel
     from trio_websocket import WebSocketConnection  # type: ignore
-    from _Node._BaseNode import BaseNode
 
 
 class ApplicationStateManager:
     def __init__(
         self,
-        event_bus: SystemEventBus,
         tc_data_send_channel: "MemorySendChannel[Dict[Any, Any]]",
         node_executor_send_channel: "MemorySendChannel[BaseNode]",
-        ui_request_send_channel: "MemorySendChannel[str]",
+        ui_request_send_channel: "MemorySendChannel[InteractionContext]",
         test_profile,  # type: ignore
     ):
         self._app_state = {}
         self._control_context = {}
         self._app_data = {}
-        self._event_bus = event_bus
+        self._event_bus = SystemEventBus()
+        self._event_bus.subscribe(self.event_handler)
         self._tc_data_send_channel = tc_data_send_channel
         self._node_executor_send_channel = node_executor_send_channel
         self._ui_request_send_channel = ui_request_send_channel
         self._test_profile = test_profile  # type: ignore
-        self._event_bus.subscribe(self.event_handler)
         self._control_session: ControlSession | None = None
         self._sessions: Dict["WebSocketConnection", Session] = {}
+        self._interactions: Dict[str, InteractionContext] = {}
         self._logger = logging.getLogger("ApplicationStateManager")
 
     @property
@@ -57,9 +59,6 @@ class ApplicationStateManager:
         if not self._control_session:
             new_session = ControlSession(
                 ws_connection,
-                self._node_executor_send_channel,
-                self._ui_request_send_channel,
-                self._event_bus,
                 self._test_profile,  # type: ignore
             )
             self._control_session = new_session
@@ -110,15 +109,13 @@ class ApplicationStateManager:
         elif isinstance(event, ProgressUpdateEvent):
             tc_data_model = event.payload
             if isinstance(tc_data_model, TestCaseDataModel):
-                self._logger.info(
-                    f"Progress updated for test case {tc_data_model.id}"
-                )
+                self._logger.info(f"Progress updated for test case {tc_data_model.id}")
                 react_ui_data_payload = {
                     "type": "tc_data",
                     "event_type": "progressUpdate",
                     "payload": {
                         "tc_id": tc_data_model.id,
-                        "progress": tc_data_model.progress,   
+                        "progress": tc_data_model.progress,
                     },
                 }
                 async with trio.open_nursery() as nursery:
@@ -173,9 +170,30 @@ class ApplicationStateManager:
         elif isinstance(event, UserInteractionEvent):
             if isinstance(event.payload, InteractionContext):
                 self._logger.info(f"User interaction id {event.payload.id}")
+                self._interactions[event.payload.id] = event.payload
                 async with trio.open_nursery() as nursery:
-                    nursery.start_soon(
-                        self._ui_request_send_channel.send, event.payload
+                    nursery.start_soon(  # type: ignore
+                        self._ui_request_send_channel.send,
+                        event.payload,
                     )
             else:
-                raise TypeError("User interaction event payload is not of type InteractionContext")
+                raise TypeError(
+                    "User interaction event payload is not of type InteractionContext"
+                )
+
+        elif isinstance(event, NodeReadyEvent):
+            if isinstance(event.payload, BaseNode):
+                self._logger.info(f"Node {event.payload.id} ready")
+                async with trio.open_nursery() as nursery:
+                    nursery.start_soon(
+                        self._node_executor_send_channel.send, event.payload
+                    )
+            else:
+                raise TypeError("Node ready event payload is not of type BaseNode")
+            
+        elif isinstance(event, UserResponseEvent):
+            self._interactions[event.payload['id']].response = event.payload['response']
+            del self._interactions[event.payload['id']]
+            self._logger.info(f"User response received for interaction {event.payload['id']}")
+
+# TODO: I should confirm that other event can be processed with some other event is stuck

@@ -117,19 +117,7 @@ def test_dependents():
     node1.remove_dependency(node2)
 
     assert node2.dependents == []
-
-
-def test_set_on_ready_callback(mocker):
-    node = ConcreteNode("Node 1")
-
-    mock_callback = mocker.Mock()
-
-    node.set_scheduling_callback(mock_callback)
-
-    node.scheduling_callback(node)
-
-    mock_callback.assert_called_once_with(node)
-
+    
 
 async def test_notify_dependencies_resolved(mocker):
     node1 = ConcreteNode("Node 1")
