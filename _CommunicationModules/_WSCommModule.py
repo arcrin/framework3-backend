@@ -38,6 +38,9 @@ class WSCommModule:
     @property
     def all_ws_connection(self):
         return list(self._asm.sessions.keys())
+    
+    def remove_connection(self, ws_connection: WebSocketConnection):
+        self._asm.remove_session(ws_connection)
 
     async def ws_connection_handler(self, request: WebSocketRequest):
         ws = await request.accept()  # type: ignore
@@ -54,7 +57,7 @@ class WSCommModule:
 
             except ConnectionClosed:
                 self._logger.info(f"WS connection closed with {ws}")
-                self._asm.remove_session(ws)
+                self.remove_connection(ws)
                 break
 
     async def start(self):

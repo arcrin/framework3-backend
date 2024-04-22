@@ -22,3 +22,8 @@ class AppCommandProcessor:
         except Exception as e:
             self._logger.error(e)
             raise
+
+
+# TODO: Do I need to convert this into event based operation? Is there any scenario where I need to execute multiple commands at the same time?
+# TODO: How about a command queue?
+# TODO: what dictates the number of command can be executed at the same time?

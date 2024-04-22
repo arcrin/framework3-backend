@@ -19,7 +19,11 @@ class TCDataWSProcessor:
             async with trio.open_nursery() as nursery: # type: ignore
                 async for tc_data in self._tc_data_receive_channel:
                     for connection in self._comm_module.all_ws_connection:  
-                        await connection.send_message(json.dumps(tc_data)) # type: ignore
+                        try:
+                            await connection.send_message(json.dumps(tc_data)) # type: ignore
+                        except trio_websocket.ConnectionClosed as e:
+                            self._logger.error(f"WS connection closed with {connection}")
+                            self._comm_module.remove_connection(connection)
         except Exception as e:
             self._logger.error(e)
             raise

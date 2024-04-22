@@ -42409,6 +42409,7 @@
     },
     {
       "message": {
+        "text": "regarding the highlighted code, is this the best way to handle events?",
         "parts": [
           {
             "range": {
@@ -42424,8 +42425,7 @@
             "text": "regarding the highlighted code, is this the best way to handle events?",
             "kind": "text"
           }
-        ],
-        "text": "regarding the highlighted code, is this the best way to handle events?"
+        ]
       },
       "variableData": {
         "variables": []
@@ -42543,6 +42543,7 @@
     },
     {
       "message": {
+        "text": "sorry, I had the wrong file referenced",
         "parts": [
           {
             "range": {
@@ -42558,8 +42559,7 @@
             "text": "sorry, I had the wrong file referenced",
             "kind": "text"
           }
-        ],
-        "text": "sorry, I had the wrong file referenced"
+        ]
       },
       "variableData": {
         "variables": []
@@ -42677,6 +42677,7 @@
     },
     {
       "message": {
+        "text": "is the highlighted code the best handle multiple event types",
         "parts": [
           {
             "range": {
@@ -42692,8 +42693,7 @@
             "text": "is the highlighted code the best handle multiple event types",
             "kind": "text"
           }
-        ],
-        "text": "is the highlighted code the best handle multiple event types"
+        ]
       },
       "variableData": {
         "variables": []
@@ -42811,6 +42811,7 @@
     },
     {
       "message": {
+        "text": "I want to send '\\n\" character as part of a JSON string through websocket. However, at the receiving end, the react app, this character is interpreated correctly ",
         "parts": [
           {
             "range": {
@@ -42826,8 +42827,7 @@
             "text": "I want to send '\\n\" character as part of a JSON string through websocket. However, at the receiving end, the react app, this character is interpreated correctly ",
             "kind": "text"
           }
-        ],
-        "text": "I want to send '\\n\" character as part of a JSON string through websocket. However, at the receiving end, the react app, this character is interpreated correctly "
+        ]
       },
       "variableData": {
         "variables": []

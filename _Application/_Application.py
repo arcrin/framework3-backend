@@ -182,3 +182,4 @@ class Application:
 # TODO: add a prompt upon test run termination
 # TODO: handle prompt cancel action
 # TODO: handle multi-user connection
+# TODO: figure out product scan and test jig hardware config
