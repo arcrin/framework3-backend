@@ -155,6 +155,7 @@ class Application:
                 await panel.test_run.load_test_case()
 
     async def retest(self, tc_id: str | None = None):
+        # TODO: update the state of test case right away to avoid multiple command execution
         if self._asm.control_session is None:
             self._logger.error("Control session not established")
             raise Exception("Control session not established")
@@ -183,3 +184,4 @@ class Application:
 # TODO: handle prompt cancel action
 # TODO: handle multi-user connection
 # TODO: figure out product scan and test jig hardware config
+# TODO: workflow configuration before App init phase

@@ -5,7 +5,8 @@ if TYPE_CHECKING:
     from _Node._BaseNode import BaseNode
     from _Node._TCNode import TCNode
     from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
-    from _Application._DomainEntity._InteractionContext import InteractionContext
+    from util._InteractionContext import InteractionContext
+    from _Application._DomainEntity._Session import ViewSession
 
 
 class BaseEvent(ABC):
@@ -55,4 +56,8 @@ class UserInteractionEvent(BaseEvent):
 
 class UserResponseEvent(BaseEvent):
     def __init__(self, payload: Dict[str, str]):  # type: ignore
+        super().__init__(payload)
+
+class NewViewSessionEvent(BaseEvent):
+    def __init__(self, payload: "ViewSession"): 
         super().__init__(payload)

@@ -1,5 +1,4 @@
 from _Node._BaseNode import BaseNode
-from _Node._TestRunTerminalNode import TestRunTerminalNode
 import trio
 import logging
 

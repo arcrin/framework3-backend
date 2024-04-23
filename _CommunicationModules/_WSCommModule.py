@@ -44,7 +44,7 @@ class WSCommModule:
 
     async def ws_connection_handler(self, request: WebSocketRequest):
         ws = await request.accept()  # type: ignore
-        self._asm.add_session(ws)
+        await self._asm.add_session(ws)
         self._logger.info(f"WS connection established with: {ws}")
         while True:
             try:

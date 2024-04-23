@@ -40,6 +40,10 @@ class TestRun:
     @property
     def parent_panel(self) -> "Panel":
         return self._parent_panel
+    
+    @property
+    def tc_nodes(self) -> List["TCNode"]:
+        return self._tc_nodes
 
     @parent_panel.setter
     def parent_panel(self, value: "Panel"):
@@ -54,6 +58,7 @@ class TestRun:
 
     async def retest_failed_test_cases(self, tc_id: str):
         tc_node = self._failed_tasks[tc_id]
+        tc_node.mark_as_not_processed()
         await self.add_tc_node(tc_node)
         self._failed_tasks.pop(tc_id)
 

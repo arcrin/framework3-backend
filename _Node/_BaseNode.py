@@ -93,6 +93,22 @@ class BaseNode(ABC):
     @property
     def dependents(self) -> List["BaseNode"]:
         return self._dependents
+    
+    def mark_as_failed(self) -> None:
+        self.state = NodeState.FAILED   
+
+    def mark_as_passed(self) -> None:
+        self.state = NodeState.PASSED
+    
+    def mark_as_not_processed(self) -> None:
+        self.state = NodeState.NOT_PROCESSED
+
+    def mark_as_processing(self) -> None:
+        self.state = NodeState.PROCESSING
+
+    def mark_as_cleared(self) -> None:
+        self.state = NodeState.CLEARED
+    
 
     async def _default_on_ready_callback(self, node: "BaseNode") -> None:
         pass

@@ -21,5 +21,6 @@ class SystemEventBus:
         
 
     async def publish(self, event: BaseEvent):
+        # TODO: delivery check?
         for listener in self._listeners:
             await listener(event)

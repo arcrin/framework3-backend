@@ -1,5 +1,5 @@
 from typing import List, TYPE_CHECKING, cast, Dict, Any
-from _Application._DomainEntity._InteractionContext import InteractionContext, InteractionType
+from util._InteractionContext import InteractionContext, InteractionType
 from _Application._DomainEntity._Parameter import Parameter
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import (
@@ -188,6 +188,7 @@ class TestCaseDataModel:
         await self._event_bus.publish(progress_update_event)
 
     async def user_input_request(self, message: str) -> str:
+        # TODO: handle multiple user interactions at test case level
         interaction_context = InteractionContext(InteractionType.InputRequest, message)
         user_interaction_event = UserInteractionEvent(interaction_context)
         await self._event_bus.publish(user_interaction_event)

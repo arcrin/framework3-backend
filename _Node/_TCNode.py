@@ -52,12 +52,12 @@ class TCNode(BaseNode):
     async def quarantine(self) -> None:
         assert self._data_model.parent_test_run is not None, "TCNode must be associated with a test run"
         self._data_model.parent_test_run.add_to_failed_test_cases(self)
-        self.state = NodeState.FAILED
+        self.mark_as_failed()
         test_case_failed_event = TestCaseFailEvent({"tc_id": self.id})
         await self._event_bus.publish(test_case_failed_event)
 
     async def execute(self):
-        self.state = NodeState.PROCESSING
+        self.mark_as_processing()
         await self.data_model.add_execution()
         self._auto_retry_count -= self.data_model.current_execution.execution_id
         assert (

@@ -1,5 +1,4 @@
-from enum import Enum, auto
-from typing import Dict, Any
+from enum import Enum
 from uuid import uuid4
 from trio import Event
 
@@ -42,3 +41,6 @@ class InteractionContext:
 
     async def response_ready(self):
         await self._response_ready_flag.wait()
+
+
+# TODO: add timeout to user interaction

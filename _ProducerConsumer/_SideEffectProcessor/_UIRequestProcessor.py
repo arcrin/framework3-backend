@@ -6,7 +6,7 @@ import trio
 import logging
 
 if TYPE_CHECKING:
-    from _Application._DomainEntity._InteractionContext import InteractionContext
+    from util._InteractionContext import InteractionContext
 
 
 class UIRequestProcessor:
@@ -36,6 +36,7 @@ class UIRequestProcessor:
                             "payload": {
                                 "id": interaction_context.id,
                                 "message": interaction_context.message,
+                                "prompt_type": interaction_context.interaction_type.value
                             }
                         })  # type: ignore
                     )

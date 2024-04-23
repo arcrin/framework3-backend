@@ -7,16 +7,19 @@ from _Application._SystemEvent import (
     TestCaseFailEvent,
     UserInteractionEvent,
     NodeReadyEvent,
-    UserResponseEvent
+    UserResponseEvent,
+    NewViewSessionEvent
 )
 from _Application._DomainEntity._Session import Session, ControlSession, ViewSession
 from _Application._SystemEventBus import SystemEventBus
 from _Application._SystemEvent import BaseEvent
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
-from _Application._DomainEntity._InteractionContext import InteractionContext
+from util._InteractionContext import InteractionContext
+from _Application._DomainEntity._Session import ViewSession
 from _Node._BaseNode import BaseNode
 from _Node._TCNode import TCNode
 from typing import TYPE_CHECKING, Dict, Any
+import json
 import trio
 import logging
 
@@ -55,7 +58,7 @@ class ApplicationStateManager:
     def sessions(self):
         return self._sessions
 
-    def add_session(self, ws_connection: "WebSocketConnection"):
+    async def add_session(self, ws_connection: "WebSocketConnection"):
         if not self._control_session:
             new_session = ControlSession(
                 ws_connection,
@@ -64,6 +67,8 @@ class ApplicationStateManager:
             self._control_session = new_session
         else:
             new_session = ViewSession(ws_connection)
+            new_view_session_event = NewViewSessionEvent(new_session)   
+            await self._event_bus.publish(new_view_session_event)
         self._sessions[ws_connection] = new_session
 
     def remove_session(self, ws_connection: "WebSocketConnection"):
@@ -195,5 +200,25 @@ class ApplicationStateManager:
             self._interactions[event.payload['id']].response = event.payload['response']
             del self._interactions[event.payload['id']]
             self._logger.info(f"User response received for interaction {event.payload['id']}")
+
+        elif isinstance(event, NewViewSessionEvent):
+            if isinstance(event.payload, ViewSession):
+                connection = event.payload.connection
+                if self.control_session:
+                    async with trio.open_nursery() as nursery:
+                        for panel in self.control_session.panels:
+                            for tc_node in panel.tc_nodes:
+                                react_ui_data_payload = {
+                                    "type": "tc_data",
+                                    "event_type": "newTC",
+                                    "payload": tc_node.data_model.react_ui_payload,
+                                }
+                                nursery.start_soon(connection.send_message, json.dumps(react_ui_data_payload)) # type: ignore
+                else:
+                    self._logger.error("No control session is associated with the current application")
+                    raise ValueError("No control session is associated with the current application")
+                self._logger.info(f"New view session {event.payload.id} added ")
+            else:
+                raise TypeError("New view session event payload is not of type WebSocketConnection")    
 
 # TODO: I should confirm that other event can be processed with some other event is stuck

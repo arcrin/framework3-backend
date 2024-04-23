@@ -1,5 +1,7 @@
 from _Node._BaseNode import BaseNode
 from _Application._SystemEvent import TestRunTerminationEvent
+from util._InteractionContext import InteractionContext, InteractionType
+from _Application._SystemEvent import UserInteractionEvent
 from typing import TYPE_CHECKING
 import logging
 
@@ -24,6 +26,9 @@ class TestRunTerminalNode(BaseNode):
 
     async def execute(self):
         self._logger.info(f"Executing TestRunTerminalNode {self.id}")
+        interaction_context = InteractionContext(InteractionType.Notification, "Test run completed")
+        user_interaction_event = UserInteractionEvent(interaction_context)
+        await self._event_bus.publish(user_interaction_event)
         test_run_termination_event = TestRunTerminationEvent(
             {"tr_id": self._test_run.id}
         )  # type: ignore
