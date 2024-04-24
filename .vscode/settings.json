@@ -2,7 +2,7 @@
   "python.terminal.launchArgs": [
     "-m",
     "IPython",
-    // "-i",
+    "-i",
     "--no-autoindent",
 ],
 "python.testing.pytestArgs": [
