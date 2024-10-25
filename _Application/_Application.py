@@ -23,7 +23,7 @@ from util.log_handler import WebSocketLogHandler
 from util.log_filter import TAGAppLoggerFilter
 from _Node._TestRunTerminalNode import TestRunTerminalNode
 
-from typing import Dict, Any, TYPE_CHECKING
+from typing import Dict, Any, Tuple, TYPE_CHECKING
 from queue import Queue
 import logging
 import trio
@@ -33,56 +33,47 @@ if TYPE_CHECKING:
 
 
 class Application:
-    def __init__(self):
-        self._command_mapping = {
+    def __init__(self,
+                node_executor_channels: Tuple[trio.MemorySendChannel["BaseNode"], trio.MemoryReceiveChannel["BaseNode"]],
+                node_result_processor_channels: Tuple[trio.MemorySendChannel["BaseNode"], trio.MemoryReceiveChannel["BaseNode"]],
+                node_failure_channels: Tuple[trio.MemorySendChannel["BaseNode"], trio.MemoryReceiveChannel["BaseNode"]],
+                app_command_channels: Tuple[trio.MemorySendChannel[Dict[Any, Any]], trio.MemoryReceiveChannel[Dict[Any, Any]]],
+                ui_request_channels: Tuple[trio.MemorySendChannel[str], trio.MemoryReceiveChannel[str]],
+                ui_response_channels: Tuple[trio.MemorySendChannel[str], trio.MemoryReceiveChannel[str]], 
+                tc_data_channels: Tuple[trio.MemorySendChannel[Dict[Any, Any]], trio.MemoryReceiveChannel[Dict[Any, Any]]],
+                ):
+        self._command_mapping: Dict[Any, Any] = {
             "loadTC": self.start_test_run,
             "retest": self.retest,
         }
-
+        #TODO: these channels could be dependencies passed into Application object during init
         self._node_executor_send_channel: trio.MemorySendChannel["BaseNode"]
         self._node_executor_receive_channel: trio.MemoryReceiveChannel["BaseNode"]
-        self._node_executor_send_channel, self._node_executor_receive_channel = (
-            trio.open_memory_channel["BaseNode"](50)
-        )
+        self._node_executor_send_channel, self._node_executor_receive_channel = node_executor_channels 
 
         self._node_result_processor_send_channel: trio.MemorySendChannel["BaseNode"]
-        self._node_result_processor_receive_channel: trio.MemoryReceiveChannel[
-            "BaseNode"
-        ]
-        (
-            self._node_result_processor_send_channel,
-            self._node_result_processor_receive_channel,
-        ) = trio.open_memory_channel(50)
+        self._node_result_processor_receive_channel: trio.MemoryReceiveChannel["BaseNode"]
+        self._node_result_processor_send_channel, self._node_result_processor_receive_channel = node_result_processor_channels
 
         self._node_failure_send_channel: trio.MemorySendChannel["BaseNode"]
         self._node_failure_receive_channel: trio.MemoryReceiveChannel["BaseNode"]
-        self._node_failure_send_channel, self._node_failure_receive_channel = (
-            trio.open_memory_channel(50)
-        )
+        self._node_failure_send_channel, self._node_failure_receive_channel = node_failure_channels 
 
         self._app_command_send_channel: trio.MemorySendChannel[Dict[Any, Any]]
         self._app_command_receive_channel: trio.MemoryReceiveChannel[Dict[Any, Any]]
-        self._app_command_send_channel, self._app_command_receive_channel = (
-            trio.open_memory_channel(50)
-        )
+        self._app_command_send_channel, self._app_command_receive_channel = app_command_channels 
 
         self._ui_request_send_channel: trio.MemorySendChannel[str]
         self._ui_request_receive_channel: trio.MemoryReceiveChannel[str]
-        self._ui_request_send_channel, self._ui_request_receive_channel = (
-            trio.open_memory_channel(50)
-        )
+        self._ui_request_send_channel, self._ui_request_receive_channel = ui_request_channels 
 
         self._ui_response_send_channel: trio.MemorySendChannel[str]
         self._ui_response_receive_channel: trio.MemoryReceiveChannel[str]
-        self._ui_response_send_channel, self._ui_response_receive_channel = (
-            trio.open_memory_channel(50)
-        )
+        self._ui_response_send_channel, self._ui_response_receive_channel = ui_response_channels 
 
         self._tc_data_send_channel: trio.MemorySendChannel[Dict[Any, Any]]
         self._tc_data_receive_channel: trio.MemoryReceiveChannel[Dict[Any, Any]]
-        self._tc_data_send_channel, self._tc_data_receive_channel = (
-            trio.open_memory_channel[Dict[Any, Any]](50)
-        )
+        self._tc_data_send_channel, self._tc_data_receive_channel = tc_data_channels 
 
         # COMMENT: Custom log handler and filter installation
         self._log_queue: Queue[logging.LogRecord | TestRunTerminalNode] = Queue()
@@ -185,3 +176,47 @@ class Application:
 # TODO: handle multi-user connection
 # TODO: figure out product scan and test jig hardware config
 # TODO: workflow configuration before App init phase
+
+#TODO:
+"""
+Refactoring:
+1. Configuration management
+    - Externalize Configuration: Separate the configuration details (like channel sizes, logging
+    settings, command mappings) from the code. Use a configuration file (JSON, YAML, etc) or 
+    environment variables. This makes the system easier to adapt without modifying the code, 
+    especially useful in different deployment environments.
+
+2. Modularization
+    - Break Down Large Classes: If classes like Application are doing too much, consider breaking 
+    them down into smaller, more focused classes. For instance, the setup of channels and handlers 
+    can be moved into their own setup functions or classes.
+    - Component-Based Architecture: Organize the code into more distinct
+    components or modules based on functionality (e.g., communication, node 
+    management, UI handling)
+
+3. Error Handling and Recovery
+    - Advanced Error Management: Instead of just logging and raising exceptions,
+    consider strategies for recovery, retires, or safe exits. Implementing these 
+    within a dedicated error handling module or class could help centralize error
+    management logic.
+    - Graceful Shutdown: Ensure the application can shut down gracefully, handling 
+    any clean-up tasks necessary to prevent data corruption or loss.
+
+4. Dependency Injection
+    - Implement Dependency Injection: For better testability and modularity, pass
+    dependencies like channels or state managers through constructors or setters
+    rather than creating them directly inside components. This makes it easier to
+    swap out these dependencies, for example, during testing.
+
+5. Enhance Asynchronous Management
+    - Refactor Async Patterns: Review and possibly refactor how asynchronous tasks
+    are managed to ensure that they are efficient and that resource locks or
+    deadlocks are aboided. This might involve better utilization of Trio's capabilities
+    or refactoring some synchronous blocks to be asynchronous.
+
+6. Improving Logging
+    - Centralize Logging Configuration: Instead of setting up logging in multiple 
+    places or within application classes, consider having a centralized logging
+    configuration that sets up all handlers and formats consistently across the 
+    application.
+"""

@@ -1,6 +1,7 @@
 from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 from typing import Callable, Any
 from _Application._SystemEvent import TestCaseFailEvent
+from _Application._SystemEventBus import SystemEventBus
 from util.async_timing import async_timed
 from _Node._BaseNode import BaseNode, NodeState
 from functools import partial
@@ -54,7 +55,7 @@ class TCNode(BaseNode):
         self._data_model.parent_test_run.add_to_failed_test_cases(self)
         self.mark_as_failed()
         test_case_failed_event = TestCaseFailEvent({"tc_id": self.id})
-        await self._event_bus.publish(test_case_failed_event)
+        await SystemEventBus.publish(test_case_failed_event)
 
     async def execute(self):
         self.mark_as_processing()

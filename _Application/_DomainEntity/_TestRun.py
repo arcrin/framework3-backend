@@ -18,7 +18,6 @@ class TestRun:
         self._id: str = uuid4().hex
         self._tc_nodes: List["TCNode"] = []
         self._failed_tasks: Dict[str, "TCNode"] = {}
-        self._event_bus = SystemEventBus()
         self._parent_panel: "Panel" = cast("Panel", None)
         # TODO: profile is downloaded once and stored somewhere, either Panel or Session
         self._test_profile = test_profile  # type: ignore
@@ -67,7 +66,7 @@ class TestRun:
         self._tc_nodes.append(tc_node)
         tc_node.data_model.parent_test_run = self
         new_test_case_event = NewTestCaseEvent(tc_node)
-        await self._event_bus.publish(new_test_case_event)
+        await SystemEventBus.publish(new_test_case_event)
         await tc_node.check_dependency_and_schedule_self()
 
     async def load_test_case(self):

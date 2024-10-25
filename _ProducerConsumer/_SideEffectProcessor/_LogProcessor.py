@@ -51,4 +51,5 @@ class LogProcessor:
                 await trio.sleep(0)
 
     def stop(self):
-        self._log_queue.put(TestRunTerminalNode())
+        # self._log_queue.put(TestRunTerminalNode())
+        pass

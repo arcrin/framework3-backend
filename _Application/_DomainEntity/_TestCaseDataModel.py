@@ -84,7 +84,6 @@ class TestCaseDataModel:
         self._test_description: str = test_description
         self._tc_id: str = tc_id
         self._execution: List[TestExecution] = []
-        self._event_bus = SystemEventBus()
         self._parent_test_run: "TestRun" = cast("TestRun", None)
         self._state: "NodeState"
 
@@ -167,7 +166,7 @@ class TestCaseDataModel:
                 "tc_state": self.state.value,
             }
         )
-        await self._event_bus.publish(new_test_execution_event)
+        await SystemEventBus.publish(new_test_execution_event)
 
     async def update_parameter(self, parameter: Parameter):
         assert len(self._execution) > 0, "No execution to update parameter"
@@ -180,18 +179,18 @@ class TestCaseDataModel:
                 "parameter": {parameter.name: parameter.as_dict()},
             }  # type: ignore
         )
-        await self._event_bus.publish(parameter_update_event)
+        await SystemEventBus.publish(parameter_update_event)
 
     async def update_progress(self, progress: int):
         self._execution[-1].progress = progress
         progress_update_event = ProgressUpdateEvent(self)
-        await self._event_bus.publish(progress_update_event)
+        await SystemEventBus.publish(progress_update_event)
 
     async def user_input_request(self, message: str) -> str:
         # TODO: handle multiple user interactions at test case level
         interaction_context = InteractionContext(InteractionType.InputRequest, message)
         user_interaction_event = UserInteractionEvent(interaction_context)
-        await self._event_bus.publish(user_interaction_event)
+        await SystemEventBus.publish(user_interaction_event)
         await interaction_context.response_ready()
         return interaction_context.response # type: ignore
 

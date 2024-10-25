@@ -38,7 +38,6 @@ class BaseNode(ABC):
         self._func_parameter_label: str | None = func_parameter_label
         self._logger = logging.getLogger("BaseNode")
         self._logger.setLevel(logging.DEBUG)
-        self._event_bus = SystemEventBus()
         self._id = uuid4().hex
 
 
@@ -154,7 +153,7 @@ class BaseNode(ABC):
             try:
                 # await self._scheduling_callback(self)
                 node_ready_event = NodeReadyEvent(self)
-                await self._event_bus.publish(node_ready_event)
+                await SystemEventBus.publish(node_ready_event)
                 self._logger.info(f"{self.name} is scheduled")
             except Exception as e:
                 self._logger.error(

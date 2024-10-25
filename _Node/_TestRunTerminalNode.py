@@ -1,5 +1,6 @@
 from _Node._BaseNode import BaseNode
 from _Application._SystemEvent import TestRunTerminationEvent
+from _Application._SystemEventBus import SystemEventBus
 from util._InteractionContext import InteractionContext, InteractionType
 from _Application._SystemEvent import UserInteractionEvent
 from typing import TYPE_CHECKING
@@ -28,7 +29,7 @@ class TestRunTerminalNode(BaseNode):
         self._logger.info(f"Executing TestRunTerminalNode {self.id}")
         interaction_context = InteractionContext(InteractionType.Notification, "Test run completed")
         user_interaction_event = UserInteractionEvent(interaction_context)
-        await self._event_bus.publish(user_interaction_event)
+        await SystemEventBus.publish(user_interaction_event)
         test_run_termination_event = TestRunTerminationEvent(
             {"tr_id": self._test_run.id}
         )  # type: ignore
@@ -36,4 +37,4 @@ class TestRunTerminalNode(BaseNode):
             self._test_run.parent_panel is not None
         ), "TestRunTerminalNode must be associated with a panel"
         self._test_run.parent_panel.remove_test_run()
-        await self._event_bus.publish(test_run_termination_event)
+        await SystemEventBus.publish(test_run_termination_event)

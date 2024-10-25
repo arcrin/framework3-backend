@@ -1,4 +1,3 @@
-from _Application._SystemEventBus import SystemEventBus
 from typing import TYPE_CHECKING, cast, List
 from _Application._DomainEntity._TestRun import TestRun
 import logging
@@ -18,7 +17,6 @@ class Panel:
         self._id = panel_id
         self._test_run: "TestRun | None" = None
         self._parent_control_session: "ControlSession" = cast("ControlSession", None)
-        self._event_bus = SystemEventBus()
         self._test_profile = test_profile  # type: ignore
         self._logger = logging.getLogger("Panel")
         # TODO: test jig hard ware related code should be in this class

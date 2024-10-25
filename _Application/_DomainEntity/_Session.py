@@ -37,7 +37,6 @@ class ControlSession(Session):
         self._panels: List[Panel] = []
         self._logger = logging.getLogger("ControlSession")
         self._panel_limit = panel_limit
-        self._event_bus = SystemEventBus()
         self._test_profile = test_profile  # type: ignore
         for i in range(panel_limit):
             self._logger.info(f"Adding panel {i + 1}")
