@@ -17,7 +17,7 @@ from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
 from util._InteractionContext import InteractionContext
 from _Node._BaseNode import BaseNode
 from _Node._TCNode import TCNode
-from typing import TYPE_CHECKING, Dict, Any, Callable, Type, Tuple, List, Coroutine
+from typing import TYPE_CHECKING, Dict, Any, Callable, Type, Tuple, List, Coroutine, TypeVar 
 import json
 import trio
 import logging
@@ -26,8 +26,9 @@ if TYPE_CHECKING:
     from trio import MemorySendChannel
     from trio_websocket import WebSocketConnection  # type: ignore
 
+E = TypeVar("E", bound=BaseEvent)
 
-class ApplicationStateManager:
+class ApplicationStateManager():
     def __init__(
         self,
         tc_data_send_channel: "MemorySendChannel[Dict[Any, Any]]",
@@ -38,7 +39,6 @@ class ApplicationStateManager:
         self._app_state = {}
         self._control_context = {}
         self._app_data = {}
-        # self._event_bus = SystemEventBus()
         self._tc_data_send_channel = tc_data_send_channel
         self._node_executor_send_channel = node_executor_send_channel
         self._ui_request_send_channel = ui_request_send_channel
@@ -48,7 +48,8 @@ class ApplicationStateManager:
         self._interactions: Dict[str, InteractionContext] = {}
         self._logger = logging.getLogger("ApplicationStateManager")
 
-        event_register: List[Tuple[Type[BaseEvent], Callable[[BaseEvent], Coroutine[Any, Any, None]]]]= [
+        event_register: List[Tuple[Type[BaseEvent], Callable[[BaseEvent], Coroutine[Any, Any, None]]]]= [ 
+            # type: ignore . Static type check has trouble recognize the sub clsss events
             (NewTestCaseEvent, self.handle_new_test_case_event),        
             (ParameterUpdateEvent, self.handle_parameter_update_event),
             (ProgressUpdateEvent, self.handle_progress_update_event),
@@ -109,7 +110,7 @@ class ApplicationStateManager:
     async def handle_parameter_update_event(self, event: ParameterUpdateEvent):
         self._logger.info( f"Parameter updated for test case {event.payload['tc_id']}")
         async with trio.open_nursery() as nursery:
-            nursery.start_soon(
+            nursery.start_soon( # type: ignore
                 self._tc_data_send_channel.send,
                 {
                     "type": "tc_data",
@@ -139,7 +140,7 @@ class ApplicationStateManager:
     async def handle_new_test_execution_event(self, event: NewTestExecutionEvent):
         self._logger.info( f"New execution added to test case {event.payload['tc_id']}")
         async with trio.open_nursery() as nursery:
-            nursery.start_soon(
+            nursery.start_soon( # type: ignore
                 self._tc_data_send_channel.send,
                 {
                     "type": "tc_data",
@@ -162,7 +163,7 @@ class ApplicationStateManager:
     async def handle_test_case_fail_event(self, event: TestCaseFailEvent):
         self._logger.info(f"Test case {event.payload['tc_id']} failed")
         async with trio.open_nursery() as nursery:
-            nursery.start_soon(
+            nursery.start_soon( # type: ignore
                 self._tc_data_send_channel.send,
                 {
                     "type": "tc_data",
