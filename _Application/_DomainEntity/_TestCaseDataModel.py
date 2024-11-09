@@ -193,5 +193,3 @@ class TestCaseDataModel:
         await SystemEventBus.publish(user_interaction_event)
         await interaction_context.response_ready()
         return interaction_context.response # type: ignore
-
-

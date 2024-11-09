@@ -21,6 +21,7 @@ class TCNode(BaseNode):
         self,
         callable_object: Callable[..., Any],
         name: str,
+        # TODO: func_parameter_label is not the best way to handle dependencies. Replace it with a structured approach
         func_parameter_label: str | None = None,
         description: str = "",
     ) -> None:
@@ -60,6 +61,7 @@ class TCNode(BaseNode):
     async def execute(self):
         self.mark_as_processing()
         await self.data_model.add_execution()
+        # TODO: should put retry counts in the log
         self._auto_retry_count -= self.data_model.current_execution.execution_id
         assert (
             self.data_model.parent_test_run is not None
@@ -68,14 +70,10 @@ class TCNode(BaseNode):
         try:
             # TODO: Update unit test to cover function signature check
             func_parameters = {}
-            dependency_parameter_labels = [
-                d.func_parameter_label
-                for d in self.dependencies
-                if d.func_parameter_label is not None  # type: ignore
-            ]
-            for p_name, p_obj in inspect.signature(
-                self._callable_object
-            ).parameters.items():
+            dependency_parameter_labels = [ d.func_parameter_label for d in self.dependencies 
+                                           if d.func_parameter_label is not None]  # type: ignore 
+            # Find out all parameter needed to execute test case 
+            for p_name, p_obj in inspect.signature( self._callable_object).parameters.items():
                 if p_obj.annotation is TestCaseDataModel:
                     func_parameters[p_name] = self.data_model
                 else:
@@ -108,3 +106,127 @@ class TCNode(BaseNode):
             )
             self.error_traceback = traceback.format_exc() + "\n" + frame_info
             self._logger.error(f"Error while executing {self.name}: {e}", exc_info=True)
+
+"""
+Key Elements in TCNode
+1. Integration with TestCaseDataModel:
+    - Each TCNode maintains a TestCaseDataModel instance, representing the test case's data and state,
+    which allows easy tracking of execution details and state management.
+    - The state of the node is synchronized wih this data model.
+2. Callable Object Handling:
+    - TCNode accepts callable_object (likely the test function or coroutine) to execute. 
+    - Using inspect to examine the callable's parameters is a thoughtful approach, ensuring
+    that the node can dynamically inject dependency results and other needed parameters,
+    such as the TestCaseDataModel
+3. Parameter Injection:
+    - Parameters are set up based on dependency results. By inspecting dependencies' func_parameter_label
+    values, TCNode can pass results from upstream nodes to the callable, enabling data flow along the DAG
+    structure.
+    - This approach allow flexible and reusable test case functions that automatically receive dependecies' 
+    outputs.
+4. Retry Mechanism:
+    - auto_retry_count provides a basic retry count, which is decremented based on the execution_id in 
+    TestCaseDataModel. This approach might suppn auto-retry mechanism in the future.
+    - If more advanced retry logic is needed, auto_retry_count could be enhanced or factored into a retry
+    handler component.
+5. Execution Management:
+    - The execute method handles both synchronous and asynchronous functions, leveraging Trio's open_onursery 
+    and to_thread.run_sync for concurrency. This approach allows seamless execution of both types of functions, 
+    enhancing flexibility.
+    - Execution errors are caught and stored in error and error_traceback, providing detailed information for 
+    debugging.
+6. Quarantine Mechanism:
+    - The quarantine method moves failed test cases into a quarantine by generating a TestCaseFailEvent. This 
+    mechanism allows the system to handle failures efficiently, potentially isolating problematic tests for 
+    further review.
+
+Potential Considerations
+- Handling Dependencies in execute:
+    - Currently, the function handles dependencies using a parameter name match based on func_parameter_label.
+    This is effective but could potentially becom complex as dependecies grow. You might consider whether an 
+    alternate, structured way to mange dependencies could reduce potential misconfigurations.
+- Structured Logging for Retry:
+    - Including specific log messages related to retries within the execute method, possibly with more granular
+    information about execution_id and auto_retry_count, might make debugging and monitoring retries easier 
+- Error Traceback Generation:
+    - Generating detailed error traceback with frame-level info is a good approach; however, the formatting logic
+    may be simplified if needed using Python's standard traceback formatting tools.
+    
+
+A structured approach to managing dependencies could simplify how TCNode retrieves and injects dependencies into
+the test case callable, especially as the number of dependencies and complexity of parameters passing grows. Here
+are some methods that might make dependency management more robust and modular.
+
+1. Dependency Injection Container
+    - Concept: Use a Dependency Injection Container to manage dependencies. In this approach, each node could 
+    register its output in the central DI Container that any downstream node can query.
+    
+    - Implementation:
+        - Upon completing execution, each node register its results in the DI container with a unique ID 
+        (such as the node's ID or a label)
+        - Nodes needing these results retrieve them directly from the DI container rather than relying on 
+        the positional matching of func_parameter_label
+    
+    - Advantage:
+        - Reduces the need for parameter name matching
+        - Promotes flexibility, as nodes don't need to know the exact names of upstream dependencies, 
+        only their identifiers in the DI container
+
+    - Drawback: Adds a central dependency repository, which may require careful management and cleanup.
+    
+    The Dependency Injection (DI) container in this system could function as a centralized repository for
+    dependencies, accessible across nodes without tightly coupling them. Here's a practical approach to 
+    implementing and locating this container within the application.
+        1. Location of the DI Container
+            - The container should ideally be a singleton within the scope of the system to ensure all
+            nodes can access a consistent set of dependencies.
+            - It could be managed as part of a dedicated service or module within the application, such
+            as DependencyRegistry or DependencyContainer.
+        2. Implementation of the DI Container
+            - The DI container can be a class with methods to register and retrieve dependencies, stroing
+            dependencies in a dictionary-like structure.
+        3. Integrating the DI Container with Nodes
+            - Each BaseNode (or TCNode specifically) could register its result with the container after
+            completing its task.
+            - In TCNode, during the execute method, you would register the result after execution
+            - When a node needs a dependency, it would retrieve it from the DependencyContainer rather than
+            relying on the func_parameter_label
+        4. Clearing Dependencies
+            - After a test run or workflow completes, the container can be cleared using DependencyCOntainer.clear() 
+            to prevent stale data from affecting subsequent runs.
+            - Optionally, nodes themselves could unregister from the container after they finish their purpose, though
+            this is not always necessary if a clear operation occurs between runs.
+        5. Advantages
+            - Modularity: Components access only the DI container, not each other, making dependencies modular and decoupled.
+            - Flexibility: Nodes don't need to know details about upstream nodes; they only know what they need to retrieve by ID
+            - Scalability: As the number of nodes grows, this pattern scales without increasing complexity in each node's implementation.
+    
+2. Dependency Resolution Map
+    - Concept: Each TCNode maintains an explicit map of dependencies, listing each dependency and how it 
+    maps to the parameters in the callable.
+    - Implementation: 
+        - TCNode could have an attribute dependency_map, where each dependency's output is mapped
+        a specific parameter in the callable. This map would define both the dependency node ID and the corresponding 
+        parameter name.
+        - During execution, TCNode checks dependency_map to fetch each dependency's result and assign it to the correct 
+        parameter in the callable.
+    - Advantages:
+        - Improves readability by explicitly mapping dependencies.
+        - Makes dependencies more visible and manageable, as there's clear definition of which outputs go where.
+    - Drawback: 
+        - Requires manual setup of dependency_map for each node, which could become cumbersome for a large number of nodes.    
+
+3. Typed Dependency Management with Decorator or Wrappers
+    - Concept: Use decorators or helper functions to automatically inject dependencies based on type hints, leveraging 
+    Python's type annotations to infer which dependencies a function needs.
+    - Implementation:
+        - Define a decorator (e.g., @inject_dependencies) that wraps the callable. This decorator inspects the function's
+        type hints and automatically injects dependencies if they match the types of the available upstream node results.
+        - Dependencies could be registered with specific types or classes, and the decorator would fetch and inject only 
+        matching types.
+    - Advantages:
+        - Automates dependency injection based on types, reducing boilerplate code in each node
+        - Improves type safety, making it clearer which dependencies a callable expects.
+    - Drawback: This approach requires consistent type annotations across all callable and dependencies, which can become 
+    restrictive.
+"""

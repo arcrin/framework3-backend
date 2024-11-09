@@ -198,3 +198,31 @@ class BaseNode(ABC):
             return False
 
         return _dfs(self)
+
+"""
+Key Elements in BaseNode
+    1. State Management with NodeState: Using an enum to manage the different states of each node (job) is a solid approach. 
+    This helps ensure consistency across different node types, with states like READY_TO_PROCESS, CLEARED, PROCESSING, etc.
+    2. Dependency Management: The methods add_dependency, remove_dependency, and _is_reachable provide a way to set and validate
+    dependencies while also avoiding cyclic dependencies, which is critical for DAGs. 
+    3. Execution Control: 
+        - The ready_to_process and check_dependency_and_schedule_self methods control when nodes become ready based on the state
+        of their dependencies.
+        - Using an event bus (SystemEventBus.publish) to notify other parts of the system when a node is erady aligns well with the 
+        Producer-Consumer pattern.
+        - The execute method is abstract, allowing subclasses to implement specific job-related functionality.
+    4. Asynchronous Operations: Trio's compatibility with async functions fits well here, especially with methods like reset, set_cleared,
+    and check_dependency_and_schedule_self. Trio's structured concurrency model should handle these async dependencies cleanly.
+    5. Error Handling: error and error_traceback properties allow tracking issues within nodes, which could simplify debugging and error 
+    reporting in the overall job flow.
+    6. Logging: Integrating logging into various methods provides clean traceability of state changes, dependency handling, and scheduling,
+    which is essential for debugging and performance monitoring.
+
+Potential Areas for Consideration
+    - Async Execution Flow: in Trio, tasks like dependent.reset() within reset might indeed benefit from a structured way to handle 
+    concurrent resets, such as with a nursery.
+    - Parameter Passing: The comment about func_parameter_label indicates some uncertainty. This attribute could potentially evolve, 
+    depending on how parameters are handled in specific node implementations.
+    - Event Bus Dependency: Relying on SystemEventBus means there's some coupling to the event system, which may require flexibility if 
+    the event handling mechanism needs to evolve.
+"""

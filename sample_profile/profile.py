@@ -18,7 +18,7 @@ class SampleTestProfile:
 
         # terminal_node = TerminalNode()
 
-        tc1 = TCNode(sync_task1, "Test Case 1")
+        tc1 = TCNode(sync_task1, "Test Case 1") # TODO: if I am to use a DI Container, I need to pass the parameter to callables based on TCNode ID.
         tc2 = TCNode(sync_task2, "Test Case 2")
         tc3 = TCNode(sync_task3, "Test Case 3")
         tc4 = TCNode(sync_task4, "Test Case 4")
