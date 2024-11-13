@@ -18,42 +18,38 @@ class NodeFailureProcessor:
                             nursery.start_soon(node.quarantine)
 
 """
-The NodeFailureProcessor class is designed to handle node processing failures by determining
-whether a failed node (specifically a TCNode) should be retired or quarantined based on its 
-properties. Here are some suggestions and best properties. Here are some suggestions and best 
-practices to enhance its robustness, functionality, and maintainability.
-    1. Error Handling and Robustness
-        - Graceful Error Handling: Implement more robus error handling around the operations
-        check_dependency_and_schedule_self and quarantine. These methods might throw exceptions
-        that should be caught and handled to ensure the failure processor doesn't crash.
+Key Elements in NodeFailureProcessor
+1. Channel for Failed Node Input:
+    - NodeFailureProcessor listens on a receive_channel for nodes that have failed during processing. 
+    This aligns with the producer-consumer model, where  it acts as a dedicated consumer for handling 
+    node failures.
+2. Conditional Retry or Quarantine Logic:
+    - The component checks if the node is an instance of TCNode and whether auto_retry_count is greater 
+    than zero.
+        - Retries: If the node has retries left, NodeFailureProcessor calls check_dependency_and_schedule_self,
+        which resets the nodes's dependencies and reschedules it for execution.
+        - Quarantine: If retries are exhausted, the node is sent to quarantine by calling node.quarantine, 
+        isolating it for review or further handling.
+3. Concurrency with Trio's Nursery:
+    - By using start_soon within a nursery, NodeFailureProcessor can handle multiple node failures concurrently. 
+    This is particularly useful if several nodes fail simultaneously and need to be retried or quarantined without
+    blocking each other.
 
-        - Logging: Add detailed logging at critical steps of the process, such as when a node
-        is retired or quarantined, and when errors occur. This will aid in debugging and monitoring 
-        the system''s behavior.
-
-    2. Concurrency and Resource Management
-        - Resource Management: Ensure that the nursery doesn't spawn an unbounded number of tasks 
-        if a large number of nodes fail simultaneously. Consider using a semaphore or a similar 
-        mechanism to limit the number of concurrent operations if necessary.
-
-        - Cancellation and Timeouts: Implement timeout or cancellation logic for retries or quarantine
-        operations that take too long or hand indefinitely. This prevents resource exhaustion from stalled
-        tasks.
-        
-    3. Functionality Improvements
-        - Retry Logic: Enhance the retry logic by implementing a backoff strategy for retries to avoid 
-        immediate and repeated retries that could exacerbate system issues.
-
-        - Failure Analysis: Incorporate more sophisticated logic to analyze the failure reasons and
-        determine the best course of action based on those reasons, potentially beyond just retry counts.
-
-    4. Testing and Validation
-        - Unit Testing: Write comprehensive tests for this class, particularly testing the retry and 
-        quarantine functionalities under various scenarios. Mock TCNode methods to simulate different
-        behaviors and failure conditions.
-
-        - Integration Testing: Test the integration with the rest of the system, especially how it interacts
-        with the channel system and other node processors. Ensure that the failure processor works
-        harmoniously within the larger system architecture.
-
+Considerations for Improvement
+1. Enhanced Retry Logic:
+    - Exponential Backoff: To avoid rapid reattempts, consider implementing an exponential backoff for retries.
+    This could be done by introducing a delay between retries, which would increase with each attempt.
+    - Retry Limit: While auto_retry_count provides a retry limit, you could make this more dynamic by configuring 
+    retry policies at runtime, allowing different nodes to have custom retry behavior.
+2. Quarantine Handling:
+    - Event Publishing: If quarantining a node triggers follow-up actions (e.g., alerts or logging), consider 
+    publishing an event when a node is quarantined. This would allow other parts of the system respond to quarantined 
+    nodes without hardcoding logic in NodeFailureProcessor.
+    - Tracking Quarantined Nodes: Maintaining a log or database entry of quarantined nodes can provide valuable insights,
+    especially if you want to analyze failure patterns later.
+3. Error Handling and REsilience:
+    - Graceful Failure: If an exception occurs while checking dependencies or quaranting, you might consider adding 
+    error handling to prevent unhandled exceptions from affecting other processes.
+    - Automatic Recovery: In the case of a temporary issue, like a network disruption affecting resource access, 
+    consider an automatic recovery or retry mechanism to handle intermittent failures gracefully.
 """
