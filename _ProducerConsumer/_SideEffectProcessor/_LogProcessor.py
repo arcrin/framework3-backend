@@ -125,3 +125,85 @@ Overall Organization of Side Effect Processors
     user-related interactions. Clear separation will help make each side effect processor's role more intuitive and 
     manageable. 
 """
+
+
+"""
+Passing comm_module into LogProcessor is definitely a step toward decoupling, as it separates the WebSocket implementation 
+from the logging itself. However, there are more ways to make this separation more distinct, especially if you foresee 
+needing to swap out WebSocket broadcasting or add alternative message broadcasting mechanisms. 
+
+Why Further Decoupling?
+1. Single Responsibility: Right now, LogProcessor is responsible for both log message formatting and message broadcasting.
+Separating broadcasting would allow LogProcessor to focus exclusively on processing and formatting log messages, while
+a dedicated broadcaster handles all message delivery.
+
+2. Easier Future Change: If you ever need to add an alternative channel (e.g., saving log to a database or sending log to
+other clients), having a dedicated MessageBroadcaster class would allow these changes without modifying LogProcessor.
+
+3. Cleaner WebSocket Management: If WSCommModule or WebSocket management itself changes, further decoupling would isolate
+changes within the broadcasting class instead of impacting the LogProcessor.
+
+Sample Implementation:
+Step 1: Define a MessageBroadcaster
+
+    class MessageBroadcaster:
+        def __init__(self, comm_module: WSCommModule):
+            self._comm_module = comm_module
+            self._logger = logging.getLogger("MessageBoardcaster")
+        
+        async def broadcast(self, message: str):
+            for connection in self._comm_module.all_ws_connection:
+                try:
+                    await connection.send_message(message)
+                except ConnectionClosed:
+                    self._logger.error(f"Connection {connection} closed, removing from connection list)
+                    self._comm_module.all_ws_connection.remove(connection)
+
+Step 2: Update LogProcessor to Use MessageBroadcaster
+
+    class LogProcessor:
+        def __init__(self, log_queue: Queue[logging.LogRecord], broadcaster: MessageBroadcaster):
+            self._log_queue = log_queue
+            self._broadcaster = broadcaster
+            self._stop_flag = False
+            self._logger = logging.getLogger("LogProcessor")
+
+        async def start(self):
+            formatter = logging.Formatter("%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s")
+            async with trio.open_nursery() as nursery:
+                while not self._stop_flag:
+                    try:
+                        if not self._log_queue.empty():
+                            record = await trio.to_thread.run_sync(self._log_queue.get)
+                            message = formatter.format(record)
+                            json_message = json.dumps({"type": "log", "message": message})
+                            nursery.start_soon(self._broadcaster.broadcast, json_message)
+                        else:
+                            await trio.sleep(0.1)
+                    except trio.sleep(0.1)
+                        self._logger.info("Log processor cancelled")
+                        break
+
+With this setup:
+    - LogProcessor only formats the message and hands if off to MessageBroadcaster
+    - MessageBroadcaster manages WebSocket connections and sends messages, providing a cleaner, single-purpose interface.
+
+This approach here resembles Mediator Pattern. In this setup, MessageBroadcaster acts as an intermediary between LogProcessor 
+and WSCommModule, coordinating communication without requyiring direct coupling between the logging logic and the communication
+logic.
+
+Key Characteristics of the Mediator Pattern
+- Decoupling Components: The Mediator reduces dependencies between classes by centralizing communication. Here, LogProcessor 
+only interacts with MessageBroadcaster, and MessageBroadcaster then ahndles the specifics of sending messages through WSCommModule.
+- Single Responsibility: Each component maintains a focused responsibility. LogProcessor focuses solely on log processing, while 
+MessageBroadcaster manages message distribution.
+- Scalability and Flexibility: The mediator (i.e., MessageBroadcaster) enables easy scaling. For instance, if you later add file 
+logging, database logging, or other types of communication, they could be additional methods in MessageBroadcaster without modifying 
+LogProcessor.
+
+When to use the Mediator Pattern
+This pattern is particularly useful when:
+- You need to centralize control or logic that involves multiple classes.
+- Direct communication between components would create complex interdependencies.
+- Components need to work together but should remain as independent and reusable as possible.
+"""

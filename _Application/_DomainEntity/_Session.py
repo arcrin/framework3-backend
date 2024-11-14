@@ -1,4 +1,3 @@
-from _Application._SystemEventBus import SystemEventBus
 from _Application._DomainEntity._Panel import Panel
 from typing import List, TYPE_CHECKING
 from uuid import uuid4

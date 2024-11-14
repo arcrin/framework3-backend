@@ -53,40 +53,52 @@ class UIRequestProcessor:
             raise
 
 """
-The UIRequestProcessor class is designed to process user interface requests by forwarding them to
-a WebSocket connection managed by WSCommModule. This setup is well-structured for handling real-time
-interactions with users, but there are areas where you can improve robustness and functionality.
+Key Elements of UIRequestProcessor
+1. Receiving User Interface Requests:
+    - UIResponseProcessor listens on ui_request_receive_channel for InteractionContext objects. This 
+    design lets it process UI requests asynchronously, aligning with the producer-consumer mode.
 
-    1. Error Handling and Connection Management
-        - Graceful Connection Handling: Currently, if the WebSocket connection is closed, the process
-        raises an exception and stops. Consider reconnecting or implementing a retry mechanism to
-        handle temporary network issues or server restarts gracefully.
+2. WebSocket Communication for UI Prompts:
+    - The processor uses WSCommModule to send InteractionContext data (like ID, message, and prompt type) 
+    to the user interface
+    - It packages the InteractionContext dta into JSOn format, specifying a "type": "app_state" and 
+    "event_type": "prompt". This structure suggests that the UI will interpret the message to display
+    prompts or other interactive elements.
 
-        - Error Handling Improvements: Improve error handling by distinguishing between different types
-        of exceptions. For instance, handle serialization errors separately from communication errors, 
-        allowing for more specific recovery actions. 
+3. Handling Interaction Responses:
+    - There's a comment about requiring a "waiting" mechanism to process one interaction at a time without 
+    directly interacting with another channel. This implies a need for synchronous handling of responses, 
+    possibly to ensure that only one prompt is handled at any moment.
 
-    2. Managing User Interaction States
-        - Handling Single Interactions: If you need to process one interaction at a time, consider 
-        implementing a semaphore or another locking mechanism to control the processing flow. This
-        can be useful if interactions must be processed in a sequence or if they depend on previous
-        interactions' responses.
+4. Graceful Error Handling:
+    - If the WebSocket connection closes unexpectedly, UIRequestProcessor logs the issue and raises an exception.
+    This keeps the process aware of any connection issues.
 
-        - Response Handling: Since you commented on the need for a waiting mechanism without directly
-        interacting with another channel, consider how you might structure this with trio's synchronization 
-        primitives or by using an event or condition variable that can be awaited until the necessary 
-        condition (response ready) is met.
+Suggestions for Improvement
+1. Decouple WSCommModule Dependency:
+    - Similar to the LogProcessor and TCDataWSProcessor, you could abstract WSCommModule with a communication 
+    interface. This would allow UIRequestProcessor to interact with other communication methods, such as HTTP,
+    if needed in the future.
+    - This would also let you centralize WebSocket handling in MessageBroadcaster, aligning with the overall 
+    decoupling strategy you've been developing. 
 
-    3. Testing and Reliability
-        - Testing: Develop thorough tests that simulate various scenarios, including lost connections,
-        malformed messages, and server-side failures. Ensure that your system handles these gracefully.
+2. Implement a Response Handling Strategy
+    - To address the need for handling one interaction at a time, consider a state or semaphore-based approach to 
+    queue UI requests:
+        - Semaphore: You could use a semaphore that limits UIRequestsProcessor to one active interaction until 
+        the response is received.
+        - Interaction Queue: For more complex interaction handling, an internal queue could buffer incoming requests.
+        The processor could handle one request at a time and wait for a response, only moving to the next interaction
+        once the previous one is completed.
 
-        - Message Formatting and Validation: Make sure that the messages sent to the WebSocket are
-        correctly formatted and validated before sending. This avoids sending potentially malformed
-        data that could lead to errors on the client side.
+3. Centralize Interaction Handling Logic in MessageBroadcaster:
+    - UIRequestProcessor could use MessageBroadcaster instead of sending WebSocket messages directly. Adding a method 
+    like broadcast_ui_prompt in MessageBroadcaster would allow UIRequestProcessor to focus on managing InteractionContext
+    objects while MEssageBroadcaster handles all communication logic.
 
-    4. Logging and Monitoring
-        - Detailed Logging: Extend logging to include not just errors but also debug information about
-        the messages being sent and their content (if not sensitive). This can help in debugging issues
-        in production.
+4. Response Processing Strategy:
+    - For processing responses, you could have a response_channel that receives responses from the UI. After sending a prompt, 
+    UIRequestProcessor would wait for a response on this channel before processing the next interaction.
+    - Alternatively, InteractionContext could hold its own state for responses. For example, it could manage a "response_received"
+    flag and a callback method to handle the response when it arrives, making it easier  to keep track of response states.
 """
