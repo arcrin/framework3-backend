@@ -1,4 +1,4 @@
-from _CommunicationModules._WSCommModule import WSCommModule
+from _Communication._WSCommModule import WSCommModule
 from typing import TYPE_CHECKING
 import json
 import trio_websocket  # type: ignore

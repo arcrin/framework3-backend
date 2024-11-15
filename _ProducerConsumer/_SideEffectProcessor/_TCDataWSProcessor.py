@@ -1,5 +1,5 @@
 from typing import Dict
-from _CommunicationModules._WSCommModule import WSCommModule
+from _Communication._WSCommModule import WSCommModule
 import trio_websocket # type: ignore
 import logging
 import json

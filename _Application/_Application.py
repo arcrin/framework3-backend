@@ -17,7 +17,7 @@ from _ProducerConsumer._SideEffectProcessor._UIResponseProcessor import (
 from _ProducerConsumer._SideEffectProcessor._TCDataWSProcessor import TCDataWSProcessor
 from _ProducerConsumer._SideEffectProcessor._LogProcessor import LogProcessor
 from _Application._AppStateManager import ApplicationStateManager
-from _CommunicationModules._WSCommModule import WSCommModule
+from _Communication._WSCommModule import WSCommModule
 from sample_profile.profile import SampleTestProfile
 from util.log_handler import WebSocketLogHandler
 from util.log_filter import TAGAppLoggerFilter
