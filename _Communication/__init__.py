@@ -17,7 +17,7 @@ Core Responsibilities of the Communication Interface
 3. Protocol Abstraction
     - Unified Interface for Different Protocols: Allow different protocols to implement the same methods (e.g., send, receive, close).
     This way, each component using the interface doesn't need toworry about protocol-specific implementations.
-    - Error Handling and Resilience: Define how erors(e.g., connection drops) are handled within each protocol. This might include 
+    - Error Handling and Resilience: Define how errors(e.g., connection drops) are handled within each protocol. This might include 
     reconnection logic or error notifications.
 
 4. Session and Role Management
@@ -36,4 +36,39 @@ Core Responsibilities of the Communication Interface
 This is similar to what I have now. Instead of using an interface, I have an implementation of the WS version. WSCommModule's dependency
 on ASM doesn't make sense, I need to figure out a better way to do this. I believe the dependency comes from the need to access the 
 connection registry. 
+
+Merging the responsibilities of the MessageBroadcaster into the communication module could simplify the architecture by consolidating all
+communication-related logic in one place. This would eliminate the need for an intermediate class, reducing complexity and potential 
+duplication.
+
+Potential Benefits of consolidation
+1. Centralized Communication: 
+    - All communication responsibilities, including sending, broadcasting, and session management, would reside in one module, making the 
+    architecture cleaner and easier to understand.
+2. Reduced coupling: 
+    - Components like LogProcessor and UIRequestProcessor could interact directly with the communication module without relying on an 
+    additional layer.
+3. Streamlined Development:
+    - Changes to communication protocols or the addition of new features (e.g., logging, broadcasting, etc.) would only require updates 
+    in the communication module.
+
+    
+What Would Change?
+- Broadcasting Responsibility:
+    - Methods like broadcast_log and broadcast_test_case_results would move into the communication module, which already manages connections 
+    and session types.
+- Session-Aware Messaging
+    - The communication module could differentiate between control and view sessions when broadcasting messages, eliminating the need for 
+    separate handling in MEssageBroadcaster.
+
+Things to Consider
+1. Future Scalability
+    - If responsibilities grow (e.g., adding multiple protocols or complex routing logic), reintroducing a separate broadcaster might make 
+    sense to keep the communication module focused.
+2. Error Handling and Resilience:
+    - Ensuring robust error handling for connection drops, retries, or protocol-specific issues would now fall solely under the communication 
+    module.
+3. Testability:
+    - Test coverage might need to be more comprehensive for the communication module since it would now handle both low-level connections 
+    and higher-level message processing.
 """
