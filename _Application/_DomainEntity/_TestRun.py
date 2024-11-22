@@ -73,3 +73,49 @@ class TestRun:
         profile = self._test_profile()  # type: ignore
         for tc_node in profile.test_case_list:  # type: ignore
             await self.add_tc_node(tc_node)  # type: ignore
+
+"""
+Key Responsibilities of TestRun
+1. Test Case Management:
+    - Maintains a list of active test case nodes (_tc_nodes) and failed test cases (_failed_tasks), providing methods to add, retry, 
+    or reinitialize test cases.
+    - Encapsulates logic for adding test case nodes, including dependency management via the TestRunTerminalNode.
+
+2. Integration with Workflow:
+    - Uses TestRunTerminalNode to establish dependencies between test cases, ensuring proper execution order and termination conditions.
+    - Triggers events (e.g., NewTestCaseEvent) via the SystemEventBus to notify other components about test case additions.
+
+3. Panel and Profile Association:
+    - The TestRun is associated with a parent Panel and uses a test_profile to load and configure test cases. The relationship with the 
+    panel is currently managed via parent_panel.
+
+4. Retesting and Dependency Re-scheduling:
+    - Provides mechanisms to mark failed test cases for retesting, ensuring they are properly re-added to the workflow.
+
+    
+Suggestions for Improvement
+1. Remove parent_panel Reference:
+    - As per your goal of maintaining a strictly hierarchical structure, the parent_panel attribute and its related parent_panel_id and 
+    parent_control_session_id properties should be removed. Communication and data flow from the TestRun to higher levels (like Panel or 
+    Session) can be handled using the SystemEventBus.
+
+2. Encapsulation of Test Profile Logic:
+    - Currently, the test_profile logic is partly within TestRun (load_test_case) and partly expected to be outside (_test_profile() method).
+    Centralizing profile handling could improve clarity and make it easier to test and modify.
+
+        Example:
+            Create a TestProfileManager class or service to encapsulate test profile loading and storage.
+
+3. Lifecycle Management:
+    - Add lifecycle methods (e.g., start, stop, reset) to better define how a TestRun transitions through its phases. These methods could
+    encapsulate initialization, cleanup, and reconfiguration logic.
+
+4. Improved Error Handling for add_tc_node:
+    - Adding a test case node involves multiple steps (dependency management, event publication, scheduling). Consider wrapping the entire 
+    operation in a try-except block to ensure any failure doesn't leave the TestRun in an inconsistent state.
+
+5. Batch Loading for load_test_case:
+    - If loading test cases involves a large number of nodes, consider implementing batch addition or throttling to avoid overwhelming the 
+    workflow or system resources.
+    
+"""

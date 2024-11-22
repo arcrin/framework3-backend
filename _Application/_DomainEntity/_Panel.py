@@ -80,7 +80,7 @@ Key Responsibilities of Panel
 Suggestions for Improvements
 1. Encapsulation of Hardware Interaction:
     - The TODO in the class suggests moving test jig hardware interaction logic into Panel. THis is a good idea since the panel is a 
-    natural place to encapsulate hardware-related code speficit to its physical configuration or state.
+    natural place to encapsulate hardware-related code specific to its physical configuration or state.
     - Examples of hardware-specific logic:
         - Activation/Deactivation: Code to power on or off the hardware associated with the panel.
         - Calibration: Methods to handle panel-specific calibration routines.

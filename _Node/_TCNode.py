@@ -56,7 +56,7 @@ class TCNode(BaseNode):
         self._data_model.parent_test_run.add_to_failed_test_cases(self)
         self.mark_as_failed()
         test_case_failed_event = TestCaseFailEvent({"tc_id": self.id})
-        await SystemEventBus.publish(test_case_failed_event)
+        await SystemEventBus.publish(test_case_failed_event) # TODO: I should move it into TestCaseDataModel
 
     async def execute(self):
         self.mark_as_processing()
@@ -229,4 +229,64 @@ are some methods that might make dependency management more robust and modular.
         - Improves type safety, making it clearer which dependencies a callable expects.
     - Drawback: This approach requires consistent type annotations across all callable and dependencies, which can become 
     restrictive.
+    
+
+Points to Align with Hierarchical Composition
+1. Remove References to Higher Levels
+    - TCNode currently has direct interactions with its TestRun via data_model.parent_test_run.
+    - Since higher-level components should manage states independently, consider removing this reference
+    - Instead, TCNode can publish events to the SystemEventBus (e.g., a TestCaseCompletedEvent) for the TestRun to handle.
+2. Expose States via @property
+    - Instead of relying on interactions with higher-level components, ensure that all necessary states and results are exposed via
+    @property.
+3. Centralize Quarantine and Retry Logic
+    - Quarantine and retry logic might be better handled at the TestRun level, allowing TCNode to remain focused on
+    individual test case execution.
+    
+
+TestCaseDataModel's role in TCNode
+Purpose of TestCaseDataModel in TCNode
+
+1. Data Representation:
+    - Encapsulates metadata and state for a test case, such as its ID, name, description, and execution results.
+    - Provides a structured way to store and retrieve test case data for reporting or debugging.
+
+2. State Management:
+    - Stores the state (NodeState) of the test case, ensuring consistency across workflow operations.
+
+3. Integration with Workflow:
+    - Acts as the bridge between the workflow (TCNode) and the higher-level application (e.g., user interfaces, data storage).
+
+4. Isolation of Business Logic:
+    - Separates the workflow-specific logic (in TCNode) from the data-specific operations (in TestCaseDataModel).
+    
+Current Usage in TCNode
+
+1. State Management:
+    - The state property in TCNode delegates directly TestCaseDataModel. This ensures that the state is stored consistently, while
+    TCNode operates on a higher abstraction level.
+
+2. Execution Tracking:
+    - add_execution() is called on the TestCaseDataModel during execution, implying that the model stores execution history or 
+    statistics.
+
+3. Parent Relationship:
+    - The parent_test_run attribute links the TestCaseDataModel to its TestRun. While useful for certain operations (like quarantining), 
+    This introduces a bidirectional reference that you've already decided to remove in favor of event-driven communication.
+
+
+Potential Improvements
+1. Remove Bidirectional Relationship
+    - The parent_test_run attribute creates unnecessary coupling between TestCaseDataModel and TestRun. Instead, rely on events (SystemEventBus)
+    for interactions with TestRun.
+    
+2. Explicit Responsibility Separation
+    - Ensure TestCaseDataModel focuses only on data storage and retrieval, leaving workflow-specific logic (like state transitions) to TCNode.
+
+3. Enhance Execution Tracking
+    - If TestCaseDataModel tracks execution history, ensure it's structured and easily queryable. For example, store a list of execution attempts
+    with timestamps and results.
+
+4. Expose Test Case Results:
+    - Add properties or methods to extract aggregated test results or statistics for reporting purposes.
 """

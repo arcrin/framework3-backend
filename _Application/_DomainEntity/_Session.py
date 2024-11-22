@@ -55,7 +55,7 @@ class ControlSession(Session):
             panel_id = self._panel_limit - len(
                 self._panels
             )  # TODO: depends on how we label the panels on the test jig
-            new_panel = Panel(
+            new_panel = Panel(  
                 panel_id,
                 self._test_profile,  # type: ignore
             )
