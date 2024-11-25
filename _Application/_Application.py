@@ -102,7 +102,6 @@ class Application:
             self._ui_response_send_channel,  # type: ignore
             self._asm,
         )
-
         self._node_executor: NodeExecutor = NodeExecutor(
             self._node_executor_receive_channel,  # type: ignore
             self._node_result_processor_send_channel,  # type: ignore
@@ -110,6 +109,7 @@ class Application:
         self._node_result_processor = NodeResultProcessor(
             self._node_result_processor_receive_channel,  # type: ignore
             self._node_failure_send_channel,  # type: ignore
+
         )
 
         self._node_failure_processor = NodeFailureProcessor(

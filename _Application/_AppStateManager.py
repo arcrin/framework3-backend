@@ -222,45 +222,131 @@ class ApplicationStateManager():
 
 # TODO: I should confirm that other event can be processed with some other event is stuck
 
-# COMMENT
 """
-ApplicationStateManager class is a central hub managing different aspects of application state,
-handling various events, and interfacing with other parts of the system. it orchestrates interactions,
-session management, and communication across various components.
+The ApplicationStateManager class plays a crucial role in the system by acting as the central point for managing application states,
+handling various events, and bridging components like the event bus, sessions, and channels.
 
-Key Roles:
+Strengths of the Current Implementation
+1. Centralized Event Handling:
+    - All event types and their handlers are registered and managed in one place, ensuring that the system remains coherent and organized.
+    - The event_register list provides a clean way to map events to their corresponding handlers.
 
-    - Event Handling: The class subscribes to and event bus and handles a variety of events, each with 
-    specific actions related to the state of the application or UI updates. This design pattern helps
-    decouple the state management from the event generation and handling logic.
+2. Seamless Integration with the Event Bus:
+    - The SystemEventBus is leveraged effectively, decoupling event producers and consumers while ensuring that state changes and actions
+    are processed asynchronously.
 
-    - Session Management: Manages both control and view sessions, indicating a multi-use or multi-view
-    capability within the application. This is crucial for systems where simultaneous access and interaction 
-    are required.
+3. Clear State Management:
+    - The use of _control_session, _sessions, and _interactions ensures that the application state is well-organized.
+    - Each session type is managed explicitly, and interactions are tracked in a dictionary for quick access.
 
-    - Interaction with Trio: Utilizes Trio's asynchronous capabilities effectively to manage non-blocking
-    communication and task execution, which is appropriate for handling I/O or network-related operations
-    within event handlers.
-    
-Refactoring:
-    
-    - Centralized Error Handling: Consider centralizing your error handling logic, perhaps by using 
-    a decorator or a bse class method to wrap event handling methods. This can reduce code
-    duplication and make maintenance easier.
+4. Asynchronous Processing:
+    - Handlers use trio.open_nursery() to allow concurrent execution, preventing blocking while processing events.
 
-    - Optimize Event Handling: Depending on the frequence and complexity of events, consider
-    implementing more sophisticated handling strategies such as throttling or debouncing,
-    especially useful in systems with high frequence updates.
+5. User Interaction Handling;
+    - The use of InteractionContext for managing user inputs and responses demonstrates a thoughtful design for interactive workflows.
 
-    - Testing: Ensure that each part of your event handling is thoroughly tested, particularly given
-    the asynchronous nature of the operations. trio provides tools for testing asynchronous 
-    code which you should leverage to ensure your handlers work as expected under various
-    conditions.
+6. Session Awareness:
+    - The add_session and remove_session methods ensure that sessions are added or removed cleanly and appropriately notify the system
+    of their state.
 
-    - Documentation:
+Areas for Improvement
+1. Event Processing Resilience
+    - If an exception occurs in one event handler, it could disrupt the handling of other events in the same nursery.
 
-    - Resource Management: In your asynchronous blocks, particularly where you're opening
-    nurseries, ensure that resources are managed properly to avoid leaks or unintended side 
-    effects. Trio handles many aspects of asynchronous resource management, but it's good 
-    practice to review these to ensure they align with your application's needs.
-    """
+    Solution:
+        - Wrap individual handler calls in try-except blocks to isolate errors:
+
+            async def handle_event_safe(handler, event):
+                try:
+                    await handler(event)
+                except Exception as e:
+                    self._logger.error(f"Error processing event {type(event).__name__}: {e}")
+
+            async def handle_new_test_case_event(self, event: NewTestCaseEvent):
+                async with trio.open_nursery() as nursery:
+                    nursery.start_soon(handle_event_safe, self._tc_data_send_channel.send, ...)
+                    
+2. Avoid Blocking on a Single Stuck Event
+    - A TODO in your code notes the risk of an event blocking other events. If one handler hangs, other events might not be processed.
+
+    Solution:
+        - Use timeouts or separate channels for event handlers.
+        Example:
+
+            async def handle_event_with_timeout(handler, event, timeout=5):
+                try:
+                    with trio.fail_after(timeout):
+                        await handler(event)
+                except trio.ToolSlowError:
+                    self._logger.warning(f"Event {type(event).__name__} handling timed out.")
+
+
+3. Modularize Event Handlers
+    - As the number of event types grows, the ApplicationStateManger class might become bloated.
+
+    Solution:
+        - Move event handler logic to separate helper classes or modules. For example, create a SessionHandler, TestCaseHandler, etc.,
+        and delegate handling to them.
+
+4. Validation of Event Payloads
+    - Many handlers check the payload type using isinstance and raise exceptions. This could be streamlined to reduce boilerplate.
+
+    Solution:
+        - Use a utility method for validation:
+
+            def validate_payload(event: BaseEvent, expected_type: Type):
+                if not isinstance(event.payload, expected_type):
+                    raise TypeError(f"Expected payload of type {expected_type}, got {type()})
+                    
+        - Example usage:
+
+            async def handle_new_test_case_event(self, event: NewTestCaseEvent):
+                validate_payload(event, TCNode)
+                ...
+
+5. Refactor event_register
+    - The event_register list is a great concept, but it could be more dynamic or declarative
+
+    Solution:
+        - Use a decorator-based approach for cleaner registration:
+
+            event_handlers = {}
+
+            def event_handler(event_type: Type[BaseEvent]):
+                def decorator(func):
+                    event_handlers[event_type] = func
+                    return func
+                return decorator
+
+            @event_handler(NewTestCaseEvent)
+            async def handle_new_test_case_event(self, event: NewTestCaseEvent):
+
+        - Register all handlers dynamically
+
+            for event_type, handler in event_handlers.items():
+                SystemEventBus.subscribe_to_event(event_type, handler)
+
+6. Testing and Debugging
+    - Logging is already well-integrated, but you could enhance it for debugging:
+        - Add a method to inspect the current state of _control_session, _sessions, and _interactions.
+        - Track the number of pending events and processed events for monitoring.
+
+
+Questions to Consider
+1. Scalability:
+    - How many event types do you anticipate? Will ApplicationStateManager become too complex to maintain as new handlers are added?
+
+2. Concurrency:
+    - Are there scenarios where two events might conflict (e.g., modifying _control_session)? if so, should locks or stricter synchronization
+    be added?
+
+3. Testing:
+    - Have you considered unit tests for individual event handlers? Mocking the event bus and testing each handler in isolation would ensure
+    reliability.
+
+
+Final Thoughts
+
+The ApplicationStateManager is a well-thought-out central hub for managing application state and events. It works well for the current
+scope but may benefit from modularization and additional error handling as it grows.
+"""

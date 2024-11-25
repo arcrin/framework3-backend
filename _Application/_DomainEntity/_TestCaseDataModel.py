@@ -327,7 +327,7 @@ Alternatices to Using Event Bus Inside TestCaseDataModel
                 self.notify_subscribers("progress_updated", {"progress": progress})
 
 3. Custom Observer for Workflow Events
-    - Define a dedicated ovserver for workflow events, such as TestRunObserver or SystemNotifier, and pass it as a dependency to TestCaseDataModel.
+    - Define a dedicated observer for workflow events, such as TestRunObserver or SystemNotifier, and pass it as a dependency to TestCaseDataModel.
         
         class TestCaseDataModel:
             def __init__(self, observer: "TestRunObserver"):
@@ -347,5 +347,79 @@ If you want to refactor:
     - Delegate event publishing to TCnode or another higher-level component, keeping TestCaseDataModel focused on managing test case data.
     
 
-Make an EventPublisher object to decouple SystemEventBus away from TestCaseDataModel
+Make an EventPublisher object to decouple SystemEventBus away from TestCaseDataModel.
+
+The concern about the TestCaseDataModel mixing responsibilities-acting as both a data container and a publisher of events-highlights a key architectural question:
+How do we balance clear separation of concerns with the need for practicality and performance in the system?
+
+Current design challenges
+1. Mixed Responsibilities:
+    - The name TestCaseDataModel suggests a pure data container, but the inclusion of event publishing adds behavior.
+    - This can blur the class's responsibility, potentially violating the Single Responsibility Principle (SRP).
+
+2. User-Facing vs. Workflow Concerns:
+    - The TestCaseDataModel exposes low-level data changes (e.g., parameter updates) to the user interface via events, but these are workflow concerns tied to the 
+    broader system.
+
+3. Tight Coupling:
+    - By embedding event publishing directly in the data model, you couple the class to SystemEventBus (even if abstracted by an EventPublisher), potentially making
+    the class harder to reuse or test independently.
+
+Options to Address the Design
+Option 1: Split Data and Behavior
+    - What: Separate the responsibilities into two classes:
+        1. A pure TestCaseDataModel that focuses on storing and managing data.
+        2. A TestCaseEventHandler or TestCaseEventPublisher that observes the data model and publishes events as needed.
+    
+    - How:
+        - Use an observer pattern or a mediator to monitor changes in the TestCaseDataModel.
+        - The EventHandler would listen for changes and publish events without adding behavior to the model itself.
+    - Pros:
+        - Clear separation of data storage and behavior.
+        - Easier to test and maintain independently.
+
+    - Cons:
+        - Increases complexity by introducing more classes and dependencies. 
+        - Requires careful orchestration to avoid performance issues or race conditions.
+    
+Option 2: Rename to Reflect Mixed Responsibilities
+    - What: Accepts that TestCaseDataModel is both a data container and an event publisher, and rename it to something more descriptive, like TestCase.
+    - How: Keep the current design but acknowledge the mixed responsibilities in the naming and documentation.
+    - Pros:
+        - Minimal refactoring required.
+        - Keeps the system simple while clarifying the intent.
+    - Cons:
+        - Compromises on SRP, which could lead to maintenance challenges as the class grows.
+        
+Option 3: Use a Separate COmponent to Expose Low-Level Data
+    - What: Introduce a dedicated "exposure layer" or "data broadcaster that sits between the TestCaseDataModel and the user interface.
+    - How: 
+        - The TestCaseDataModel remains focused on data, while a DataBroadcaster observes its state and publishers events when changes occur.
+        - The DataBroadcaster could also aggregate data across multiple test cases, reducing the frequency of low-level event emissions.
+    - Pros:
+        - Separates user-facing concerns from the core dta model
+        - Reduces the load on the event bus by batching or filtering events.
+    - Cons: 
+        - Adds complexity to the system.
+        - May require additional synchronization mechanisms.
+
+Option 4: Keep the Current Design but Enforce Boundaries
+    - What: Retain the current design but ensure that event publishing is carefully encapsulated within the TestCaseDataModel
+    - How:
+        - Use the EventPublisher abstraction you've planned to decouple event logic.
+        - Clearly document the dual responsibilities of the TestCaseDataModel
+    - Pros:
+        - Simple to implement with minimal disruption.
+        - Centralizes both data and events in one place, which can simplify debugging.
+    - Cons:
+        - The dual-purpose design may grow unwieldy as the system scales.
+
+Recommendation
+Given your need for exposing low-level data and the practicality of the current design, I recommend Option 4 with careful abstraction:
+    1. Encapsulation:
+        - Use the EventPublisher to abstract all event publishing, keeping the TestCaseDataModel focus on its core purpose.
+    2. Clear naming and Documentation:
+        - Rename the class if necessary (e.g., TestCaseEntity) to reflect its mixed responsibilities and document its role as both a data manger and event source.
+    3. Future Scalability:
+        - Monitor the complexity of event publishing in the TestCaseDataModel. If it grows, you can transition to Option 1 or Option 3 incrementally.
 """

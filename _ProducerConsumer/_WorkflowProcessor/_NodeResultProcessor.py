@@ -46,7 +46,7 @@ Considerations for Improvement
     - Currently, the processor either marks the node as cleared or sends it to the next stage. If more nuanced result 
     handling is required (e.g., redirecting nodes with warnings or partially successful results), consider expanding
     this routing logic.
-    - For instance, you could introduce categoried like "warning", "retry", or "log only" and route the nodes based
+    - For instance, you could introduce categories like "warning", "retry", or "log only" and route the nodes based
     on these categories.
 3. Error Handling:
     - send_channel.send and set_cleared might fail under certain conditions. Adding error handling to log these issues 

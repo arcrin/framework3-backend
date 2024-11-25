@@ -1,3 +1,4 @@
+# type: ignore
 from queue import Queue
 from _Node._TestRunTerminalNode import TestRunTerminalNode
 import logging 
