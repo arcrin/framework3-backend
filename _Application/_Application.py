@@ -177,46 +177,127 @@ class Application:
 # TODO: figure out product scan and test jig hardware config
 # TODO: workflow configuration before App init phase
 
-#TODO:
 """
-Refactoring:
-1. Configuration management
-    - Externalize Configuration: Separate the configuration details (like channel sizes, logging
-    settings, command mappings) from the code. Use a configuration file (JSON, YAML, etc) or 
-    environment variables. This makes the system easier to adapt without modifying the code, 
-    especially useful in different deployment environments.
+The Application class is the central orchetrator of your system, responsible for initializing and running all components,
+handling communication channels, and managing the application's lifecycle. 
 
-2. Modularization
-    - Break Down Large Classes: If classes like Application are doing too much, consider breaking 
-    them down into smaller, more focused classes. For instance, the setup of channels and handlers 
-    can be moved into their own setup functions or classes.
-    - Component-Based Architecture: Organize the code into more distinct
-    components or modules based on functionality (e.g., communication, node 
-    management, UI handling)
 
-3. Error Handling and Recovery
-    - Advanced Error Management: Instead of just logging and raising exceptions,
-    consider strategies for recovery, retires, or safe exits. Implementing these 
-    within a dedicated error handling module or class could help centralize error
-    management logic.
-    - Graceful Shutdown: Ensure the application can shut down gracefully, handling 
-    any clean-up tasks necessary to prevent data corruption or loss.
+Strengths
+1. Centralized Initialization
+    - All components and dependencies are initialized in one place, providing a clear overview of the system's setup
 
-4. Dependency Injection
-    - Implement Dependency Injection: For better testability and modularity, pass
-    dependencies like channels or state managers through constructors or setters
-    rather than creating them directly inside components. This makes it easier to
-    swap out these dependencies, for example, during testing.
+2. Seamless Integration of Producer-Consumer Pattern:
+    - The Application class orchestrates the interaction between different producers and consumers effectively, leveraging
+    Trio's asynchronous capabilities.
 
-5. Enhance Asynchronous Management
-    - Refactor Async Patterns: Review and possibly refactor how asynchronous tasks
-    are managed to ensure that they are efficient and that resource locks or
-    deadlocks are aboided. This might involve better utilization of Trio's capabilities
-    or refactoring some synchronous blocks to be asynchronous.
+3. Modular Design:
+    - Different components, such as Node Executor, LogProcessor, and UIRequestProcessor, are encapsulated, adhering to the 
+    Single Responsibility Principle (SRP).
 
-6. Improving Logging
-    - Centralize Logging Configuration: Instead of setting up logging in multiple 
-    places or within application classes, consider having a centralized logging
-    configuration that sets up all handlers and formats consistently across the 
-    application.
+4. Channel-Based Communication
+    - The use of Trio memory channels ensures efficient and thread-safe communication between components.
+
+5. Dynamic Command Mapping:
+    - The _command_mapping dictionary allows for extensible command handling, making it easy to add new commands.
+
+6. Clear Logging Setup:
+    - The logging mechanism, with custom handlers and filters, ensures that logs are appropriately formatted and routed.
+
+7. Error Isolation:
+    - Components are started in separate nursery tasks, isolating errors and ensuring that the failure of one component 
+    doesn't crash the entire application.
+
+
+Potential Improvements
+1. Dependency Injection
+    - The Application class directly instantiates components, coupling it tightly to specific implementations.
+
+    - Solution:
+        - Use Dependency Injection (DI) to decouple the initialization logic and make the class more testable modular.
+        - For instance, pass pre-configured components or a DI container into the Application constructor
+
+2. Simplify Channel Initialization
+    - The current method of unpacking and assigning channels is repetitive.
+    - Solution
+        - Create a helper method or object to encapsulate channel initialization:
+        
+            def create_channel_pair():
+                send_channel, receive_channel = trio.open_memory_channel(0)
+                return send_channel, receive_channel
+
+            self._node_executor_channels = create_channel_pair()
+            self._node_result_processor_channels = create_channel_pair()
+            
+3. Handle Command Failures Gracefully
+    - The start_test_run and retest methods raise exceptions that could disrupt the application.
+    - Solution:
+        - Handle errors more gracefully, such as logging them or notifying the user, instead of stopping the application:
+
+            async def start_test_run(self):
+                if not self._asm.control_session:
+                    self._logger.error("Control session not established")
+                    return
+                try:
+                    for panel in self._asm.control_session.panels:
+                        await panel.add_test_run()
+                        await panel.test_run.load_test_case()
+                except Exception as e:
+                    self._logger.error(f"Error during test run: {e}")
+            
+            
+4. Enhance Modularity
+    - The Application class contains both high-level orchestration and some low-level details, such as command mapping and direct access to channels.
+    - Solution:
+        - Delegate command handling to a CommandHandler class and abstract channel management into a separate utility.
+
+        
+5. Add Graceful Shutdown
+    - Currently, there is not explicit shutdown logic for stopping components or cleaning up resources.
+    - Solution:
+        - Add a stop method to shut down all consumers and close channels gracefully:
+
+            async def stop(self):
+                self._logger.info("Shutting down application...")
+                await self._ws_comm_module.stop()
+                await self._node_executor.stop()
+                # Add similar stop methods for other components
+
+6. Dynamic Component Loading
+    - Hardcoding all components in the Application class limits flexibility
+    - Solution:
+        - Dynamically load components from a configuration or registry, making it easier  to add or remove features. (Another DI?)
+        
+
+Scalability Considerations
+1. Error Propagation:
+    - Ensure that errors in one component do not propagate to others. Currently, the exception handling in start appears robust but could benefit from more 
+    granular control.
+
+2. Monitoring and Metrics:
+    - Add hooks or instrumentation to monitor the health and performance of each component, especially in production environments.
+
+3. Dynamic Command Registration:
+    - Allow commands to be registered dynamically rather than hardcoding them in _command_mapping.
+
+    
+
+Refactored Initialization Example
+
+    class Application:
+        def __init__(self, dependencies):
+            self._logger = logging.getLogger("Application")
+            self._dependencies = dependencies  # DI container or pre-configured components
+            self._initialize_components()
+
+        def _initialize_components(self):
+            # Example: Retrieve components from dependencies
+            self._node_executor = self._dependencies.get("NodeExecutor")
+            self._node_result_processor = self._dependencies.get("NodeResultProcessor")
+            self._log_processor = self._dependencies.get("LogProcessor")
+            # ... Load other components dynamically
+
+Final Thoughts
+
+The Application class is well-structured and provides a clear entry point for managing the entire system. Implementing some of the suggested improvements will
+make it more robust, modular, and scalable.
 """

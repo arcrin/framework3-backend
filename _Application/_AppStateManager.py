@@ -349,4 +349,313 @@ Final Thoughts
 
 The ApplicationStateManager is a well-thought-out central hub for managing application state and events. It works well for the current
 scope but may benefit from modularization and additional error handling as it grows.
+
+
+Why Modularize Event Handlers?
+1. Improved Readability:
+    - Separating event handlers into distinct modules makes it easier to locate, understand, and maintain them.
+
+2. Focused Responsibilities:
+    - Each handler module can focus on a specific domain or functionality (e.g., session management, test case updates).
+
+3. Reusability:
+    - Decoupled handlers can be reused in other parts of the system if needed
+
+4. Scalability:
+    - As the number of event types grows, modularization prevents a monolithic ApplicationStateManager class.
+
+Approaches to Modularizing Handlers
+1. Group by Functionality
+Create separate handler classes for each logical domain of the application. For example:
+    - SessionHandlers: Handles events related to sessions (e.g., NewViewSessionEvent).
+    - TestCaseHandlers: Handles events related to test cases (e.g., NewTestEvent, ProgressUpdateEvent).
+    - NodeHandlers: Handles events related to nodes (e.g., NodeReadyEvent).
+    
+    Example Folder Structure:
+    
+        application/
+            handlers/
+                __init__.py
+                session_handler.py
+                test_case_handler.py
+                node_handler.py
+
+    Implementation:
+    - session_handler.py
+        
+        class SessionHandler:
+            def __init__(self, app_state_manager):
+                self._app_state_manager = app_state_manager
+
+            async def handle_new_view_session(self, event):
+                # Logic for handling NewViewSessionsEvent
+
+    - Register the handlers:
+
+        from application.handlers.session_handler import SessionHandler
+        from application.handlers.test_case_handler import TestCaseHandler
+
+        class ApplicationStateManager:
+            def __init__(...):
+                self._session_handler = SessionHandler(self)
+                self._test_case_handler = TestCaseHandler(self)
+                
+                event_register = [
+                    (NewViewSessionEvent, self._session_handler.handle_new_view_session),
+                    (NewTestCaseEvent, self._test_case_handler.handle_new_test_case),
+                    ...
+                ]
+                for event_type, handler in event_register:
+                    SystemEventBus.subscribe_to_event(event_type, handler)
+
+2. Group by Event Types
+If you want a more event-centric grouping, create a separate file or class for each event type. Each handler would 
+process a single event.
+
+    Example Folder Structure:
+        application/
+            event_handlers/
+                __init__.py
+                new_test_case_event_handler.py
+                progress_update_event_handler.py
+                user_interaction_event_handler.py
+
+    Implementation:
+    - new_test_case_event_handler.py
+
+        class NewTestCaseEventHandler:
+            async def handle(self, event):
+                # Logic for NewTestCaseEvent
+                ...
+
+    Register the handlers:
+
+        from application.event_handlers.new_test_case_event_handler import NewTestCaseEventHandler
+
+        class ApplicationStateManager:
+            def __init__(...):
+                self._new_test_case_event_handler = NewTestCaseEventHandler()
+
+                event_register = [
+                    (NewTestCaseEvent, self._new_test_case_event_handler.handle),
+                    ...
+                ]
+                for event_type, handler in event_register:
+                    SystemEventBus.subscribe_to_event(event_type, handler)
+
+3. Combine with Dependency Injection
+Instead of the ApplicationStateManager passing itself to handlers, use a Dependency Injection (DI) container to supply dependencies.
+This makes testing and reusing handlers easier.
+
+Implementation:
+    - Use a DI library like injector or a custom DI pattern:
+
+        from injector import inject
+
+        class SessionHandler:
+            @inject
+            def __init__(self, session_service, logging_service)
+                self._session_service = session_service
+                self._logger = logging_service
+
+            async def handle_new_view_session(self, event):
+                # Logic for handling session events
+                ...
+
+    - Define a DI container to wire dependencies and register handlers.
+
+
+4. Dynamic Handler Discovery
+Use Python's importlib or similar libraries to dynamically discover and register handlers. This approach is useful for plugin-based
+architectures or systems with a large number of handlers.
+
+Implementation:
+    - Organize handlers into a specific folder
+    - Use importlib to load them dynamically:
+
+        import importlib
+        import os
+
+        def load_handlers(folder):
+            for file in os.listdir(folder):
+                if file.endswith("_handler.py"):
+                    module = importlib.import_module(f"{folder}.{file[:-3]}")
+                    yield module
+
+    - Dynamically register handlers:
+
+        for handler_module in load_handlers("application.event_handlers"):
+            for event_type, handler in handler_module.get_handlers():
+                SystemEventBus.subscribe_to_event(event_type, handler)
+
+
+Pros
+    - Readability: Clear separation of concerns.
+    - Testability: Handlers are easier to test in isolation
+    - Maintainability: Adding or modifying a handler doesn't require changes to the monolithic ApplicationStateManager.
+    - Scalability: Better suited for large or grouwing systems.
+
+Cons
+    - Increased Boilerplate: Requires more files and classes.
+    - Overhead for Small Systems: For small projects, the added complexity may not be worth it.
+
+Choosing the Right Approach
+1. Small Systems:
+    - Stick with your current structure or group handlers by functionality (Option 1).
+
+2. Medium Systems:
+    - Use a combination of Option 1 and Option 2 for better clarity.
+
+3. Large or Plugin-Based Systems:
+    - Consider DI or dynamic discovery (Options 3 and 4)
+    
+
+    
+Modularizing event handlers using Dependency Injection (DI) enhances flexibility, testability, and scalability by decoupling
+the handlers form their dependencies. DI ensures that each handler receives the components it needs without directly constructing
+or importing them. This approach aligns well with modular architecture and clean code principles.
+
+What is Dependency Injection (DI)?
+    - Definition: DI is a design pattern where dependencies are provided to a class or function rather than being created or fetched
+    within it.
+    - How it works: A DI container manages object creation and wiring, ensuring dependencies are injected at runtime.
+
+Steps to Modularize Handlers with DI
+1. Define handlers as Separate Classes
+Each handler is a class with a single responsibility - handling a specific type of event or related events. Dependencies required by
+the handler are passed via its constructor. 
+
+    Example:
+        
+        form _Application._SystemEvent import NewTestCaseEvent
+        from typing import TYPE_CHECKING
+        import logging
+
+        if TYPE_CHECKING:
+            from _Application._DomainEntity._TestCaseDataModel import TestCaseDataModel
+            from trio import MemorySendChannel
+
+        
+        class testCaseHandler:
+            def __init__(self, tc_data_send_channel: "MemorySendChannel"):
+                self._tc_data_send_channel = tc_data_send_channel
+                self._logger = logging.getLogger("TesCaseHandler")
+
+            async def handler_new_test_case(self, event: NewTestCaseEvent):
+                self._logger.info(f"Handling new test case: {event.payload.name}")
+                react_ui_data_payload = {
+                    "type": "tc_data",
+                    "event_type": "newTC",
+                    "payload": event.payload.data_model.react_ui_payload,
+                }
+                await self._tc_data_send_channel.send(react_ui_data_payload)
+                
+2. Use a DI Container
+A DI container is responsible for managing the lifecycle of objects and injecting dependencies. Libraries like injector make this process straightforward.
+
+    Example with injector:
+
+        from injector import Injector, inject, singleton
+
+        # Define DI container modules
+        class ApplicationModule:
+            @singleton
+            @inject
+            def provide_tc_data_send_channel(self) -> "MemorySendChannel":
+                # Create and return the channel (placeholder for actual implementation)
+                return MemorySendChannel()
+
+            @singleton
+            @inject
+            def provide_test_case_handler(self, tc_data_send_channel: "MemorySendChannel") -> TestCaseHandler:
+                return TestCaseHandler(tc_data_send_channel)
+
+        injector = Injector([ApplicationModule])
+
+3. Register Handlers Dynamically
+Use the DI container to resolve and register handlers with the SystemEventBus.
+
+    Example:
+
+        class ApplicationStateManager:
+            def __init__(self, injector: Injector):
+                self._logger = logging.getLogger("ApplicationStateManager")
+
+                # Resolve handlers
+                test_case_handler = injector.get(TestCaseHandler)
+
+                # Register handlers with the SystemEventBus
+                event_register = [
+                    (NewTestCaseEvent, test_case_handler.handle_new_test_case),
+                    # Add other event-handler pairs here
+                ]
+
+                for event_type, handler in event_register:
+                    SystemEventBus.subscribe_to_event(event_type, handler)
+
+4. Testing with Mocks
+DI makes testing straightforward by allowing you to replace real dependencies with mocks during tests.
+
+    Example:
+
+        from unittest.mock import AsyncMock, MagicMock
+
+        def test_test_case_handler():
+            # Mock the dependencies
+            mock_send_channel = AsyncMock()
+
+            # Crate the handler
+            handler = TestCaseHandler(mock_send_channel)
+
+            # Create a mock event
+            mock_event = MagicMock()
+            mock_event.payload.name = "TestCase"
+            mock_event.payload.data_model.react_ui_payload = {"id": 1, "name": "TestCase1"}
+
+            # Run the handler
+            trio.run(handler.handle_new_test_case, mock_event)
+
+            # Asser that the channel send method was called with the correct payload
+            mock_send_channel.send_assert_called_once_with({
+                "type": "tc_data",
+                "event_type": "newTC",
+                "payload": {"id": 1, "name": "Testcase1"},
+            })
+
+Advantages of DI for Modularizing Handlers
+1. Improved Testability:
+    - Handlers are decoupled fro their dependencies, making it easy to inject mocks for unit testing
+
+2. Easier Refactoring:
+    - Changes to a handler's dependencies don't require changes to the handler itself, as long as the interface remains consistent.
+
+3. Centralized Dependency Management:
+    - Dependencies are declared in one place (DI container), making it easy to understand and modify the application's architecture.
+
+4. Reusability:
+    - Handlers and their dependencies can be reused across different contexts or applications.
+
+5. Reduced Boilerplate in Handlers:
+    - Handlers dont't need to instantiate or manage their dependencies, keeping them focused on their core logic.
+    
+
+When to use DI for Event Handlers
+- Complex Systems: When there are many handlers and dependencies.
+- Test-Driven Development: If you aim for high test coverage and clean separation of concerns.
+- Dynamic Environments: Where dependencies or implementations might change (e.g., switching a message queue system).
+
+
+Challenges with DI
+1. Learning Curve:
+    - For teams new to DI, understanding and implementing it might take some time.
+
+2. Overhead for Small Projects:
+    - In simple systems, manually managing dependencies might be more straightforward than setting up DI.
+
+3. Debugging:
+    - Indirect wiring of dependencies via DI can make it harder to trace issues during debugging.
+
+Conclusion
+DI adds structure and flexibility to your system. While it might seem like an overhead for smaller systems, it pays off as your application grows in complexity.
+
 """

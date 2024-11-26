@@ -67,3 +67,27 @@ app = Application(
 )
 trio.run(app.start)
 # plot_task_timing()
+
+
+"""
+The main.py file serves as the entry point for your application, where channels are set up, logging is configured, and the application is initialized
+and executed. Here's a detailed analysis:
+
+Key Observation
+1. Logging Setup:
+    - Logging is configured to log to both a file and the console.
+    - Filters are applied (TagAppLoggerFilter) to control what gets logged, ensuring relevant output.
+
+2. Channel Initialization:
+    - Multiple trio.MemoryChannel instances are created to facilitate communication between components of the application.
+
+3. Application Initialization:
+    - The Application class is instantiated with the pre-configured channels and starts with trio.run()
+
+4. Task Timing (Commented Out):
+    - A utility (plot_task_timing) for task timing analysis is included but commented out. This could be useful for debugging or performance monitoring.
+    
+
+Strengths
+1. Separation of Concerns:
+"""
