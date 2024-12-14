@@ -47,6 +47,7 @@ class Application:
             "retest": self.retest,
         }
         #TODO: these channels could be dependencies passed into Application object during init
+        #TODO: Instead of expecting BaseNode in channels, make a new WorkflowMessage class to further decouple the processors from Nodes.
         self._node_executor_send_channel: trio.MemorySendChannel["BaseNode"]
         self._node_executor_receive_channel: trio.MemoryReceiveChannel["BaseNode"]
         self._node_executor_send_channel, self._node_executor_receive_channel = node_executor_channels 

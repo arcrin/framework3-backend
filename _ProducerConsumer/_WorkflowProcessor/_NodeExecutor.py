@@ -26,7 +26,7 @@ class NodeExecutor:
         async with trio.open_nursery() as nursery:
             async with self._receive_channel:
                 async for node in self._receive_channel:
-                    nursery.start_soon(self._execute_node, node)
+                    nursery.start_soon(self._execute_node, node) #TODO: how to handle cancellation?
 
     async def stop(self):
         await self._send_channel.aclose()
