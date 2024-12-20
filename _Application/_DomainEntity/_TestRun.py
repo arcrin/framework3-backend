@@ -70,6 +70,9 @@ class TestRun:
         await tc_node.check_dependency_and_schedule_self()
 
     async def load_test_case(self):
+        # TODO: request for user to scan serial number through an event. OR, create a SerialNmberRequest node?
+        # TestRun is a domain entity. If a TestCase (also an entity) is wrapped inside a node then processes, 
+        # a TestRun should be treated the same way.
         profile = self._test_profile()  # type: ignore
         for tc_node in profile.test_case_list:  # type: ignore
             await self.add_tc_node(tc_node)  # type: ignore

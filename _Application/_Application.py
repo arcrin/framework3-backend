@@ -135,7 +135,7 @@ class Application:
 
         self._logger = logging.getLogger("Application")
 
-    async def start_test_run(self):
+    async def start_test_run(self): # TODO: put this in a commander interface: ICOmmand
         if self._asm.control_session is None:
             self._logger.error("Control session not established")
             raise Exception(
@@ -146,7 +146,7 @@ class Application:
             if panel.test_run is not None:
                 await panel.test_run.load_test_case()
 
-    async def retest(self, tc_id: str | None = None):
+    async def retest(self, tc_id: str | None = None): # TODO: move to ICommand
         # TODO: update the state of test case right away to avoid multiple command execution
         if self._asm.control_session is None:
             self._logger.error("Control session not established")
@@ -154,7 +154,7 @@ class Application:
         if tc_id is not None and self._asm.control_session.panels[0].test_run is not None:
             await self._asm.control_session.panels[0].test_run.retest_failed_test_cases(tc_id)
 
-    async def start(self):
+    async def start(self): # This isn't a command. It is the entry point.
         try:
             async with trio.open_nursery() as nursery:
                 # NOTE: Each consumer can be considered as an attachment
